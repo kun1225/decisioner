@@ -1,9 +1,9 @@
 # Product Requirements Document: Decision Log
 
-> **Version:** 1.0.0
+> **Version:** 1.0.1
 > **Status:** Draft
 > **Last Updated:** 2026-02-06
-> **Author:** [Your Name]
+> **Author:** Kun
 
 ---
 
@@ -56,12 +56,11 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ### Non-Goals (Explicitly Out of Scope)
 
-- ❌ **提升決策成功率**：這不是決策輔助工具
-- ❌ **評分或評判決策好壞**：系統不做價值判斷
-- ❌ **協作功能**：MVP 階段只支援個人使用
-- ❌ **任務管理**：不是待辦清單或專案管理
-- ❌ **AI 輔助建議**：不在 MVP 範圍
-- ❌ **公開分享**：不在 MVP 範圍
+- **評分或評判決策好壞**：系統不做價值判斷
+- **協作功能**：MVP 階段只支援個人使用
+- **任務管理**：不是待辦清單或專案管理
+- **AI 輔助建議**：不在 MVP 範圍
+- **公開分享**：不在 MVP 範圍
 
 ---
 
@@ -122,14 +121,14 @@ Full flows: `docs/specs/ux-flows.md`
 
 ### UC-02: Edit Draft Decision
 
-| Attribute     | Value                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                                 |
-| Precondition  | Decision exists with status DRAFT                                                                                                              |
-| Trigger       | User opens decision and edits                                                                                                                  |
+| Attribute     | Value                                                                                                                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actor         | Decision Owner                                                                                                                                                                                 |
+| Precondition  | Decision exists with status DRAFT                                                                                                                                                              |
+| Trigger       | User opens decision and edits                                                                                                                                                                  |
 | Main Flow     | 1. User modifies any field (including decision deadline)<br>2. If deadline changes, user provides reason<br>3. System records change with timestamp<br>4. Previous values preserved in history |
-| Postcondition | Decision updated, history preserved                                                                                                            |
-| Constraint    | Not allowed if status ≠ DRAFT or decision deadline has passed (except Extend Deadline)                                                         |
+| Postcondition | Decision updated, history preserved                                                                                                                                                            |
+| Constraint    | Not allowed if status ≠ DRAFT or decision deadline has passed (except Extend Deadline)                                                                                                         |
 
 ### UC-03: Add Evidence
 
@@ -211,15 +210,15 @@ Full flows: `docs/specs/ux-flows.md`
 
 ### UC-10: Extend Decision Deadline
 
-| Attribute     | Value                                                                                                                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                                                                                                                                 |
-| Precondition  | Decision status is DRAFT                                                                                                                                                                                                                       |
-| Trigger       | User selects "Extend deadline" (from decision page or notification page)                                                                                                                                  |
+| Attribute     | Value                                                                                                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actor         | Decision Owner                                                                                                                                                                    |
+| Precondition  | Decision status is DRAFT                                                                                                                                                          |
+| Trigger       | User selects "Extend deadline" (from decision page or notification page)                                                                                                          |
 | Main Flow     | 1. User selects Extend<br>2. User enters new deadline and reason<br>3. System validates new deadline is in the future<br>4. System updates deadline and records reason in history |
-| Postcondition | Deadline extended; decision remains DRAFT                                                                                                                                                                                                      |
-| Constraint    | Reason is required for every extension                                                                                                                                                                                                         |
-| Note          | Can be used before deadline; if deadline has passed, other edits remain blocked until the user extends the deadline or freezes the decision                                                                                                        |
+| Postcondition | Deadline extended; decision remains DRAFT                                                                                                                                         |
+| Constraint    | Reason is required for every extension                                                                                                                                            |
+| Note          | Can be used before deadline; if deadline has passed, other edits remain blocked until the user extends the deadline or freezes the decision                                       |
 
 ---
 
@@ -304,9 +303,9 @@ Full flows: `docs/specs/ux-flows.md`
 
 ### Anti-Metrics (What NOT to Optimize)
 
-- ❌ Decision count（多不代表好）
-- ❌ Time spent in app（不是 engagement 型產品）
-- ❌ Decision success rate（不是系統要管的事）
+- Decision count（多不代表好）
+- Time spent in app（不是 engagement 型產品）
+- Decision success rate（不是系統要管的事）
 
 ---
 
@@ -314,7 +313,7 @@ Full flows: `docs/specs/ux-flows.md`
 
 ### Week 1-2: Core Decision Flow
 
-- [ ] **Authentication** (basic email/password)
+- [ ] **Authentication** (basic email/password/google oauth)
 - [ ] **UC-01**: Create Decision
 - [ ] **UC-02**: Edit Draft Decision
 - [ ] **UC-04**: Adjust Confidence (with history)
@@ -381,7 +380,7 @@ Full flows: `docs/specs/ux-flows.md`
 
 ## Revision History
 
-| Version | Date       | Author | Changes     |
-| ------- | ---------- | ------ | ----------- |
+| Version | Date       | Author | Changes          |
+| ------- | ---------- | ------ | ---------------- |
 | 1.0.1   | 2026-02-06 | -      | Split appendices |
-| 1.0.0   | 2026-02-05 | -      | Initial PRD |
+| 1.0.0   | 2026-02-05 | -      | Initial PRD      |
