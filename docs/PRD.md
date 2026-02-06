@@ -131,7 +131,11 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 │     "If I accept: expect to feel engaged in 3 months..."        │
 │              │                                                  │
 │              ▼                                                  │
-│  6. Save as Draft                                               │
+│  6. Set decision deadline                                       │
+│     "Decide by: 2026-02-20"                                     │
+│              │                                                  │
+│              ▼                                                  │
+│  7. Save as Draft                                               │
 │     Status: DRAFT                                               │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
@@ -174,7 +178,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Key Constraint:** 信心調整會保留歷史記錄，不是覆蓋。
+**Key Constraint:** 信心調整會保留歷史記錄，不是覆蓋，且僅能在 `decision_deadline` 前進行。
 
 ---
 
@@ -204,8 +208,12 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 │     │   • Expected outcomes                       │             │
 │     │                                             │             │
 │     │ You can still:                              │             │
+│     │   • Add evidence later                      │             │
 │     │   • Add reviews later                       │             │
 │     │   • View full history                       │             │
+│     │                                             │             │
+│     │ If new evidence changes your choice:        │             │
+│     │   • Use Reconsider to create a new decision │             │
 │     │                                             │             │
 │     │ [Cancel]  [Freeze Decision]                 │             │
 │     └─────────────────────────────────────────────┘             │
@@ -223,7 +231,40 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ---
 
-### Scenario D: Post-Decision Review
+### Scenario D: Deadline Notification & Extension
+
+**Context:** 決策期限到期，系統提醒使用者要延長期限或凍結決策。
+
+**User Flow:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Flow 4: Deadline Notification                                  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Decision deadline reached                                  │
+│              │                                                  │
+│              ▼                                                  │
+│  2. Notification appears in notification page                  │
+│     ┌─────────────────────────────────────────────┐             │
+│     │ Deadline reached                            │             │
+│     │ Choose one:                                 │             │
+│     │ • Freeze decision now                       │             │
+│     │ • Extend deadline (reason required)         │             │
+│     └─────────────────────────────────────────────┘             │
+│              │                                                  │
+│              ▼                                                  │
+│  3. If extend: enter new deadline + reason                      │
+│              │                                                  │
+│              ▼                                                  │
+│  4. System updates deadline and records reason                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Scenario E: Post-Decision Review
 
 **Context:** 三個月後，使用者想回顧這個決策的結果。
 
@@ -231,7 +272,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Flow 4: Add Review                                             │
+│  Flow 5: Add Review                                             │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1. Open decision (Status: ACTIVE)                              │
@@ -274,7 +315,43 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ---
 
-### Scenario E: Cross-Decision Patterns
+### Scenario F: Reconsider After New Evidence
+
+**Context:** 使用者在做出選擇後出現新證據，想改變選擇但保留原決策快照。
+
+**User Flow:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Flow 6: Reconsider Decision                                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Open decision (Status: ACTIVE or CLOSED)                    │
+│              │                                                  │
+│              ▼                                                  │
+│  2. Review frozen content & new evidence                        │
+│     (ACTIVE can add evidence; CLOSED cannot add evidence)       │
+│              │                                                  │
+│              ▼                                                  │
+│  3. Click "Reconsider"                                          │
+│              │                                                  │
+│              ▼                                                  │
+│  4. Provide reconsider reason & new deadline                    │
+│     "New data contradicts assumption H2"                        │
+│              │                                                  │
+│              ▼                                                  │
+│  5. System creates a new decision (Status: DRAFT)               │
+│     Copies content and evidence; links to original              │
+│              │                                                  │
+│              ▼                                                  │
+│  6. User updates the new draft and proceeds later               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### Scenario G: Cross-Decision Patterns
 
 **Context:** 使用者想看自己過去一年的決策模式。
 
@@ -282,7 +359,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Flow 5: Pattern Review                                         │
+│  Flow 7: Pattern Review                                         │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1. Navigate to "Decision History"                              │
@@ -325,47 +402,47 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ### UC-01: Create Decision
 
-| Attribute     | Value                                                                                                                                                                                                                              |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Authenticated User                                                                                                                                                                                                                 |
-| Precondition  | User is logged in                                                                                                                                                                                                                  |
-| Trigger       | User clicks "New Decision"                                                                                                                                                                                                         |
-| Main Flow     | 1. System displays empty decision form<br>2. User enters title (required)<br>3. User enters description/context<br>4. User adds hypotheses with confidence (0-100%)<br>5. User defines expected outcomes<br>6. User saves decision |
-| Postcondition | Decision created with status DRAFT                                                                                                                                                                                                 |
-| Validation    | Title is required, max 200 chars<br>At least one hypothesis recommended                                                                                                                                                            |
+| Attribute     | Value                                                                                                                                                                                                                                                                           |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actor         | Authenticated User                                                                                                                                                                                                                                                              |
+| Precondition  | User is logged in                                                                                                                                                                                                                                                               |
+| Trigger       | User clicks "New Decision"                                                                                                                                                                                                                                                      |
+| Main Flow     | 1. System displays empty decision form<br>2. User enters title (required)<br>3. User enters description/context<br>4. User adds hypotheses with confidence (0-100%)<br>5. User defines expected outcomes<br>6. User sets decision deadline (required)<br>7. User saves decision |
+| Postcondition | Decision created with status DRAFT                                                                                                                                                                                                                                              |
+| Validation    | Title is required, max 200 chars<br>Decision deadline is required and must be in the future<br>At least one hypothesis recommended                                                                                                                                              |
 
 ### UC-02: Edit Draft Decision
 
-| Attribute     | Value                                                                                                            |
-| ------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                   |
-| Precondition  | Decision exists with status DRAFT                                                                                |
-| Trigger       | User opens decision and edits                                                                                    |
-| Main Flow     | 1. User modifies any field<br>2. System records change with timestamp<br>3. Previous values preserved in history |
-| Postcondition | Decision updated, history preserved                                                                              |
-| Constraint    | Not allowed if status ≠ DRAFT                                                                                    |
+| Attribute     | Value                                                                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actor         | Decision Owner                                                                                                                                 |
+| Precondition  | Decision exists with status DRAFT                                                                                                              |
+| Trigger       | User opens decision and edits                                                                                                                  |
+| Main Flow     | 1. User modifies any field (including decision deadline)<br>2. If deadline changes, user provides reason<br>3. System records change with timestamp<br>4. Previous values preserved in history |
+| Postcondition | Decision updated, history preserved                                                                                                            |
+| Constraint    | Not allowed if status ≠ DRAFT or decision deadline has passed (except Extend Deadline)                                                         |
 
 ### UC-03: Add Evidence
 
 | Attribute     | Value                                                                                                                                       |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | Actor         | Decision Owner                                                                                                                              |
-| Precondition  | Decision exists (any status)                                                                                                                |
+| Precondition  | Decision status is DRAFT (before decision deadline) or ACTIVE                                                                               |
 | Trigger       | User clicks "Add Evidence"                                                                                                                  |
 | Main Flow     | 1. User enters evidence (link, note, file reference)<br>2. User optionally links to specific hypothesis<br>3. System records with timestamp |
 | Postcondition | Evidence appended (never overwrites)                                                                                                        |
-| Note          | Evidence can be added even after freeze                                                                                                     |
+| Note          | Evidence can be added even after freeze, but not after close; in DRAFT it is only allowed before deadline                                   |
 
 ### UC-04: Adjust Confidence
 
 | Attribute     | Value                                                                                                                                          |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Actor         | Decision Owner                                                                                                                                 |
-| Precondition  | Decision status is DRAFT                                                                                                                       |
+| Precondition  | Decision status is DRAFT and before decision deadline                                                                                          |
 | Trigger       | User changes confidence value                                                                                                                  |
 | Main Flow     | 1. User selects hypothesis<br>2. User enters new confidence (0-100%)<br>3. User provides reason for change<br>4. System records as new version |
 | Postcondition | New confidence recorded, old value in history                                                                                                  |
-| Constraint    | Not allowed after freeze                                                                                                                       |
+| Constraint    | Not allowed after freeze or after decision deadline                                                                                            |
 
 ### UC-05: Freeze Decision
 
@@ -377,6 +454,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 | Main Flow       | 1. System shows confirmation with implications<br>2. User confirms<br>3. User optionally records final choice<br>4. System changes status to ACTIVE<br>5. System records freeze timestamp |
 | Postcondition   | Decision frozen, content immutable                                                                                                                                                        |
 | Irreversibility | Cannot unfreeze                                                                                                                                                                           |
+| Note            | If decision deadline has passed, user must freeze before further edits                                                                                                                    |
 
 ### UC-06: Add Review
 
@@ -398,6 +476,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 | Trigger       | User clicks "View History"                                                                                   |
 | Main Flow     | 1. System displays timeline of all changes<br>2. User can see any past state<br>3. User can compare versions |
 | Postcondition | None (read-only)                                                                                             |
+| Note          | History includes deadline changes and extension reasons                                                      |
 
 ### UC-08: Close Decision
 
@@ -409,6 +488,29 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 | Main Flow     | 1. User marks decision as concluded<br>2. System changes status to CLOSED |
 | Postcondition | Decision archived, still viewable                                         |
 | Note          | Can still add reviews after closing                                       |
+
+### UC-09: Reconsider Decision
+
+| Attribute     | Value                                                                                                                                                                                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actor         | Decision Owner                                                                                                                                                                                                                                                      |
+| Precondition  | Decision status is ACTIVE or CLOSED                                                                                                                                                                                                                                 |
+| Trigger       | User clicks "Reconsider"                                                                                                                                                                                                                                            |
+| Main Flow     | 1. System shows frozen content and existing evidence (read-only)<br>2. User provides reconsider reason<br>3. User sets new decision deadline<br>4. System creates new decision in DRAFT by copying content and evidence<br>5. System links new decision to original |
+| Postcondition | New decision created; original decision remains unchanged                                                                                                                                                                                                           |
+| Note          | New decision can be edited and frozen independently                                                                                                                                                                                                                 |
+
+### UC-10: Extend Decision Deadline
+
+| Attribute     | Value                                                                                                                                                                                                                                          |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actor         | Decision Owner                                                                                                                                                                                                                                 |
+| Precondition  | Decision status is DRAFT                                                                                                                                                                                                                       |
+| Trigger       | User selects "Extend deadline" (from decision page or notification page)                                                                                                                                  |
+| Main Flow     | 1. User selects Extend<br>2. User enters new deadline and reason<br>3. System validates new deadline is in the future<br>4. System updates deadline and records reason in history |
+| Postcondition | Deadline extended; decision remains DRAFT                                                                                                                                                                                                      |
+| Constraint    | Reason is required for every extension                                                                                                                                                                                                         |
+| Note          | Can be used before deadline; if deadline has passed, other edits remain blocked until the user extends the deadline or freezes the decision                                                                                                        |
 
 ---
 
@@ -425,6 +527,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
             │  • Add hypotheses       │
             │  • Adjust confidence    │
             │  • Add evidence         │
+            │  • Extend deadline      │
             │                         │
             └────────────┬────────────┘
                          │
@@ -441,6 +544,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
             │  • Add reviews          │
             │  • Add evidence         │
             │  • View history         │
+            │  • Reconsider           │
             │                         │
             │  ✗ Cannot edit content  │
             │                         │
@@ -458,6 +562,7 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
             │  • View frozen content  │
             │  • Add reviews          │
             │  • View history         │
+            │  • Reconsider           │
             │                         │
             │  ✗ Cannot edit          │
             │  ✗ Cannot add evidence  │
@@ -465,15 +570,25 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
             └─────────────────────────┘
 ```
 
+**Notes:**
+
+- DRAFT 編輯、信心調整與新增 evidence 僅允許在 `decision_deadline` 前進行
+- Extend Deadline 可在 DRAFT 任何時間使用，且每次需填寫原因
+- deadline 到期後，僅能 Freeze 或 Extend Deadline
+- Reconsider 不會改變原決策狀態，而是建立新的 DRAFT 並連結到原決策
+
 ### State Transition Rules
 
-| Current State | Action | Next State | Allowed Operations After               |
-| ------------- | ------ | ---------- | -------------------------------------- |
-| DRAFT         | Create | DRAFT      | Edit, Add Evidence, Adjust Confidence  |
-| DRAFT         | Freeze | ACTIVE     | Add Review, Add Evidence, View History |
-| ACTIVE        | Close  | CLOSED     | Add Review, View History               |
-| ACTIVE        | -      | ACTIVE     | Cannot go back to DRAFT                |
-| CLOSED        | -      | CLOSED     | Terminal state                         |
+| Current State | Action          | Next State  | Allowed Operations After                                    |
+| ------------- | --------------- | ----------- | ----------------------------------------------------------- |
+| DRAFT         | Create          | DRAFT       | Edit, Add Evidence, Adjust Confidence (before deadline)     |
+| DRAFT         | Extend Deadline | DRAFT       | Edit, Add Evidence, Adjust Confidence (before new deadline; reason required) |
+| DRAFT         | Freeze          | ACTIVE      | Add Review, Add Evidence, View History, Reconsider          |
+| ACTIVE        | Close           | CLOSED      | Add Review, View History, Reconsider                        |
+| ACTIVE        | Reconsider      | DRAFT (new) | Edit, Add Evidence, Adjust Confidence                       |
+| ACTIVE        | -               | ACTIVE      | Original decision cannot go back to DRAFT (use Reconsider)  |
+| CLOSED        | Reconsider      | DRAFT (new) | Edit, Add Evidence, Adjust Confidence                       |
+| CLOSED        | -               | CLOSED      | Terminal state (read-only except review & reconsider)       |
 
 ---
 
@@ -503,6 +618,9 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 │ final_choice: text (nullable, filled on freeze)                 │
 │ status: enum [DRAFT, ACTIVE, CLOSED]                            │
 │ category: string (optional)                                     │
+│ decision_deadline: timestamp (required)                         │
+│ supersedes_decision_id: UUID (nullable, FK → Decision)          │
+│ reconsider_reason: text (nullable)                              │
 │ created_at: timestamp                                           │
 │ frozen_at: timestamp (nullable)                                 │
 │ closed_at: timestamp (nullable)                                 │
@@ -558,7 +676,12 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
    - 一個 Decision 可有多個 Review
    - 每個 Review 記錄時間點的觀察
 
-4. **HypothesisAssessment 在 Review 內**
+4. **Reconsider 透過新 Decision，不回寫原決策**
+   - 新決策以 `supersedes_decision_id` 連結原決策
+   - 原決策保持凍結快照，方便回顧
+   - 新決策會複製原決策的 evidence
+
+5. **HypothesisAssessment 在 Review 內**
    - 每次回顧時評估每個假設
    - 同一假設可在不同時間點有不同評估
 
@@ -574,6 +697,8 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 - DRAFT 狀態下的編輯會創建新版本，不覆蓋舊值
 - 凍結後，核心欄位變為 read-only
+- 重大改變透過 Reconsider 建立新決策，不回寫原決策
+- Deadline 延長需填寫原因並寫入歷史（每次）
 - 資料庫層面不提供 UPDATE 凍結內容的 API
 
 ### 2. Low-Friction Recording 低摩擦記錄
@@ -606,6 +731,17 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 - 重點功能是凍結和回顧
 - Review 功能鼓勵在時間過後回來
 
+### 5. Time-Boxed Decisions 有截止時間
+
+> 沒有期限就很難做出決定。每個決策必須有時間界線。
+
+**Implementation:**
+
+- `decision_deadline` 為必填欄位
+- Extend Deadline 可在 DRAFT 任何時間使用，且每次需填寫原因
+- deadline 到期後，DRAFT 僅能 Freeze 或 Extend Deadline
+- UI 顯示倒數與逾期提醒
+
 ---
 
 ## Success Metrics
@@ -621,12 +757,14 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ### Secondary Metrics
 
-| Metric                 | Definition                                 | Signal             |
-| ---------------------- | ------------------------------------------ | ------------------ |
-| Draft Completion       | % of started decisions that reach freeze   | Usability          |
-| Confidence Adjustments | Avg adjustments per decision before freeze | Engagement         |
-| Review Depth           | Avg words in lessons learned               | Reflection quality |
-| Pattern View Usage     | % of users who use cross-decision view     | Feature value      |
+| Metric                 | Definition                                  | Signal             |
+| ---------------------- | ------------------------------------------- | ------------------ |
+| Draft Completion       | % of started decisions that reach freeze    | Usability          |
+| Confidence Adjustments | Avg adjustments per decision before freeze  | Engagement         |
+| Review Depth           | Avg words in lessons learned                | Reflection quality |
+| Pattern View Usage     | % of users who use cross-decision view      | Feature value      |
+| Deadline Compliance    | % of decisions frozen by deadline           | Commitment         |
+| Reconsider Rate        | % of frozen decisions that are reconsidered | Learning loop      |
 
 ### Anti-Metrics (What NOT to Optimize)
 
@@ -645,6 +783,9 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 - [ ] **UC-02**: Edit Draft Decision
 - [ ] **UC-04**: Adjust Confidence (with history)
 - [ ] **UC-05**: Freeze Decision
+- [ ] Decision deadline field + validation
+- [ ] **UC-10**: Extend Decision Deadline (with reason)
+- [ ] Deadline notification (at deadline)
 - [ ] Basic decision list view
 
 ### Week 3: Review & History
@@ -656,8 +797,9 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ### Week 4: Polish & Patterns
 
-- [ ] **Flow 5**: Cross-decision view (simplified)
+- [ ] **Flow 7**: Cross-decision view (simplified)
 - [ ] Category/tagging system
+- [ ] **UC-09**: Reconsider Decision
 - [ ] UI polish and responsive design
 - [ ] Bug fixes and edge cases
 
