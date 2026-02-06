@@ -12,16 +12,16 @@ Decision Log 使用 monorepo 架構，採用 pnpm workspaces + Turborepo 管理�
 
 ### Tech Stack
 
-| Layer | Technology | Version |
-|-------|------------|---------|
-| Frontend | TanStack Start | ^1.x |
-| Backend API | Express.js | ^4.x |
-| Database | PostgreSQL | 16 |
-| ORM | Drizzle ORM | ^0.29 |
-| Authentication | Lucia | ^3.x |
-| Validation | Zod | ^3.x |
-| Package Manager | pnpm | ^8.x |
-| Build System | Turborepo | ^2.x |
+| Layer           | Technology     | Version |
+| --------------- | -------------- | ------- |
+| Frontend        | TanStack Start | ^1.x    |
+| Backend API     | Express.js     | ^4.x    |
+| Database        | PostgreSQL     | 16      |
+| ORM             | Drizzle ORM    | ^0.29   |
+| Authentication  | Lucia          | ^3.x    |
+| Validation      | Zod            | ^3.x    |
+| Package Manager | pnpm           | ^8.x    |
+| Build System    | Turborepo      | ^2.x    |
 
 ---
 
@@ -33,15 +33,16 @@ Decision Log 使用 monorepo 架構，採用 pnpm workspaces + Turborepo 管理�
 
 **Rationale:**
 
-| Aspect | Drizzle | Prisma |
-|--------|---------|--------|
-| Bundle Size | ~35KB | ~2MB |
-| SQL Control | 完整控制，可寫 raw SQL | 抽象層，較難優化 |
-| Code Generation | 不需要 | 需要 `prisma generate` |
-| Type Safety | SQL-like 語法推導 | 從 schema 生成 |
-| Monorepo | 簡單 package | 需要 generate step |
+| Aspect          | Drizzle                | Prisma                 |
+| --------------- | ---------------------- | ---------------------- |
+| Bundle Size     | ~35KB                  | ~2MB                   |
+| SQL Control     | 完整控制，可寫 raw SQL | 抽象層，較難優化       |
+| Code Generation | 不需要                 | 需要 `prisma generate` |
+| Type Safety     | SQL-like 語法推導      | 從 schema 生成         |
+| Monorepo        | 簡單 package           | 需要 generate step     |
 
 **For this project:**
+
 1. Confidence snapshot 需要 SQL-level 控制（history 查詢、aggregation）
 2. TanStack Start server functions 需要輕量 bundle
 3. Monorepo 不需要額外的 code generation step
@@ -54,14 +55,15 @@ Decision Log 使用 monorepo 架構，採用 pnpm workspaces + Turborepo 管理�
 
 **Rationale:**
 
-| Aspect | Lucia | Better-Auth | Auth.js |
-|--------|-------|-------------|---------|
-| Philosophy | Low-level, full control | Higher-level | Framework-focused |
-| Database | 任何 adapter | Built-in | Adapter-based |
-| Customization | Excellent | Good | Limited |
-| Drizzle Support | Official adapter | Community | Community |
+| Aspect          | Lucia                   | Better-Auth  | Auth.js           |
+| --------------- | ----------------------- | ------------ | ----------------- |
+| Philosophy      | Low-level, full control | Higher-level | Framework-focused |
+| Database        | 任何 adapter            | Built-in     | Adapter-based     |
+| Customization   | Excellent               | Good         | Limited           |
+| Drizzle Support | Official adapter        | Community    | Community         |
 
 **For this project:**
+
 1. 官方 Drizzle adapter 可用
 2. 完整控制 session 管理
 3. 可實作自訂 session validation
@@ -263,18 +265,18 @@ decisioner/
 
 ### 4.2 Indexes
 
-| Table | Index | Columns |
-|-------|-------|---------|
-| decisions | decisions_user_id_idx | user_id |
-| decisions | decisions_status_idx | status |
-| decisions | decisions_created_at_idx | created_at |
-| hypotheses | hypotheses_decision_id_idx | decision_id |
-| confidence_snapshots | confidence_snapshots_hypothesis_id_idx | hypothesis_id |
-| confidence_snapshots | confidence_snapshots_created_at_idx | created_at |
-| evidence | evidence_decision_id_idx | decision_id |
-| evidence | evidence_hypothesis_id_idx | hypothesis_id |
-| reviews | reviews_decision_id_idx | decision_id |
-| hypothesis_assessments | hypothesis_assessments_review_id_idx | review_id |
+| Table                  | Index                                  | Columns       |
+| ---------------------- | -------------------------------------- | ------------- |
+| decisions              | decisions_user_id_idx                  | user_id       |
+| decisions              | decisions_status_idx                   | status        |
+| decisions              | decisions_created_at_idx               | created_at    |
+| hypotheses             | hypotheses_decision_id_idx             | decision_id   |
+| confidence_snapshots   | confidence_snapshots_hypothesis_id_idx | hypothesis_id |
+| confidence_snapshots   | confidence_snapshots_created_at_idx    | created_at    |
+| evidence               | evidence_decision_id_idx               | decision_id   |
+| evidence               | evidence_hypothesis_id_idx             | hypothesis_id |
+| reviews                | reviews_decision_id_idx                | decision_id   |
+| hypothesis_assessments | hypothesis_assessments_review_id_idx   | review_id     |
 
 ### 4.3 Enums
 
@@ -292,64 +294,64 @@ CREATE TYPE hypothesis_assessment AS ENUM ('CONFIRMED', 'PARTIALLY', 'WRONG', 'U
 
 ### 5.1 Authentication Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/auth/register` | Create new account | No |
-| POST | `/api/auth/login` | Login with email/password | No |
-| POST | `/api/auth/logout` | Invalidate session | Yes |
-| GET | `/api/auth/me` | Get current user info | Yes |
+| Method | Endpoint             | Description               | Auth Required |
+| ------ | -------------------- | ------------------------- | ------------- |
+| POST   | `/api/auth/register` | Create new account        | No            |
+| POST   | `/api/auth/login`    | Login with email/password | No            |
+| POST   | `/api/auth/logout`   | Invalidate session        | Yes           |
+| GET    | `/api/auth/me`       | Get current user info     | Yes           |
 
 ### 5.2 Decision Endpoints
 
-| Method | Endpoint | Description | State Constraint |
-|--------|----------|-------------|------------------|
-| GET | `/api/decisions` | List user's decisions | - |
-| POST | `/api/decisions` | Create new decision | - |
-| GET | `/api/decisions/:id` | Get decision with details | Owner only |
-| PATCH | `/api/decisions/:id` | Update decision fields | **DRAFT only** |
-| POST | `/api/decisions/:id/freeze` | Freeze decision | **DRAFT only** |
-| POST | `/api/decisions/:id/close` | Close decision | **ACTIVE only** |
-| GET | `/api/decisions/:id/history` | Get change history | Owner only |
+| Method | Endpoint                     | Description               | State Constraint |
+| ------ | ---------------------------- | ------------------------- | ---------------- |
+| GET    | `/api/decisions`             | List user's decisions     | -                |
+| POST   | `/api/decisions`             | Create new decision       | -                |
+| GET    | `/api/decisions/:id`         | Get decision with details | Owner only       |
+| PATCH  | `/api/decisions/:id`         | Update decision fields    | **DRAFT only**   |
+| POST   | `/api/decisions/:id/freeze`  | Freeze decision           | **DRAFT only**   |
+| POST   | `/api/decisions/:id/close`   | Close decision            | **ACTIVE only**  |
+| GET    | `/api/decisions/:id/history` | Get change history        | Owner only       |
 
 ### 5.3 Hypothesis Endpoints
 
-| Method | Endpoint | Description | State Constraint |
-|--------|----------|-------------|------------------|
-| POST | `/api/decisions/:id/hypotheses` | Add hypothesis | **DRAFT only** |
-| PATCH | `/api/hypotheses/:id` | Update hypothesis content | **DRAFT only** |
-| DELETE | `/api/hypotheses/:id` | Delete hypothesis | **DRAFT only** |
-| POST | `/api/hypotheses/:id/confidence` | Adjust confidence | **DRAFT only** |
-| GET | `/api/hypotheses/:id/history` | Get confidence history | Owner only |
+| Method | Endpoint                         | Description               | State Constraint |
+| ------ | -------------------------------- | ------------------------- | ---------------- |
+| POST   | `/api/decisions/:id/hypotheses`  | Add hypothesis            | **DRAFT only**   |
+| PATCH  | `/api/hypotheses/:id`            | Update hypothesis content | **DRAFT only**   |
+| DELETE | `/api/hypotheses/:id`            | Delete hypothesis         | **DRAFT only**   |
+| POST   | `/api/hypotheses/:id/confidence` | Adjust confidence         | **DRAFT only**   |
+| GET    | `/api/hypotheses/:id/history`    | Get confidence history    | Owner only       |
 
 ### 5.4 Evidence Endpoints
 
-| Method | Endpoint | Description | State Constraint |
-|--------|----------|-------------|------------------|
-| POST | `/api/decisions/:id/evidence` | Add evidence | DRAFT or ACTIVE |
-| GET | `/api/decisions/:id/evidence` | List all evidence | Owner only |
+| Method | Endpoint                      | Description       | State Constraint |
+| ------ | ----------------------------- | ----------------- | ---------------- |
+| POST   | `/api/decisions/:id/evidence` | Add evidence      | DRAFT or ACTIVE  |
+| GET    | `/api/decisions/:id/evidence` | List all evidence | Owner only       |
 
 ### 5.5 Review Endpoints
 
-| Method | Endpoint | Description | State Constraint |
-|--------|----------|-------------|------------------|
-| POST | `/api/decisions/:id/reviews` | Add review | **ACTIVE or CLOSED** |
-| GET | `/api/decisions/:id/reviews` | List all reviews | Owner only |
+| Method | Endpoint                     | Description      | State Constraint     |
+| ------ | ---------------------------- | ---------------- | -------------------- |
+| POST   | `/api/decisions/:id/reviews` | Add review       | **ACTIVE or CLOSED** |
+| GET    | `/api/decisions/:id/reviews` | List all reviews | Owner only           |
 
 ### 5.6 Pattern Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/patterns/summary` | Get cross-decision statistics |
+| Method | Endpoint                | Description                   |
+| ------ | ----------------------- | ----------------------------- |
+| GET    | `/api/patterns/summary` | Get cross-decision statistics |
 
 ### 5.7 Error Codes
 
-| HTTP Code | Scenario |
-|-----------|----------|
-| 400 | Validation error (Zod) |
-| 401 | Not authenticated |
-| 403 | Not authorized (not owner) |
-| 404 | Resource not found |
-| 409 | Invalid state transition |
+| HTTP Code | Scenario                   |
+| --------- | -------------------------- |
+| 400       | Validation error (Zod)     |
+| 401       | Not authenticated          |
+| 403       | Not authorized (not owner) |
+| 404       | Resource not found         |
+| 409       | Invalid state transition   |
 
 ---
 
@@ -382,19 +384,19 @@ CREATE TYPE hypothesis_assessment AS ENUM ('CONFIRMED', 'PARTIALLY', 'WRONG', 'U
 
 ### 6.2 State Permissions Matrix
 
-| Operation | DRAFT | ACTIVE | CLOSED |
-|-----------|-------|--------|--------|
-| Edit title/description | ✓ | ✗ | ✗ |
-| Edit context/expected_outcome | ✓ | ✗ | ✗ |
-| Add hypothesis | ✓ | ✗ | ✗ |
-| Edit hypothesis | ✓ | ✗ | ✗ |
-| Delete hypothesis | ✓ | ✗ | ✗ |
-| Adjust confidence | ✓ | ✗ | ✗ |
-| Add evidence | ✓ | ✓ | ✗ |
-| Add review | ✗ | ✓ | ✓ |
-| View history | ✓ | ✓ | ✓ |
-| Freeze | ✓ | ✗ | ✗ |
-| Close | ✗ | ✓ | ✗ |
+| Operation                     | DRAFT | ACTIVE | CLOSED |
+| ----------------------------- | ----- | ------ | ------ |
+| Edit title/description        | ✓     | ✗      | ✗      |
+| Edit context/expected_outcome | ✓     | ✗      | ✗      |
+| Add hypothesis                | ✓     | ✗      | ✗      |
+| Edit hypothesis               | ✓     | ✗      | ✗      |
+| Delete hypothesis             | ✓     | ✗      | ✗      |
+| Adjust confidence             | ✓     | ✗      | ✗      |
+| Add evidence                  | ✓     | ✓      | ✗      |
+| Add review                    | ✗     | ✓      | ✓      |
+| View history                  | ✓     | ✓      | ✓      |
+| Freeze                        | ✓     | ✗      | ✗      |
+| Close                         | ✗     | ✓      | ✗      |
 
 ---
 
@@ -450,6 +452,7 @@ async freeze(id: string, input: FreezeDecisionInput) {
 ```
 
 **Key Points:**
+
 - 使用 transaction 確保原子性
 - 每個 hypothesis 的最新 confidence snapshot 會被標記為 `is_frozen: true`
 - `frozen_at` timestamp 記錄凍結時間
@@ -501,6 +504,7 @@ async getConfidenceHistory(hypothesisId: string) {
 ```
 
 **Key Points:**
+
 - 當前信心值 = 最新的 snapshot
 - 歷史查詢按 `created_at` 排序
 - `is_frozen` 標記凍結時刻的值（用於顯示「凍結時的信心」）
@@ -581,21 +585,21 @@ async findAllByUser(userId: string) {
 export async function checkDecisionOwnership(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const { id } = req.params;
-  const decision = await decisionService.findById(id);
+  const { id } = req.params
+  const decision = await decisionService.findById(id)
 
   if (!decision) {
-    throw new ApiError(404, "Decision not found");
+    throw new ApiError(404, 'Decision not found')
   }
 
   if (decision.userId !== req.user!.id) {
-    throw new ApiError(403, "Not authorized");
+    throw new ApiError(403, 'Not authorized')
   }
 
-  req.decision = decision;
-  next();
+  req.decision = decision
+  next()
 }
 ```
 
@@ -607,24 +611,24 @@ export async function checkDecisionOwnership(
 
 ```typescript
 // packages/auth/src/lucia.ts
-import { Lucia } from "lucia";
-import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
-import { db } from "@decisioner/database";
-import { users, sessions } from "@decisioner/database/schema";
+import { Lucia } from 'lucia'
+import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle'
+import { db } from '@decisioner/database'
+import { users, sessions } from '@decisioner/database/schema'
 
-const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);
+const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users)
 
 export const lucia = new Lucia(adapter, {
   sessionCookie: {
     attributes: {
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === 'production',
     },
   },
   getUserAttributes: (attributes) => ({
     email: attributes.email,
     name: attributes.name,
   }),
-});
+})
 ```
 
 ### 8.2 Auth Middleware
@@ -634,48 +638,46 @@ export const lucia = new Lucia(adapter, {
 export async function authMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  const sessionId = lucia.readSessionCookie(req.headers.cookie ?? "");
+  const sessionId = lucia.readSessionCookie(req.headers.cookie ?? '')
 
   if (!sessionId) {
-    req.user = null;
-    req.session = null;
-    return next();
+    req.user = null
+    req.session = null
+    return next()
   }
 
-  const { session, user } = await lucia.validateSession(sessionId);
+  const { session, user } = await lucia.validateSession(sessionId)
 
   if (session?.fresh) {
     res.appendHeader(
-      "Set-Cookie",
-      lucia.createSessionCookie(session.id).serialize()
-    );
+      'Set-Cookie',
+      lucia.createSessionCookie(session.id).serialize(),
+    )
   }
 
   if (!session) {
-    res.appendHeader(
-      "Set-Cookie",
-      lucia.createBlankSessionCookie().serialize()
-    );
+    res.appendHeader('Set-Cookie', lucia.createBlankSessionCookie().serialize())
   }
 
-  req.user = user;
-  req.session = session;
-  next();
+  req.user = user
+  req.session = session
+  next()
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!req.user) {
-    throw new ApiError(401, "Authentication required");
+    throw new ApiError(401, 'Authentication required')
   }
-  next();
+  next()
 }
 ```
 
 ### 8.3 Flow Diagrams
 
 **Registration:**
+
 ```
 POST /api/auth/register { email, password, name }
   → Validate input (Zod)
@@ -688,6 +690,7 @@ POST /api/auth/register { email, password, name }
 ```
 
 **Login:**
+
 ```
 POST /api/auth/login { email, password }
   → Find user by email
@@ -703,35 +706,35 @@ POST /api/auth/login { email, password }
 
 ### 9.1 Route Structure
 
-| Route | Component | Description |
-|-------|-----------|-------------|
-| `/` | index.tsx | Landing / Dashboard |
-| `/login` | login.tsx | Login form |
-| `/register` | register.tsx | Registration form |
-| `/decisions` | decisions/index.tsx | Decision list |
-| `/decisions/new` | decisions/new.tsx | Create decision |
-| `/decisions/:id` | decisions/$id/index.tsx | View/Edit decision |
-| `/decisions/:id/history` | decisions/$id/history.tsx | Confidence timeline |
-| `/decisions/:id/review` | decisions/$id/review.tsx | Add/View reviews |
-| `/patterns` | patterns.tsx | Cross-decision analysis |
+| Route                    | Component                 | Description             |
+| ------------------------ | ------------------------- | ----------------------- |
+| `/`                      | index.tsx                 | Landing / Dashboard     |
+| `/login`                 | login.tsx                 | Login form              |
+| `/register`              | register.tsx              | Registration form       |
+| `/decisions`             | decisions/index.tsx       | Decision list           |
+| `/decisions/new`         | decisions/new.tsx         | Create decision         |
+| `/decisions/:id`         | decisions/$id/index.tsx   | View/Edit decision      |
+| `/decisions/:id/history` | decisions/$id/history.tsx | Confidence timeline     |
+| `/decisions/:id/review`  | decisions/$id/review.tsx  | Add/View reviews        |
+| `/patterns`              | patterns.tsx              | Cross-decision analysis |
 
 ### 9.2 Server Functions vs API Calls
 
-| Use Server Functions | Use API Calls |
-|---------------------|---------------|
-| Initial page data loading | Real-time updates |
-| Form submissions | Background sync |
-| Auth-dependent queries | Optimistic updates |
-| SEO-critical content | Polling |
+| Use Server Functions      | Use API Calls      |
+| ------------------------- | ------------------ |
+| Initial page data loading | Real-time updates  |
+| Form submissions          | Background sync    |
+| Auth-dependent queries    | Optimistic updates |
+| SEO-critical content      | Polling            |
 
 ### 9.3 State Management
 
-| State Type | Solution |
-|------------|----------|
-| Server State | TanStack Query |
-| Auth State | React Context |
-| UI State | React Context |
-| URL State | TanStack Router |
+| State Type   | Solution        |
+| ------------ | --------------- |
+| Server State | TanStack Query  |
+| Auth State   | React Context   |
+| UI State     | React Context   |
+| URL State    | TanStack Router |
 
 ---
 
@@ -827,7 +830,7 @@ NODE_ENV="development"
 
 ```yaml
 # docker-compose.yml
-version: "3.8"
+version: '3.8'
 
 services:
   postgres:
@@ -838,7 +841,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: decisioner
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -850,6 +853,6 @@ volumes:
 
 ## 13. Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0.0 | 2026-02-05 | - | Initial architecture document |
+| Version | Date       | Author | Changes                       |
+| ------- | ---------- | ------ | ----------------------------- |
+| 1.0.0   | 2026-02-05 | -      | Initial architecture document |
