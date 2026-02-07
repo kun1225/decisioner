@@ -1,6 +1,4 @@
-# Appendix A: User Scenarios & Flows
-
-## User Scenarios & Flows
+# 10. UX Flows
 
 ### Scenario A: Recording a Decision in Progress
 

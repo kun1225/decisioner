@@ -1,6 +1,4 @@
-# Appendix E: Example Decision
-
-## Example Decision
+# 11. Example Decision
 
 **Title:** Should I learn Rust in 2024?
 
