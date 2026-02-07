@@ -12,16 +12,16 @@ Decision Log 使用 monorepo 架構，採用 pnpm workspaces + Turborepo 管理�
 
 ### Tech Stack
 
-| Layer           | Technology     | Version |
-| --------------- | -------------- | ------- |
-| Frontend        | TanStack Start | ^1.x    |
-| Backend API     | Express.js     | ^4.x    |
-| Database        | PostgreSQL     | 16      |
-| ORM             | Drizzle ORM    | ^0.29   |
-| Authentication  | Lucia          | ^3.x    |
-| Validation      | Zod            | ^3.x    |
-| Package Manager | pnpm           | ^8.x    |
-| Build System    | Turborepo      | ^2.x    |
+| Layer           | Technology             | Version |
+| --------------- | ---------------------- | ------- |
+| Frontend        | TanStack Start         | ^1.x    |
+| Backend API     | Express.js             | ^4.x    |
+| Database        | PostgreSQL             | 16      |
+| ORM             | Drizzle ORM            | ^0.29   |
+| Authentication  | DIY (**bcrypt** + JWT) | -       |
+| Validation      | Zod                    | ^3.x    |
+| Package Manager | pnpm                   | ^8.x    |
+| Build System    | Turborepo              | ^2.x    |
 
 ---
 
@@ -49,25 +49,27 @@ Decision Log 使用 monorepo 架構，採用 pnpm workspaces + Turborepo 管理�
 
 ---
 
-### 2.2 Authentication: Lucia
+### 2.2 Authentication: DIY (bcrypt + JWT)
 
-**Decision:** 選擇 Lucia Auth
+**Decision:** 使用 bcrypt + jsonwebtoken
 
 **Rationale:**
 
-| Aspect          | Lucia                   | Better-Auth  | Auth.js           |
-| --------------- | ----------------------- | ------------ | ----------------- |
-| Philosophy      | Low-level, full control | Higher-level | Framework-focused |
-| Database        | 任何 adapter            | Built-in     | Adapter-based     |
-| Customization   | Excellent               | Good         | Limited           |
-| Drizzle Support | Official adapter        | Community    | Community         |
+| Aspect       | DIY (bcrypt + JWT)     | Lucia        | Clerk           | Auth.js           |
+| ------------ | ---------------------- | ------------ | --------------- | ----------------- |
+| Philosophy   | Full control, no magic | Low-level    | Managed service | Framework-focused |
+| Express 整合 | 原生支援               | 需要 adapter | SDK             | 主要為 Next.js    |
+| 成本         | 免費                   | 免費         | 付費            | 免費              |
+| Session 管理 | JWT（stateless）       | DB session   | 託管            | DB session        |
+| 學習價值     | 高                     | 中           | 低              | 中                |
 
 **For this project:**
 
-1. 官方 Drizzle adapter 可用
-2. 完整控制 session 管理
-3. 可實作自訂 session validation
-4. 程式碼路徑明確，無 magic
+1. Express.js 後端原生整合，無需額外 adapter
+2. JWT token-based 適合 SPA + API 分離架構（TanStack Start + Express）
+3. API server 不需維護 session 狀態（stateless）
+4. Lucia 作者已建議改為 DIY（官網公告）
+5. 用 bcrypt（密碼雜湊）+ jsonwebtoken 皆為成熟穩定的 npm 套件
 
 ---
 
@@ -174,9 +176,9 @@ decisioner/
 │   └── auth/                         # Authentication package
 │       ├── src/
 │       │   ├── index.ts
-│       │   ├── lucia.ts              # Lucia auth setup
-│       │   ├── adapter.ts            # Drizzle adapter
-│       │   └── utils.ts
+│       │   ├── password.ts           # bcrypt hash/verify
+│       │   ├── jwt.ts                # JWT sign/verify
+│       │   └── types.ts
 │       ├── package.json
 │       └── tsconfig.json
 │
@@ -254,13 +256,7 @@ decisioner/
 │ is_frozen: boolean              │  └─────────────────────────────────┘
 └─────────────────────────────────┘
 
-┌─────────────────────────────────┐
-│           sessions              │
-├─────────────────────────────────┤
-│ id: varchar(255) (PK)           │
-│ user_id: uuid (FK → users)      │
-│ expires_at: timestamp           │
-└─────────────────────────────────┘
+Note: Authentication uses JWT (stateless), no sessions table needed.
 ```
 
 ### 4.2 Indexes
@@ -298,7 +294,7 @@ CREATE TYPE hypothesis_assessment AS ENUM ('CONFIRMED', 'PARTIALLY', 'WRONG', 'U
 | ------ | -------------------- | ------------------------- | ------------- |
 | POST   | `/api/auth/register` | Create new account        | No            |
 | POST   | `/api/auth/login`    | Login with email/password | No            |
-| POST   | `/api/auth/logout`   | Invalidate session        | Yes           |
+| POST   | `/api/auth/logout`   | Client-side token removal | Yes           |
 | GET    | `/api/auth/me`       | Get current user info     | Yes           |
 
 ### 5.2 Decision Endpoints
@@ -607,62 +603,72 @@ export async function checkDecisionOwnership(
 
 ## 8. Authentication Flow
 
-### 8.1 Lucia Configuration
+### 8.1 JWT Configuration
 
 ```typescript
-// packages/auth/src/lucia.ts
-import { Lucia } from 'lucia'
-import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle'
-import { db } from '@decisioner/database'
-import { users, sessions } from '@decisioner/database/schema'
+// packages/auth/src/jwt.ts
+import jwt from 'jsonwebtoken'
 
-const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users)
+const JWT_SECRET = process.env.JWT_SECRET!
 
-export const lucia = new Lucia(adapter, {
-  sessionCookie: {
-    attributes: {
-      secure: process.env.NODE_ENV === 'production',
-    },
-  },
-  getUserAttributes: (attributes) => ({
-    email: attributes.email,
-    name: attributes.name,
-  }),
-})
+export interface JwtPayload {
+  userId: string
+  email: string
+}
+
+export function signToken(payload: JwtPayload): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })
+}
+
+export function verifyToken(token: string): JwtPayload {
+  return jwt.verify(token, JWT_SECRET) as JwtPayload
+}
+```
+
+```typescript
+// packages/auth/src/password.ts
+import bcrypt from 'bcrypt'
+
+const SALT_ROUNDS = 12
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS)
+}
+
+export async function verifyPassword(
+  password: string,
+  hash: string,
+): Promise<boolean> {
+  return bcrypt.compare(password, hash)
+}
 ```
 
 ### 8.2 Auth Middleware
 
 ```typescript
 // apps/api/src/middleware/auth.middleware.ts
+import { verifyToken } from '@repo/auth'
+
 export async function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const sessionId = lucia.readSessionCookie(req.headers.cookie ?? '')
+  const authHeader = req.headers.authorization
 
-  if (!sessionId) {
+  if (!authHeader?.startsWith('Bearer ')) {
     req.user = null
-    req.session = null
     return next()
   }
 
-  const { session, user } = await lucia.validateSession(sessionId)
-
-  if (session?.fresh) {
-    res.appendHeader(
-      'Set-Cookie',
-      lucia.createSessionCookie(session.id).serialize(),
-    )
+  try {
+    const token = authHeader.slice(7)
+    const payload = verifyToken(token)
+    req.user = payload
+  } catch {
+    req.user = null
   }
 
-  if (!session) {
-    res.appendHeader('Set-Cookie', lucia.createBlankSessionCookie().serialize())
-  }
-
-  req.user = user
-  req.session = session
   next()
 }
 
@@ -682,11 +688,10 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 POST /api/auth/register { email, password, name }
   → Validate input (Zod)
   → Check email uniqueness
-  → Hash password (Argon2)
+  → Hash password (bcrypt)
   → Create user in database
-  → Create session via Lucia
-  → Set session cookie
-  → Return user data
+  → Sign JWT token
+  → Return { user, token }
 ```
 
 **Login:**
@@ -694,10 +699,19 @@ POST /api/auth/register { email, password, name }
 ```
 POST /api/auth/login { email, password }
   → Find user by email
-  → Verify password (Argon2)
-  → Create session via Lucia
-  → Set session cookie
-  → Return user data
+  → Verify password (bcrypt)
+  → Sign JWT token
+  → Return { user, token }
+```
+
+**Authenticated Request:**
+
+```
+GET /api/decisions (Authorization: Bearer <token>)
+  → Auth middleware extracts token
+  → Verify JWT signature & expiry
+  → Inject user payload into req.user
+  → Proceed to controller
 ```
 
 ---
@@ -773,8 +787,8 @@ POST /api/auth/login { email, password }
   ├── @decisioner/shared
   └── @decisioner/auth
 
-@decisioner/auth
-  └── @decisioner/database
+@repo/auth
+  └── bcrypt, jsonwebtoken (no internal deps)
 
 @decisioner/database
   └── (no internal deps)
@@ -817,8 +831,8 @@ API_URL="http://localhost:3001"
 # Web Server
 WEB_PORT=3000
 
-# Authentication
-SESSION_SECRET="your-session-secret-at-least-32-chars-long"
+# Authentication (JWT)
+JWT_SECRET="your-jwt-secret-at-least-32-chars-long"
 
 # Environment
 NODE_ENV="development"
@@ -853,6 +867,7 @@ volumes:
 
 ## 13. Revision History
 
-| Version | Date       | Author | Changes                       |
-| ------- | ---------- | ------ | ----------------------------- |
-| 1.0.0   | 2026-02-05 | -      | Initial architecture document |
+| Version | Date       | Author | Changes                                           |
+| ------- | ---------- | ------ | ------------------------------------------------- |
+| 1.1.0   | 2026-02-06 | -      | Auth: Lucia → DIY (bcrypt + JWT), remove sessions |
+| 1.0.0   | 2026-02-05 | -      | Initial architecture document                     |

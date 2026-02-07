@@ -350,12 +350,27 @@ Full flows: `docs/specs/ux-flows.md`
 
 ## Open Questions
 
-| Question          | Options                       | Decision Needed By |
-| ----------------- | ----------------------------- | ------------------ |
-| Auth provider?    | DIY, Lucia, Clerk, Auth.js    | Week 1             |
-| ORM choice?       | Prisma, Drizzle               | Week 1             |
-| Deploy target?    | Vercel, Railway, VPS          | Week 3             |
-| Hypothesis order? | User-defined vs chronological | Week 2             |
+| Question          | Options                       | Decision Needed By | Status                                       |
+| ----------------- | ----------------------------- | ------------------ | -------------------------------------------- |
+| Auth provider?    | DIY, Lucia, Clerk, Auth.js    | Week 1             | **Decided: DIY (bcrypt + JWT)**              |
+| ORM choice?       | Prisma, Drizzle               | Week 1             | **Decided: Drizzle ORM**                     |
+| Deploy target?    | Vercel, Railway, VPS          | Week 3             | Open                                         |
+| Hypothesis order? | User-defined vs chronological | Week 2             | Open                                         |
+
+### Decision Records
+
+**Auth: DIY (bcrypt + JWT)**
+- Clerk: Managed service，MVP 階段 overkill
+- Auth.js (NextAuth): 主要為 Next.js 設計，Express 整合不自然
+- Lucia: 作者已建議改為 DIY（官網公告）
+- **DIY**: 用 bcrypt（密碼雜湊）+ jsonwebtoken（JWT）成熟套件，Express 上最直接
+- JWT token-based 適合 SPA (TanStack Start) + API (Express) 分離架構，API server 不需維護 session 狀態
+
+**ORM: Drizzle**
+- 更輕量（~35KB vs Prisma ~2MB）
+- 完整 SQL 控制力
+- 無 code generation 步驟
+- Monorepo 整合更簡單
 
 ---
 

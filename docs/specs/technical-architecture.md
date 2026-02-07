@@ -19,7 +19,7 @@ decisioner/
 │   ├── web/              # TanStack Start frontend
 │   └── api/              # Express.js backend
 ├── packages/
-│   ├── database/         # Prisma/Drizzle schema, migrations
+│   ├── database/         # Drizzle schema, migrations
 │   ├── shared/           # Shared types, validation schemas
 │   └── ui/               # Shared UI components (optional)
 ├── package.json

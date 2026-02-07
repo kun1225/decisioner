@@ -9,6 +9,7 @@
 │ id: UUID (PK)                                                   │
 │ email: string (unique)                                          │
 │ name: string                                                    │
+│ hashed_password: string                                         │
 │ created_at: timestamp                                           │
 └─────────────────────────────────────────────────────────────────┘
                               │
