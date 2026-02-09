@@ -240,6 +240,9 @@ importers:
       eslint-plugin-react-hooks:
         specifier: ^5.2.0
         version: 5.2.0(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-simple-import-sort:
+        specifier: ^12.1.1
+        version: 12.1.1(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-turbo:
         specifier: ^2.7.1
         version: 2.7.1(eslint@9.39.1(jiti@2.6.1))(turbo@2.8.3)
@@ -2675,6 +2678,11 @@ packages:
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
+
+  eslint-plugin-simple-import-sort@12.1.1:
+    resolution: {integrity: sha512-6nuzu4xwQtE3332Uz0to+TxDQYRLTKRESSc2hefVT48Zc8JthmN23Gx9lnYhu0FtkRSL1oxny3kJ2aveVhmOVA==}
+    peerDependencies:
+      eslint: '>=5.0.0'
 
   eslint-plugin-turbo@2.7.1:
     resolution: {integrity: sha512-ZC7dTOdw6tGuvx1CeC1WQ0pMkgT/Jmj69QW93d63nysiLbbKRLiDKKA9s/TvwJHq8Uvbou2+hnU8if1L0jHsVQ==}
@@ -6599,6 +6607,10 @@ snapshots:
       semver: 6.3.1
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
+
+  eslint-plugin-simple-import-sort@12.1.1(eslint@9.39.1(jiti@2.6.1)):
+    dependencies:
+      eslint: 9.39.1(jiti@2.6.1)
 
   eslint-plugin-turbo@2.7.1(eslint@9.39.1(jiti@2.6.1))(turbo@2.8.3):
     dependencies:
