@@ -1,5 +1,5 @@
 //  @ts-check
 
-import { config } from '@repo/eslint-config/react-internal'
+import { config } from '@repo/eslint-config/tanstack-internal'
 
 export default config

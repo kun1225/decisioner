@@ -1,9 +1,7 @@
-import js from '@eslint/js'
-import eslintConfigPrettier from 'eslint-config-prettier'
-import tseslint from 'typescript-eslint'
 import pluginReactHooks from 'eslint-plugin-react-hooks'
 import pluginReact from 'eslint-plugin-react'
 import globals from 'globals'
+import { tanstackConfig } from '@tanstack/eslint-config'
 import { config as baseConfig } from './base.js'
 
 /**
@@ -11,6 +9,7 @@ import { config as baseConfig } from './base.js'
  *
  * @type {import("eslint").Linter.Config[]} */
 export const config = [
+  ...tanstackConfig,
   ...baseConfig,
   pluginReact.configs.flat.recommended,
   {
@@ -28,6 +27,10 @@ export const config = [
     },
     settings: { react: { version: 'detect' } },
     rules: {
+      // Use simple-import-sort from base config instead of import/order.
+      'import/order': 'off',
+      // Avoid conflicts with simple-import-sort.
+      'sort-imports': 'off',
       ...pluginReactHooks.configs.recommended.rules,
       // React scope no longer necessary with new JSX transform.
       'react/react-in-jsx-scope': 'off',

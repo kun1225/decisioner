@@ -57,6 +57,6 @@ export const config = [
     },
   },
   {
-    ignores: ['dist/**'],
+    ignores: ['dist/**', '**/.output/**', '**/coverage/**', '**/*.gen.ts'],
   },
 ]
