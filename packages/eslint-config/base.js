@@ -37,14 +37,16 @@ export const config = [
             ['^node:'],
             // External packages.
             ['^react$', '^react-dom$', '^@?\\w'],
+            // Monorepo Internal aliases.
+            ['^@repo(/.*|$)'],
             // Internal aliases.
-            ['^@repo(/.*|$)', '^@/'],
+            ['^@/'],
             // Parent imports.
             ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
             // Same-folder imports.
             ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
             // Style imports.
-            ['^.+\\.(css|scss|sass|less)$'],
+            ['^.+\\.(css)$'],
           ],
         },
       ],
