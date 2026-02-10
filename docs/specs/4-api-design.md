@@ -2,14 +2,14 @@
 
 ## Authentication Endpoints
 
-| Method | Endpoint             | Description                         | Auth Required                          |
-| ------ | -------------------- | ----------------------------------- | -------------------------------------- |
-| POST   | `/api/auth/register` | Create new account                  | No                                     |
-| POST   | `/api/auth/login`    | Login with email/password           | No                                     |
-| POST   | `/api/auth/google`   | Login/Register via Google idToken   | No                                     |
-| POST   | `/api/auth/refresh`  | Rotate refresh token, issue access  | No (requires valid `refresh_token` cookie) |
-| POST   | `/api/auth/logout`   | Revoke refresh token and clear cookie | No (requires `refresh_token` cookie)   |
-| GET    | `/api/auth/me`       | Get current user info               | Yes (`Authorization: Bearer <accessToken>`) |
+| Method | Endpoint             | Description                           | Auth Required                               |
+| ------ | -------------------- | ------------------------------------- | ------------------------------------------- |
+| POST   | `/api/auth/register` | Create new account                    | No                                          |
+| POST   | `/api/auth/login`    | Login with email/password             | No                                          |
+| POST   | `/api/auth/google`   | Login/Register via Google idToken     | No                                          |
+| POST   | `/api/auth/refresh`  | Rotate refresh token, issue access    | No (requires valid `refresh_token` cookie)  |
+| POST   | `/api/auth/logout`   | Revoke refresh token and clear cookie | No (requires `refresh_token` cookie)        |
+| GET    | `/api/auth/me`       | Get current user info                 | Yes (`Authorization: Bearer <accessToken>`) |
 
 ## Auth Token Contract
 
@@ -63,11 +63,11 @@
 
 ## Error Codes
 
-| HTTP Code | Scenario                   |
-| --------- | -------------------------- |
-| 400       | Validation error (Zod)     |
-| 401       | Not authenticated          |
-| 403       | Not authorized (not owner) |
-| 404       | Resource not found         |
-| 409       | Invalid state transition   |
+| HTTP Code | Scenario                       |
+| --------- | ------------------------------ |
+| 400       | Validation error (Zod)         |
+| 401       | Not authenticated              |
+| 403       | Not authorized (not owner)     |
+| 404       | Resource not found             |
+| 409       | Invalid state transition       |
 | 429       | Too many requests (rate limit) |

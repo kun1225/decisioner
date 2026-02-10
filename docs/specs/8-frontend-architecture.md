@@ -2,17 +2,17 @@
 
 ## Route Structure
 
-| Route                    | Component                 | Description             |
-| ------------------------ | ------------------------- | ----------------------- |
-| `/`                      | index.tsx                 | Landing / Dashboard     |
+| Route                    | Component                 | Description                 |
+| ------------------------ | ------------------------- | --------------------------- |
+| `/`                      | index.tsx                 | Landing / Dashboard         |
 | `/login`                 | login.tsx                 | Login form + Google Sign-In |
-| `/register`              | register.tsx              | Registration form       |
-| `/decisions`             | decisions/index.tsx       | Decision list           |
-| `/decisions/new`         | decisions/new.tsx         | Create decision         |
-| `/decisions/:id`         | decisions/$id/index.tsx   | View/Edit decision      |
-| `/decisions/:id/history` | decisions/$id/history.tsx | Confidence timeline     |
-| `/decisions/:id/review`  | decisions/$id/review.tsx  | Add/View reviews        |
-| `/patterns`              | patterns.tsx              | Cross-decision analysis |
+| `/register`              | register.tsx              | Registration form           |
+| `/decisions`             | decisions/index.tsx       | Decision list               |
+| `/decisions/new`         | decisions/new.tsx         | Create decision             |
+| `/decisions/:id`         | decisions/$id/index.tsx   | View/Edit decision          |
+| `/decisions/:id/history` | decisions/$id/history.tsx | Confidence timeline         |
+| `/decisions/:id/review`  | decisions/$id/review.tsx  | Add/View reviews            |
+| `/patterns`              | patterns.tsx              | Cross-decision analysis     |
 
 ## Server Functions vs API Calls
 

@@ -15,169 +15,50 @@ Access Token 只用於 API 授權；Refresh Token 只用於換發新 Access Toke
 - `LOCAL`: email + password（bcrypt）
 - `GOOGLE`: Google `idToken`（由後端驗證）
 
-## JWT Configuration
+## Token Contract
 
-```typescript
-// packages/auth/src/jwt.ts
-import jwt from 'jsonwebtoken'
-import { randomUUID } from 'crypto'
+Access Token（JWT）：
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!
+- 用途：API 授權（`Authorization: Bearer <accessToken>`）
+- 有效期：15 分鐘
+- Claims：`userId`、`email`
+- 性質：stateless，不落 DB
 
-export interface AccessTokenPayload {
-  userId: string
-  email: string
-}
+Refresh Token（JWT）：
 
-export interface RefreshTokenPayload {
-  userId: string
-  jti: string
-  familyId: string
-}
+- 用途：僅用於 `POST /api/auth/refresh`
+- 有效期：30 天
+- Claims：`userId`、`jti`、`familyId`
+- 傳輸：`HttpOnly + Secure + SameSite=Strict` cookie（`refresh_token`）
+- 儲存：僅儲存 `sha256(token)`，不儲存明文 token
+- 狀態：透過 `refresh_tokens` table 管理（schema 見 `docs/specs/3-data-model.md`）
 
-export function signAccessToken(payload: AccessTokenPayload): string {
-  return jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: '15m' })
-}
+Rotation 規則：
 
-export function verifyAccessToken(token: string): AccessTokenPayload {
-  return jwt.verify(token, ACCESS_TOKEN_SECRET) as AccessTokenPayload
-}
+- `login/register/google-login` 建立新 `familyId` 並簽發第一個 refresh token
+- 每次 refresh 成功都撤銷舊 token、簽發新 token（new `jti`, same `familyId`）
+- 偵測舊 token 重放（reuse）時，撤銷整個 token family 並要求重新登入
 
-export function signRefreshToken(userId: string, familyId: string): string {
-  const payload: RefreshTokenPayload = { userId, jti: randomUUID(), familyId }
-  return jwt.sign(payload, REFRESH_TOKEN_SECRET, { expiresIn: '30d' })
-}
+## Security Requirements
 
-export function verifyRefreshToken(token: string): RefreshTokenPayload {
-  return jwt.verify(token, REFRESH_TOKEN_SECRET) as RefreshTokenPayload
-}
-```
+Local 帳密：
 
-## Refresh Token Storage
+- 密碼必須使用 bcrypt 雜湊後儲存（不可明文）
+- 驗證流程為：以 email 查 user，再比對輸入密碼與 `hashed_password`
+- `GOOGLE` provider 帳號允許 `hashed_password = null`
 
-Refresh Token 不儲存明文，只儲存雜湊值（`sha256(token)`），並以 `jti` / `family_id` 管理輪替與撤銷。
+Google 登入：
 
-```sql
--- apps/api
-create table refresh_tokens (
-  id uuid primary key,
-  user_id uuid not null,
-  jti text unique not null,
-  family_id text not null,
-  token_hash text not null,
-  expires_at timestamptz not null,
-  revoked_at timestamptz,
-  replaced_by_jti text,
-  created_at timestamptz not null default now()
-);
-```
-
-規則：
-
-- `login/register/google-login` 建立新 `family_id`，簽發第一個 refresh token
-- `refresh` 成功後，舊 token 標記為 `replaced_by_jti`，簽發新 token（rotation）
-- 若偵測到已撤銷或已替換 token 被重複使用，整個 `family_id` 立刻撤銷（reuse detection）
-
-## Password Handling
-
-```typescript
-// packages/auth/src/password.ts
-import bcrypt from 'bcrypt'
-
-const SALT_ROUNDS = 12
-
-export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, SALT_ROUNDS)
-}
-
-export async function verifyPassword(
-  password: string,
-  hash: string,
-): Promise<boolean> {
-  return bcrypt.compare(password, hash)
-}
-```
-
-## Google Token Verification
-
-```typescript
-// packages/auth/src/google.ts
-import { OAuth2Client } from 'google-auth-library'
-
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
-
-export interface GoogleProfile {
-  sub: string
-  email: string
-  name?: string
-  picture?: string
-}
-
-export async function verifyGoogleIdToken(idToken: string): Promise<GoogleProfile> {
-  const ticket = await googleClient.verifyIdToken({
-    idToken,
-    audience: GOOGLE_CLIENT_ID,
-  })
-
-  const payload = ticket.getPayload()
-  if (!payload?.sub || !payload.email || !payload.email_verified) {
-    throw new Error('Invalid Google identity token')
-  }
-
-  return {
-    sub: payload.sub,
-    email: payload.email,
-    name: payload.name,
-    picture: payload.picture,
-  }
-}
-```
-
-Google 登入安全規則：
-
-- 必須驗證 `aud`（client id）、`iss`、`exp`
+- 後端必須驗證 Google `idToken` 的 `aud`、`iss`、`exp`
 - 只接受 `email_verified = true`
 - 不儲存 Google `idToken`，只用來交換本系統 token
 - `POST /api/auth/google` 需套用 rate limit
 
-## Auth Middleware
+授權中介層：
 
-```typescript
-// apps/api/src/middleware/auth.middleware.ts
-import { verifyAccessToken } from '@repo/auth'
-
-export async function authMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const authHeader = req.headers.authorization
-
-  if (!authHeader?.startsWith('Bearer ')) {
-    req.user = null
-    return next()
-  }
-
-  try {
-    const token = authHeader.slice(7)
-    const payload = verifyAccessToken(token)
-    req.user = payload
-  } catch {
-    req.user = null
-  }
-
-  next()
-}
-
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.user) {
-    throw new ApiError(401, 'Authentication required')
-  }
-  next()
-}
-```
+- Bearer token 缺失或格式錯誤：視為未登入
+- Access token 驗證失敗（簽章/過期）：視為未登入
+- 受保護端點由 `requireAuth` 風格機制統一回傳 `401`
 
 ## Flow Diagrams
 
@@ -188,9 +69,9 @@ POST /api/auth/register { email, password, name }
   → Validate input (Zod)
   → Check email uniqueness
   → Hash password (bcrypt)
-  → Create user in database
+  → Create user in database (provider=LOCAL)
   → Sign access token + refresh token
-  → Persist refresh token hash (new family_id)
+  → Persist refresh token hash (new familyId)
   → Set refresh_token cookie (HttpOnly, Secure, SameSite=Strict)
   → Return { user, accessToken }
 ```
@@ -200,9 +81,10 @@ POST /api/auth/register { email, password, name }
 ```
 POST /api/auth/login { email, password }
   → Find user by email
+  → Ensure provider supports password login (LOCAL)
   → Verify password (bcrypt)
   → Sign access token + refresh token
-  → Persist refresh token hash (new family_id)
+  → Persist refresh token hash (new familyId)
   → Set refresh_token cookie (HttpOnly, Secure, SameSite=Strict)
   → Return { user, accessToken }
 ```
@@ -216,7 +98,7 @@ POST /api/auth/google { idToken }
   → If user not exists, create user (provider=GOOGLE)
   → If LOCAL user with same verified email, link google_sub
   → Sign access token + refresh token
-  → Persist refresh token hash (new family_id)
+  → Persist refresh token hash (new familyId)
   → Set refresh_token cookie (HttpOnly, Secure, SameSite=Strict)
   → Return { user, accessToken }
 ```
@@ -228,7 +110,7 @@ POST /api/auth/refresh (Cookie: refresh_token=<token>)
   → Verify refresh token signature & expiry
   → Lookup by jti + token hash + not revoked
   → Revoke old token row (set replaced_by_jti)
-  → Sign new refresh token (new jti, same family_id)
+  → Sign new refresh token (new jti, same familyId)
   → Persist new token hash
   → Sign new access token
   → Replace refresh_token cookie
@@ -240,7 +122,7 @@ POST /api/auth/refresh (Cookie: refresh_token=<token>)
 ```
 POST /api/auth/refresh with old/revoked refresh token
   → Token row already revoked/replaced
-  → Mark all tokens in same family_id as revoked
+  → Mark all tokens in same familyId as revoked
   → Clear refresh_token cookie
   → Return 401 (force re-login)
 ```
