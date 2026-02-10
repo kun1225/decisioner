@@ -6,6 +6,7 @@
 | ------ | -------------------- | ----------------------------------- | -------------------------------------- |
 | POST   | `/api/auth/register` | Create new account                  | No                                     |
 | POST   | `/api/auth/login`    | Login with email/password           | No                                     |
+| POST   | `/api/auth/google`   | Login/Register via Google idToken   | No                                     |
 | POST   | `/api/auth/refresh`  | Rotate refresh token, issue access  | No (requires valid `refresh_token` cookie) |
 | POST   | `/api/auth/logout`   | Revoke refresh token and clear cookie | No (requires `refresh_token` cookie)   |
 | GET    | `/api/auth/me`       | Get current user info               | Yes (`Authorization: Bearer <accessToken>`) |
@@ -14,6 +15,7 @@
 
 - Access token: returned in JSON response body (`accessToken`), expires in 15m
 - Refresh token: set as `HttpOnly + Secure + SameSite=Strict` cookie (`refresh_token`), expires in 30d
+- `POST /api/auth/google`: request body `{ idToken: string }`
 - `POST /api/auth/refresh`: always performs token rotation (old refresh token revoked, new one issued)
 - Reuse detection: if revoked/replaced refresh token is reused, revoke full token family and return `401`
 

@@ -2,13 +2,18 @@
 
 ## Overview
 
-使用 DIY 方式實作驗證：bcrypt（密碼雜湊）+ jsonwebtoken（JWT token）。
+使用 DIY 方式實作驗證：bcrypt（本地帳密）+ Google Identity（Google 登入）+ jsonwebtoken（JWT token）。
 採用雙 token 模型：
 
 - Access Token（短效，JWT，stateless）
 - Refresh Token（長效，JWT + DB 儲存/輪替，stateful）
 
 Access Token 只用於 API 授權；Refresh Token 只用於換發新 Access Token，且每次 refresh 都會 rotation。
+
+## Identity Providers
+
+- `LOCAL`: email + password（bcrypt）
+- `GOOGLE`: Google `idToken`（由後端驗證）
 
 ## JWT Configuration
 
@@ -70,7 +75,7 @@ create table refresh_tokens (
 
 規則：
 
-- `login/register` 建立新 `family_id`，簽發第一個 refresh token
+- `login/register/google-login` 建立新 `family_id`，簽發第一個 refresh token
 - `refresh` 成功後，舊 token 標記為 `replaced_by_jti`，簽發新 token（rotation）
 - 若偵測到已撤銷或已替換 token 被重複使用，整個 `family_id` 立刻撤銷（reuse detection）
 
@@ -93,6 +98,49 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash)
 }
 ```
+
+## Google Token Verification
+
+```typescript
+// packages/auth/src/google.ts
+import { OAuth2Client } from 'google-auth-library'
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
+
+export interface GoogleProfile {
+  sub: string
+  email: string
+  name?: string
+  picture?: string
+}
+
+export async function verifyGoogleIdToken(idToken: string): Promise<GoogleProfile> {
+  const ticket = await googleClient.verifyIdToken({
+    idToken,
+    audience: GOOGLE_CLIENT_ID,
+  })
+
+  const payload = ticket.getPayload()
+  if (!payload?.sub || !payload.email || !payload.email_verified) {
+    throw new Error('Invalid Google identity token')
+  }
+
+  return {
+    sub: payload.sub,
+    email: payload.email,
+    name: payload.name,
+    picture: payload.picture,
+  }
+}
+```
+
+Google 登入安全規則：
+
+- 必須驗證 `aud`（client id）、`iss`、`exp`
+- 只接受 `email_verified = true`
+- 不儲存 Google `idToken`，只用來交換本系統 token
+- `POST /api/auth/google` 需套用 rate limit
 
 ## Auth Middleware
 
@@ -153,6 +201,20 @@ POST /api/auth/register { email, password, name }
 POST /api/auth/login { email, password }
   → Find user by email
   → Verify password (bcrypt)
+  → Sign access token + refresh token
+  → Persist refresh token hash (new family_id)
+  → Set refresh_token cookie (HttpOnly, Secure, SameSite=Strict)
+  → Return { user, accessToken }
+```
+
+**Google Login:**
+
+```
+POST /api/auth/google { idToken }
+  → Verify Google idToken (aud/iss/exp/email_verified)
+  → Find user by google_sub OR verified email
+  → If user not exists, create user (provider=GOOGLE)
+  → If LOCAL user with same verified email, link google_sub
   → Sign access token + refresh token
   → Persist refresh token hash (new family_id)
   → Set refresh_token cookie (HttpOnly, Secure, SameSite=Strict)

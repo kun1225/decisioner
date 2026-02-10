@@ -56,8 +56,10 @@ API_URL="http://localhost:4000"
 # Web Server
 WEB_PORT=3000
 
-# Authentication (JWT)
-JWT_SECRET="your-jwt-secret-at-least-32-chars-long"
+# Authentication (JWT + Google)
+ACCESS_TOKEN_SECRET="your-access-token-secret-at-least-32-chars-long"
+REFRESH_TOKEN_SECRET="your-refresh-token-secret-at-least-32-chars-long"
+GOOGLE_CLIENT_ID="your-google-oauth-client-id.apps.googleusercontent.com"
 
 # Environment
 NODE_ENV="development"

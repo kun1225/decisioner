@@ -9,7 +9,10 @@
 │ id: uuid (PK)                                                   │
 │ email: varchar(255) UNIQUE                                      │
 │ name: varchar(255)                                              │
-│ hashed_password: varchar(255)                                   │
+│ auth_provider: enum [LOCAL, GOOGLE]                             │
+│ hashed_password: varchar(255) (nullable for GOOGLE)             │
+│ google_sub: varchar(255) UNIQUE (nullable)                      │
+│ avatar_url: varchar(500) (nullable)                             │
 │ created_at: timestamp                                           │
 └─────────────────────────────────────────────────────────────────┘
                               │
@@ -95,6 +98,7 @@ Note: Authentication 使用 access token（JWT, stateless）+ refresh token rota
 | refresh_tokens         | refresh_tokens_family_id_idx           | family_id     |
 | refresh_tokens         | refresh_tokens_expires_at_idx          | expires_at    |
 | refresh_tokens         | refresh_tokens_jti_key (UNIQUE)        | jti           |
+| users                  | users_google_sub_key (UNIQUE)          | google_sub    |
 
 ## Enums
 
@@ -104,6 +108,9 @@ CREATE TYPE decision_status AS ENUM ('DRAFT', 'ACTIVE', 'CLOSED');
 
 -- Hypothesis Assessment
 CREATE TYPE hypothesis_assessment AS ENUM ('CONFIRMED', 'PARTIALLY', 'WRONG', 'UNKNOWN');
+
+-- Auth Provider
+CREATE TYPE auth_provider AS ENUM ('LOCAL', 'GOOGLE');
 ```
 
 ## Key Design Decisions
@@ -132,3 +139,7 @@ CREATE TYPE hypothesis_assessment AS ENUM ('CONFIRMED', 'PARTIALLY', 'WRONG', 'U
 6. **Refresh Token 採用 Rotation + Reuse Detection**
    - refresh token 只存 hash，不存明文 token
    - 透過 `jti` + `family_id` 支援輪替與整個 token family 撤銷
+
+7. **User 支援多身份提供者（LOCAL / GOOGLE）**
+   - `LOCAL` 使用 `hashed_password`
+   - `GOOGLE` 以 `google_sub` 辨識，`hashed_password` 可為 null

@@ -22,24 +22,25 @@
 
 ---
 
-## 1.2 Authentication: DIY (bcrypt + JWT)
+## 1.2 Authentication: DIY (Local + Google + JWT)
 
-**Decision:** 使用 bcrypt + jsonwebtoken
+**Decision:** 使用 bcrypt + Google Identity + jsonwebtoken
 
 **Rationale:**
 
-| Aspect       | DIY (bcrypt + JWT)                            | Lucia        | Clerk           | Auth.js           |
-| ------------ | --------------------------------------------- | ------------ | --------------- | ----------------- |
-| Philosophy   | Full control, no magic                        | Low-level    | Managed service | Framework-focused |
-| Express 整合 | 原生支援                                      | 需要 adapter | SDK             | 主要為 Next.js    |
-| 成本         | 免費                                          | 免費         | 付費            | 免費              |
-| Session 管理 | Access JWT（stateless）+ Refresh rotation（DB） | DB session   | 託管            | DB session        |
-| 學習價值     | 高                                            | 中           | 低              | 中                |
+| Aspect          | DIY (Local + Google + JWT)                      | Lucia        | Clerk           | Auth.js           |
+| --------------- | ----------------------------------------------- | ------------ | --------------- | ----------------- |
+| Philosophy      | Full control, no magic                          | Low-level    | Managed service | Framework-focused |
+| Express 整合    | 原生支援                                        | 需要 adapter | SDK             | 主要為 Next.js    |
+| Provider 擴展性 | 可同時支援 email/password + Google              | 中           | 高              | 中                |
+| 成本            | 免費                                            | 免費         | 付費            | 免費              |
+| Session 管理    | Access JWT（stateless）+ Refresh rotation（DB） | DB session   | 託管            | DB session        |
 
 **For this project:**
 
 1. Express.js 後端原生整合，無需額外 adapter
 2. JWT token-based 適合 SPA + API 分離架構（TanStack Start + Express）
 3. API 授權層維持 stateless（access token），同時用 refresh token rotation 提供可撤銷與重放防護
-4. Lucia 作者已建議改為 DIY（官網公告）
-5. 用 bcrypt（密碼雜湊）+ jsonwebtoken 皆為成熟穩定的 npm 套件
+4. 同一套 auth service 可支援 local 帳號與 Google 登入，不需導入完整託管方案
+5. Lucia 作者已建議改為 DIY（官網公告）
+6. bcrypt、google-auth-library、jsonwebtoken 皆為成熟穩定的 npm 套件
