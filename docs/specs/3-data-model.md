@@ -14,7 +14,8 @@
 └─────────────────────────────────────────────────────────────────┘
                               │
                               │ 1:N
-                              ▼
+                ┌─────────────┴──────────────────────┐
+                ▼                                    ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                        decisions                                │
 ├─────────────────────────────────────────────────────────────────┤
@@ -33,6 +34,19 @@
 │ created_at: timestamp                                           │
 │ frozen_at: timestamp (nullable)                                 │
 │ closed_at: timestamp (nullable)                                 │
+└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                      refresh_tokens                             │
+├─────────────────────────────────────────────────────────────────┤
+│ id: uuid (PK)                                                   │
+│ user_id: uuid (FK → users)                                      │
+│ jti: varchar(255) UNIQUE                                        │
+│ family_id: varchar(255)                                         │
+│ token_hash: varchar(255)                                        │
+│ expires_at: timestamp                                           │
+│ revoked_at: timestamp (nullable)                                │
+│ replaced_by_jti: varchar(255) (nullable)                        │
+│ created_at: timestamp                                           │
 └─────────────────────────────────────────────────────────────────┘
          │                    │                    │
          │ 1:N                │ 1:N                │ 1:N
@@ -61,7 +75,7 @@
 └─────────────────────────────────┘
 ```
 
-Note: Authentication uses JWT (stateless), no sessions table needed.
+Note: Authentication 使用 access token（JWT, stateless）+ refresh token rotation（DB stateful via `refresh_tokens` table）。
 
 ## Indexes
 
@@ -77,6 +91,10 @@ Note: Authentication uses JWT (stateless), no sessions table needed.
 | evidence               | evidence_hypothesis_id_idx             | hypothesis_id |
 | reviews                | reviews_decision_id_idx                | decision_id   |
 | hypothesis_assessments | hypothesis_assessments_review_id_idx   | review_id     |
+| refresh_tokens         | refresh_tokens_user_id_idx             | user_id       |
+| refresh_tokens         | refresh_tokens_family_id_idx           | family_id     |
+| refresh_tokens         | refresh_tokens_expires_at_idx          | expires_at    |
+| refresh_tokens         | refresh_tokens_jti_key (UNIQUE)        | jti           |
 
 ## Enums
 
@@ -110,3 +128,7 @@ CREATE TYPE hypothesis_assessment AS ENUM ('CONFIRMED', 'PARTIALLY', 'WRONG', 'U
 5. **HypothesisAssessment 在 Review 內**
    - 每次回顧時評估每個假設
    - 同一假設可在不同時間點有不同評估
+
+6. **Refresh Token 採用 Rotation + Reuse Detection**
+   - refresh token 只存 hash，不存明文 token
+   - 透過 `jti` + `family_id` 支援輪替與整個 token family 撤銷

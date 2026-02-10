@@ -28,18 +28,18 @@
 
 **Rationale:**
 
-| Aspect       | DIY (bcrypt + JWT)     | Lucia        | Clerk           | Auth.js           |
-| ------------ | ---------------------- | ------------ | --------------- | ----------------- |
-| Philosophy   | Full control, no magic | Low-level    | Managed service | Framework-focused |
-| Express 整合 | 原生支援               | 需要 adapter | SDK             | 主要為 Next.js    |
-| 成本         | 免費                   | 免費         | 付費            | 免費              |
-| Session 管理 | JWT（stateless）       | DB session   | 託管            | DB session        |
-| 學習價值     | 高                     | 中           | 低              | 中                |
+| Aspect       | DIY (bcrypt + JWT)                            | Lucia        | Clerk           | Auth.js           |
+| ------------ | --------------------------------------------- | ------------ | --------------- | ----------------- |
+| Philosophy   | Full control, no magic                        | Low-level    | Managed service | Framework-focused |
+| Express 整合 | 原生支援                                      | 需要 adapter | SDK             | 主要為 Next.js    |
+| 成本         | 免費                                          | 免費         | 付費            | 免費              |
+| Session 管理 | Access JWT（stateless）+ Refresh rotation（DB） | DB session   | 託管            | DB session        |
+| 學習價值     | 高                                            | 中           | 低              | 中                |
 
 **For this project:**
 
 1. Express.js 後端原生整合，無需額外 adapter
 2. JWT token-based 適合 SPA + API 分離架構（TanStack Start + Express）
-3. API server 不需維護 session 狀態（stateless）
+3. API 授權層維持 stateless（access token），同時用 refresh token rotation 提供可撤銷與重放防護
 4. Lucia 作者已建議改為 DIY（官網公告）
 5. 用 bcrypt（密碼雜湊）+ jsonwebtoken 皆為成熟穩定的 npm 套件
