@@ -7,6 +7,7 @@ describe('registerSchema', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
       password: 'Secure@123',
+      confirmedPassword: 'Secure@123',
       name: 'Test User',
     });
 
@@ -17,6 +18,7 @@ describe('registerSchema', () => {
     const result = registerSchema.safeParse({
       email: 'not-an-email',
       password: 'Secure@123',
+      confirmedPassword: 'Secure@123',
       name: 'Test User',
     });
 
@@ -26,7 +28,8 @@ describe('registerSchema', () => {
   it('should reject short password', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
-      password: '1234567',
+      password: 'Ab@1234',
+      confirmedPassword: 'Ab@1234',
       name: 'Test User',
     });
 
@@ -34,9 +37,11 @@ describe('registerSchema', () => {
   });
 
   it('should reject password over 72 characters', () => {
+    const long = 'Aa@' + 'a'.repeat(70);
     const result = registerSchema.safeParse({
       email: 'test@example.com',
-      password: 'a'.repeat(73),
+      password: long,
+      confirmedPassword: long,
       name: 'Test User',
     });
 
@@ -47,6 +52,7 @@ describe('registerSchema', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
       password: 'secure@123',
+      confirmedPassword: 'secure@123',
       name: 'Test User',
     });
 
@@ -57,6 +63,7 @@ describe('registerSchema', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
       password: 'SECURE@123',
+      confirmedPassword: 'SECURE@123',
       name: 'Test User',
     });
 
@@ -67,6 +74,18 @@ describe('registerSchema', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
       password: 'Secure1234',
+      confirmedPassword: 'Secure1234',
+      name: 'Test User',
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject mismatched confirmedPassword', () => {
+    const result = registerSchema.safeParse({
+      email: 'test@example.com',
+      password: 'Secure@123',
+      confirmedPassword: 'Different@456',
       name: 'Test User',
     });
 
@@ -77,6 +96,7 @@ describe('registerSchema', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
       password: 'Secure@123',
+      confirmedPassword: 'Secure@123',
       name: '',
     });
 
