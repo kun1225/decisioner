@@ -1,73 +1,134 @@
 # 4. API Design
 
-## Authentication Endpoints
+## 4.1 Base Contract
 
-| Method | Endpoint             | Description                           | Auth Required                               |
-| ------ | -------------------- | ------------------------------------- | ------------------------------------------- |
-| POST   | `/api/auth/register` | Create new account                    | No                                          |
-| POST   | `/api/auth/login`    | Login with email/password             | No                                          |
-| POST   | `/api/auth/google`   | Login/Register via Google idToken     | No                                          |
-| POST   | `/api/auth/refresh`  | Rotate refresh token, issue access    | No (requires valid `refresh_token` cookie)  |
-| POST   | `/api/auth/logout`   | Revoke refresh token and clear cookie | No (requires `refresh_token` cookie)        |
-| GET    | `/api/auth/me`       | Get current user info                 | Yes (`Authorization: Bearer <accessToken>`) |
+1. Base path: `/api`
+2. Auth: Bearer token（refresh 使用 HttpOnly cookie）
+3. Response: JSON
 
-## Auth Token Contract
+## 4.2 Auth
 
-- Access token: returned in JSON response body (`accessToken`), expires in 15m
-- Refresh token: set as `HttpOnly + Secure + SameSite=Strict` cookie (`refresh_token`), expires in 30d
-- `POST /api/auth/google`: request body `{ idToken: string }`
-- `POST /api/auth/refresh`: always performs token rotation (old refresh token revoked, new one issued)
-- Reuse detection: if revoked/replaced refresh token is reused, revoke full token family and return `401`
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | `/api/auth/register` | Register local account | No |
+| POST | `/api/auth/login` | Login local account | No |
+| POST | `/api/auth/google` | Login via Google idToken | No |
+| POST | `/api/auth/refresh` | Rotate refresh token | No (cookie) |
+| POST | `/api/auth/logout` | Revoke refresh token | No (cookie) |
+| GET | `/api/auth/me` | Current user profile | Yes |
 
-## Decision Endpoints
+## 4.3 Media
 
-| Method | Endpoint                     | Description               | State Constraint |
-| ------ | ---------------------------- | ------------------------- | ---------------- |
-| GET    | `/api/decisions`             | List user's decisions     | -                |
-| POST   | `/api/decisions`             | Create new decision       | -                |
-| GET    | `/api/decisions/:id`         | Get decision with details | Owner only       |
-| PATCH  | `/api/decisions/:id`         | Update decision fields    | **DRAFT only**   |
-| POST   | `/api/decisions/:id/freeze`  | Freeze decision           | **DRAFT only**   |
-| POST   | `/api/decisions/:id/close`   | Close decision            | **ACTIVE only**  |
-| GET    | `/api/decisions/:id/history` | Get change history        | Owner only       |
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | `/api/media/upload-url` | Get pre-signed upload URL | Yes |
+| POST | `/api/media/complete` | Confirm upload and bind media | Yes |
 
-## Hypothesis Endpoints
+## 4.4 Exercises
 
-| Method | Endpoint                         | Description               | State Constraint |
-| ------ | -------------------------------- | ------------------------- | ---------------- |
-| POST   | `/api/decisions/:id/hypotheses`  | Add hypothesis            | **DRAFT only**   |
-| PATCH  | `/api/hypotheses/:id`            | Update hypothesis content | **DRAFT only**   |
-| DELETE | `/api/hypotheses/:id`            | Delete hypothesis         | **DRAFT only**   |
-| POST   | `/api/hypotheses/:id/confidence` | Adjust confidence         | **DRAFT only**   |
-| GET    | `/api/hypotheses/:id/history`    | Get confidence history    | Owner only       |
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| GET | `/api/exercises/preset` | List preset exercises | Yes |
+| POST | `/api/exercises/custom` | Create custom exercise | Yes |
+| GET | `/api/exercises/:exerciseId` | Exercise detail | Yes |
 
-## Evidence Endpoints
+## 4.5 Gyms
 
-| Method | Endpoint                      | Description       | State Constraint |
-| ------ | ----------------------------- | ----------------- | ---------------- |
-| POST   | `/api/decisions/:id/evidence` | Add evidence      | DRAFT or ACTIVE  |
-| GET    | `/api/decisions/:id/evidence` | List all evidence | Owner only       |
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | `/api/gyms` | Create gym | Yes |
+| POST | `/api/gyms/:gymId/equipments` | Create equipment | Yes |
+| GET | `/api/gyms/:gymId/equipments` | List equipment | Yes |
 
-## Review Endpoints
+## 4.6 Templates
 
-| Method | Endpoint                     | Description      | State Constraint     |
-| ------ | ---------------------------- | ---------------- | -------------------- |
-| POST   | `/api/decisions/:id/reviews` | Add review       | **ACTIVE or CLOSED** |
-| GET    | `/api/decisions/:id/reviews` | List all reviews | Owner only           |
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | `/api/templates` | Create template | Yes |
+| GET | `/api/templates` | List own/shared templates | Yes |
+| GET | `/api/templates/:templateId` | Get template detail | Yes |
+| PATCH | `/api/templates/:templateId` | Update template meta | Yes |
+| POST | `/api/templates/:templateId/items` | Add template item | Yes |
+| PATCH | `/api/templates/:templateId/items/:itemId` | Update item | Yes |
+| DELETE | `/api/templates/:templateId/items/:itemId` | Remove item | Yes |
+| GET | `/api/templates/:templateId/versions` | Version history | Yes |
+| POST | `/api/templates/:templateId/share` | Share template to crew | Yes |
 
-## Pattern Endpoints
+## 4.7 Workouts
 
-| Method | Endpoint                | Description                   |
-| ------ | ----------------------- | ----------------------------- |
-| GET    | `/api/patterns/summary` | Get cross-decision statistics |
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | `/api/workouts/start` | Start session from template/manual | Yes |
+| GET | `/api/workouts/:sessionId` | Session detail (editor source) | Yes |
+| PATCH | `/api/workouts/:sessionId` | Update session meta/date | Yes |
+| PATCH | `/api/workouts/:sessionId/items/:itemId` | Replace/update session item | Yes |
+| POST | `/api/workouts/:sessionId/items` | Add manual item | Yes |
+| POST | `/api/workouts/:sessionId/sets` | Add set | Yes |
+| PATCH | `/api/workouts/:sessionId/sets/:setId` | Edit set | Yes |
+| DELETE | `/api/workouts/:sessionId/sets/:setId` | Delete set | Yes |
+| POST | `/api/workouts/:sessionId/finish` | Mark session completed | Yes |
+| GET | `/api/workouts/history` | List past sessions (date/template) | Yes |
 
-## Error Codes
+### `GET /api/workouts/history` response (example)
 
-| HTTP Code | Scenario                       |
-| --------- | ------------------------------ |
-| 400       | Validation error (Zod)         |
-| 401       | Not authenticated              |
-| 403       | Not authorized (not owner)     |
-| 404       | Resource not found             |
-| 409       | Invalid state transition       |
-| 429       | Too many requests (rate limit) |
+```json
+{
+  "items": [
+    {
+      "sessionId": "8b8f...",
+      "sessionDate": "2026-02-08",
+      "templateName": "Chest A",
+      "status": "COMPLETED",
+      "lastEditedAt": "2026-02-09T02:20:11.000Z"
+    }
+  ],
+  "nextCursor": null
+}
+```
+
+### Past Workout Editing Rule
+
+1. 已完成的 session 可由 `/api/workouts/history` 列表進入編輯流程
+2. 編輯後狀態仍維持 `COMPLETED`
+3. 系統建立 `workout_session_revisions`，並重算 metrics/achievements
+
+## 4.8 Progress
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| GET | `/api/progress/exercises/:exerciseId/last-best` | Last + best summary | Yes |
+| GET | `/api/progress/exercises/:exerciseId/charts/max-weight` | Max weight over time | Yes |
+| GET | `/api/progress/exercises/:exerciseId/charts/volume` | Volume over time | Yes |
+
+## 4.9 Social
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| POST | `/api/friends/invite` | Send friend request | Yes |
+| POST | `/api/friends/:friendId/accept` | Accept friend request | Yes |
+| GET | `/api/friends/:friendId/latest-workout` | Friend latest workout | Yes |
+
+## 4.10 Privacy
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| PUT | `/api/privacy-settings` | Update workout visibility settings | Yes |
+
+## 4.11 Achievements
+
+| Method | Endpoint | Description | Auth |
+| --- | --- | --- | --- |
+| GET | `/api/achievements` | List achievements | Yes |
+| GET | `/api/achievements/timeline` | Achievement timeline | Yes |
+
+## 4.12 Error Contract
+
+| HTTP | Meaning |
+| --- | --- |
+| 400 | Validation error |
+| 401 | Not authenticated |
+| 403 | Not authorized / blocked by privacy |
+| 404 | Resource not found |
+| 409 | Version conflict / invalid transition |
+| 422 | Business rule failed |
+| 429 | Rate limit |
