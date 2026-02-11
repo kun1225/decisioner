@@ -1,93 +1,46 @@
-# 5. Decision State Machine
+# 5. State Machine
 
-## States
+## 5.1 Workout Session State
 
-```
-                    ┌─────────┐
-                    │  DRAFT  │
-                    └────┬────┘
-                         │
-            ┌────────────┴────────────┐
-            │                         │
-            │  • Edit content         │
-            │  • Add hypotheses       │
-            │  • Adjust confidence    │
-            │  • Add evidence         │
-            │  • Extend deadline      │
-            │                         │
-            └────────────┬────────────┘
-                         │
-                    [Freeze]
-                         │
-                         ▼
-                    ┌─────────┐
-                    │ ACTIVE  │
-                    └────┬────┘
-                         │
-            ┌────────────┴────────────┐
-            │                         │
-            │  • View frozen content  │
-            │  • Add reviews          │
-            │  • Add evidence         │
-            │  • View history         │
-            │  • Reconsider           │
-            │                         │
-            │  ✗ Cannot edit content  │
-            │                         │
-            └────────────┬────────────┘
-                         │
-                    [Close]
-                         │
-                         ▼
-                    ┌─────────┐
-                    │ CLOSED  │
-                    └─────────┘
-                         │
-            ┌────────────┴────────────┐
-            │                         │
-            │  • View frozen content  │
-            │  • Add reviews          │
-            │  • View history         │
-            │  • Reconsider           │
-            │                         │
-            │  ✗ Cannot edit          │
-            │  ✗ Cannot add evidence  │
-            │                         │
-            └─────────────────────────┘
+```text
+IN_PROGRESS --finish--> COMPLETED
+COMPLETED --edit--> COMPLETED
 ```
 
-## Transition Rules
+### Transition Rules
 
-| Current State | Action          | Next State  | Allowed Operations After                                                     |
-| ------------- | --------------- | ----------- | ---------------------------------------------------------------------------- |
-| DRAFT         | Create          | DRAFT       | Edit, Add Evidence, Adjust Confidence (before deadline)                      |
-| DRAFT         | Extend Deadline | DRAFT       | Edit, Add Evidence, Adjust Confidence (before new deadline; reason required) |
-| DRAFT         | Freeze          | ACTIVE      | Add Review, Add Evidence, View History, Reconsider                           |
-| ACTIVE        | Close           | CLOSED      | Add Review, View History, Reconsider                                         |
-| ACTIVE        | Reconsider      | DRAFT (new) | Edit, Add Evidence, Adjust Confidence                                        |
-| ACTIVE        | -               | ACTIVE      | Original decision cannot go back to DRAFT (use Reconsider)                   |
-| CLOSED        | Reconsider      | DRAFT (new) | Edit, Add Evidence, Adjust Confidence                                        |
-| CLOSED        | -               | CLOSED      | Terminal state (read-only except review & reconsider)                        |
+| Current     | Action                     | Next        | Notes                       |
+| ----------- | -------------------------- | ----------- | --------------------------- |
+| IN_PROGRESS | Add/Edit/Delete sets/items | IN_PROGRESS | 即時編輯                    |
+| IN_PROGRESS | Finish session             | COMPLETED   | 產生 metrics / achievements |
+| COMPLETED   | Edit past session          | COMPLETED   | 建立 revision + 重新計算    |
 
-## Permissions Matrix
+### Constraints
 
-| Operation                     | DRAFT | ACTIVE | CLOSED |
-| ----------------------------- | ----- | ------ | ------ |
-| Edit title/description        | ✓     | ✗      | ✗      |
-| Edit context/expected_outcome | ✓     | ✗      | ✗      |
-| Add hypothesis                | ✓     | ✗      | ✗      |
-| Edit hypothesis               | ✓     | ✗      | ✗      |
-| Delete hypothesis             | ✓     | ✗      | ✗      |
-| Adjust confidence             | ✓     | ✗      | ✗      |
-| Add evidence                  | ✓     | ✓      | ✗      |
-| Add review                    | ✗     | ✓      | ✓      |
-| View history                  | ✓     | ✓      | ✓      |
-| Freeze                        | ✓     | ✗      | ✗      |
-| Close                         | ✗     | ✓      | ✗      |
+1. `COMPLETED` 不回到 `IN_PROGRESS`
+2. past edit 必須記錄 revision（避免 silent overwrite）
+3. past edit 後需重算 progress 與成就事件
 
-## Notes
+## 5.2 Friend Request State
 
-- DRAFT 編輯、信心調整與新增 evidence 僅允許在 `decision_deadline` 前進行
-- Extend Deadline 可在 DRAFT 任何時間使用，且每次需填寫原因
-- deadline 到期後，僅能 Freeze 或 Extend Deadline
-- Reconsider 不會改變原決策狀態，而是建立新的 DRAFT 並連結到原決策
+```text
+PENDING --accept--> ACCEPTED
+PENDING --block--> BLOCKED
+ACCEPTED --block--> BLOCKED
+```
+
+| Current  | Action | Next     |
+| -------- | ------ | -------- |
+| PENDING  | Accept | ACCEPTED |
+| PENDING  | Block  | BLOCKED  |
+| ACCEPTED | Block  | BLOCKED  |
+
+## 5.3 Template Lifecycle
+
+```text
+ACTIVE --archive--> ARCHIVED
+ARCHIVED --restore--> ACTIVE
+```
+
+1. template item 可編輯，但每次變更都要產生新 version
+2. shared template 由 crew member 編輯時也套用相同版本規則

@@ -2,45 +2,52 @@
 
 ## 1.1 ORM: Drizzle (over Prisma)
 
-**Decision:** 選擇 Drizzle ORM
+**Decision:** 使用 Drizzle ORM。
 
-**Rationale:**
+**Why:**
 
-| Aspect          | Drizzle                | Prisma                 |
-| --------------- | ---------------------- | ---------------------- |
-| Bundle Size     | ~35KB                  | ~2MB                   |
-| SQL Control     | 完整控制，可寫 raw SQL | 抽象層，較難優化       |
-| Code Generation | 不需要                 | 需要 `prisma generate` |
-| Type Safety     | SQL-like 語法推導      | 從 schema 生成         |
-| Monorepo        | 簡單 package           | 需要 generate step     |
+1. 可精準控制 SQL（fitness analytics 與聚合查詢較多）
+2. monorepo 下不需要額外 code generation 流程
+3. type inference 直接由 schema 推導，維護成本低
 
-**For this project:**
+## 1.2 Authentication: DIY JWT (Local + Google)
 
-1. Confidence snapshot 需要 SQL-level 控制（history 查詢、aggregation）
-2. TanStack Start server functions 需要輕量 bundle
-3. Monorepo 不需要額外的 code generation step
+**Decision:** 使用 `bcrypt + jsonwebtoken + refresh token rotation`。
 
----
+**Why:**
 
-## 1.2 Authentication: DIY (Local + Google + JWT)
+1. 與 Express 整合最直接
+2. Access token stateless，API 擴展簡單
+3. Refresh token 可撤銷，可防重放
 
-**Decision:** 使用 bcrypt + Google Identity + jsonwebtoken
+## 1.3 API Style: REST + Domain Modules
 
-**Rationale:**
+**Decision:** 採 REST API，按 domain 切模組（workouts/templates/social 等）。
 
-| Aspect          | DIY (Local + Google + JWT)                      | Lucia        | Clerk           | Auth.js           |
-| --------------- | ----------------------------------------------- | ------------ | --------------- | ----------------- |
-| Philosophy      | Full control, no magic                          | Low-level    | Managed service | Framework-focused |
-| Express 整合    | 原生支援                                        | 需要 adapter | SDK             | 主要為 Next.js    |
-| Provider 擴展性 | 可同時支援 email/password + Google              | 中           | 高              | 中                |
-| 成本            | 免費                                            | 免費         | 付費            | 免費              |
-| Session 管理    | Access JWT（stateless）+ Refresh rotation（DB） | DB session   | 託管            | DB session        |
+**Why:**
 
-**For this project:**
+1. 前後端職責清楚
+2. 可逐模組獨立開發與測試
+3. 對行動端或其他 client 擴充友善
 
-1. Express.js 後端原生整合，無需額外 adapter
-2. JWT token-based 適合 SPA + API 分離架構（TanStack Start + Express）
-3. API 授權層維持 stateless（access token），同時用 refresh token rotation 提供可撤銷與重放防護
-4. 同一套 auth service 可支援 local 帳號與 Google 登入，不需導入完整託管方案
-5. Lucia 作者已建議改為 DIY（官網公告）
-6. bcrypt、google-auth-library、jsonwebtoken 皆為成熟穩定的 npm 套件
+## 1.4 Media Storage: S3 + Pre-signed Upload
+
+**Decision:** 動作圖片採 S3 直傳（pre-signed URL）。
+
+**Why:**
+
+1. 降低 API 帶寬壓力
+2. 可直接接 CDN 提升載入速度
+3. 能以 object key 管理資產生命週期
+
+## 1.5 History Strategy: Append-Only for Critical Changes
+
+**Decision:** 對關鍵可回溯資料採 append-only：
+
+1. `template_versions` 保留課表每次編輯快照
+2. `workout_session_revisions` 保留已完成訓練的編輯歷史
+
+**Why:**
+
+1. 可審計多人協作與歷史修正
+2. 避免「直接覆蓋」導致資料來源不明

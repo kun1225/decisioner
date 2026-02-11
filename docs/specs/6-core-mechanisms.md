@@ -1,202 +1,82 @@
 # 6. Core Mechanisms
 
-## 6.1 Freeze Mechanism
+## 6.1 Template Versioning (Append-only)
 
-**Purpose:** 鎖定決策當下的狀態，防止事後修改。
+1. template 每次編輯建立 `template_versions`
+2. `template_version_items` 保存完整快照
+3. session 啟動時記錄 `template_version_id`
 
-**Implementation:**
+目的：
 
-```typescript
-// decision.service.ts
-async freeze(id: string, input: FreezeDecisionInput) {
-  return await db.transaction(async (tx) => {
-    // 1. Update decision status
-    const [updated] = await tx
-      .update(decisions)
-      .set({
-        status: "ACTIVE",
-        finalChoice: input.finalChoice,
-        frozenAt: new Date(),
-      })
-      .where(eq(decisions.id, id))
-      .returning();
+1. 支援多人協作與完整回溯
+2. 避免「今天的 template 影響昨天訓練紀錄」
 
-    // 2. Get all hypotheses
-    const hypothesisList = await tx
-      .select()
-      .from(hypotheses)
-      .where(eq(hypotheses.decisionId, id));
+## 6.2 Session Snapshot Isolation
 
-    // 3. Mark latest confidence snapshot as frozen
-    for (const h of hypothesisList) {
-      const [latestSnapshot] = await tx
-        .select()
-        .from(confidenceSnapshots)
-        .where(eq(confidenceSnapshots.hypothesisId, h.id))
-        .orderBy(desc(confidenceSnapshots.createdAt))
-        .limit(1);
+1. `POST /workouts/start` 會把 template items 複製成 `workout_session_items`
+2. 訓練中替換或新增動作只修改 session items
+3. template 不被當日變動污染
 
-      if (latestSnapshot) {
-        await tx
-          .update(confidenceSnapshots)
-          .set({ isFrozen: true })
-          .where(eq(confidenceSnapshots.id, latestSnapshot.id));
-      }
-    }
+## 6.3 Past Workout Editing
 
-    return updated;
-  });
-}
-```
+需求：使用者可在歷史列表看到日期與 template，點進去編輯。
 
-**Key Points:**
+機制：
 
-- 使用 transaction 確保原子性
-- 每個 hypothesis 的最新 confidence snapshot 會被標記為 `is_frozen: true`
-- `frozen_at` timestamp 記錄凍結時間
+1. `GET /workouts/history` 提供歷史列表
+2. 點擊後進入 `/train/$sessionId`，載入 `GET /workouts/:sessionId`
+3. 若 session 狀態為 `COMPLETED`：
+   - 允許編輯 set/item
+   - 編輯後建立 `workout_session_revisions`
+   - 重算 `exercise_session_metrics`
+   - 成就判斷重新同步（去重）
 
----
+## 6.4 Last / Best Computation
 
-## 6.2 Confidence History (Append-Only)
+### Last
 
-**Purpose:** 保留所有信心值變更的歷史記錄。
+1. 同使用者、同動作、最近一次完成 session
 
-**Pattern:** 永遠 INSERT 新的 snapshot，不 UPDATE 既有記錄。
+### Best
 
-```typescript
-// hypothesis.service.ts
-async adjustConfidence(hypothesisId: string, input: UpdateConfidenceInput) {
-  // Always INSERT new row, never UPDATE
-  const [snapshot] = await db
-    .insert(confidenceSnapshots)
-    .values({
-      hypothesisId,
-      confidence: input.confidence,
-      reason: input.reason,  // Required: why the change?
-    })
-    .returning();
+1. 比較 `max_weight` 最大者
+2. 若同重，選 `reps` 較高
+3. 若再同，選較新時間
 
-  return snapshot;
-}
+## 6.5 Chart Aggregation
 
-// Get current confidence (latest snapshot)
-async getCurrentConfidence(hypothesisId: string) {
-  const [latest] = await db
-    .select()
-    .from(confidenceSnapshots)
-    .where(eq(confidenceSnapshots.hypothesisId, hypothesisId))
-    .orderBy(desc(confidenceSnapshots.createdAt))
-    .limit(1);
+1. Max Weight Chart
+   x 軸：`session_date`
+   y 軸：`max_weight`
+   tooltip：`max_weight_reps`、`max_weight_set_index`
 
-  return latest?.confidence ?? null;
-}
+2. Volume Chart
+   x 軸：`session_date`
+   y 軸：`volume = sum(weight * reps)`
 
-// Get full history
-async getConfidenceHistory(hypothesisId: string) {
-  return await db
-    .select()
-    .from(confidenceSnapshots)
-    .where(eq(confidenceSnapshots.hypothesisId, hypothesisId))
-    .orderBy(asc(confidenceSnapshots.createdAt));
-}
-```
+## 6.6 Privacy Guard
 
-**Key Points:**
+1. 所有朋友資料查詢先過 `privacy_settings`
+2. 日期與訓練細節分開判斷
+3. default 為 `FRIENDS`
 
-- 當前信心值 = 最新的 snapshot
-- 歷史查詢按 `created_at` 排序
-- `is_frozen` 標記凍結時刻的值（用於顯示「凍結時的信心」）
+## 6.7 Achievement Trigger
 
----
+事件：
 
-## 6.3 State Validation Middleware
+1. `WORKOUT_COMPLETED`
+2. `PERSONAL_BEST_BROKEN`
+3. `CREW_WORKOUT_COMPLETED`
 
-**Purpose:** 在 API 層阻擋非法的狀態操作。
+規則：
 
-```typescript
-// In controller
-async update(req: Request, res: Response, next: NextFunction) {
-  try {
-    const { id } = req.params;
-    const decision = await decisionService.findById(id);
+1. 以 `achievement_definitions` 可配置 threshold
+2. 發放寫入 `user_achievements`
+3. 同條件發放需去重
 
-    // 1. Check existence
-    if (!decision) {
-      throw new ApiError(404, "Decision not found");
-    }
+## 6.8 S3 Upload Lifecycle
 
-    // 2. Check ownership
-    if (decision.userId !== req.user!.id) {
-      throw new ApiError(403, "Not authorized");
-    }
-
-    // 3. Check state constraint
-    if (decision.status !== "DRAFT") {
-      throw new ApiError(409, "Cannot edit frozen decision");
-    }
-
-    // Proceed with update...
-    const input = updateDecisionSchema.parse(req.body);
-    const updated = await decisionService.update(id, input);
-    res.json({ data: updated });
-  } catch (error) {
-    next(error);
-  }
-}
-```
-
-**Error Response for Invalid State:**
-
-```json
-{
-  "error": {
-    "code": 409,
-    "message": "Cannot edit frozen decision"
-  }
-}
-```
-
----
-
-## 6.4 Multi-tenancy (User Isolation)
-
-**Purpose:** 確保使用者只能存取自己的資料。
-
-**Implementation Layers:**
-
-1. **Query Level:** 所有查詢都包含 `user_id` 條件
-
-```typescript
-async findAllByUser(userId: string) {
-  return await db
-    .select()
-    .from(decisions)
-    .where(eq(decisions.userId, userId))
-    .orderBy(desc(decisions.createdAt));
-}
-```
-
-2. **Middleware Level:** 驗證資源擁有權
-
-```typescript
-// ownership.middleware.ts
-export async function checkDecisionOwnership(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const { id } = req.params
-  const decision = await decisionService.findById(id)
-
-  if (!decision) {
-    throw new ApiError(404, 'Decision not found')
-  }
-
-  if (decision.userId !== req.user!.id) {
-    throw new ApiError(403, 'Not authorized')
-  }
-
-  req.decision = decision
-  next()
-}
-```
+1. Client 取得 pre-signed URL
+2. Client 直傳 S3
+3. Client 呼叫完成 API 綁定 `exercise_media`
+4. API 僅保存 `object_key` + `public_url`

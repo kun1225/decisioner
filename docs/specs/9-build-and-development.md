@@ -1,86 +1,58 @@
 # 9. Build & Development
 
-## Turborepo Pipeline
-
-```json
-{
-  "pipeline": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "db:generate": { "cache": false },
-    "db:migrate": { "cache": false },
-    "lint": { "dependsOn": ["^build"] },
-    "type-check": { "dependsOn": ["^build"] },
-    "test": { "dependsOn": ["^build"] }
-  }
-}
-```
-
-## Development Scripts
+## 9.1 Scripts
 
 ```bash
-# Start all services
+# root
 pnpm dev
+pnpm build
+pnpm lint
+pnpm check-types
+pnpm test
 
-# Database operations
-pnpm db:up          # Start PostgreSQL (Docker)
-pnpm db:down        # Stop PostgreSQL
-pnpm db:generate    # Generate Drizzle client
-pnpm db:migrate     # Run migrations
-pnpm db:seed        # Seed test data
-
-# Quality checks
-pnpm lint           # Run ESLint
-pnpm type-check     # Run TypeScript
-pnpm test           # Run tests
+# database
+pnpm db:generate
+pnpm db:migrate
+pnpm db:studio
 ```
 
-## Environment Variables
+## 9.2 Environment Variables
 
 ```bash
-# .env.example
-
 # Database
-DATABASE_URL="postgresql://decisioner:decisioner@localhost:5432/decisioner"
+DATABASE_URL="postgresql://..."
 
-# API Server
-API_PORT=4000
+# API
+PORT=4000
 API_URL="http://localhost:4000"
 
-# Web Server
-WEB_PORT=3000
+# JWT
+ACCESS_TOKEN_SECRET="..."
+REFRESH_TOKEN_SECRET="..."
 
-# Authentication (JWT + Google)
-ACCESS_TOKEN_SECRET="your-access-token-secret-at-least-32-chars-long"
-REFRESH_TOKEN_SECRET="your-refresh-token-secret-at-least-32-chars-long"
-GOOGLE_CLIENT_ID="your-google-oauth-client-id.apps.googleusercontent.com"
+# Google Auth
+GOOGLE_CLIENT_ID="..."
 
-# Environment
+# S3 Media
+S3_REGION="ap-northeast-1"
+S3_BUCKET="decisioner-fitness-assets"
+S3_ACCESS_KEY_ID="..."
+S3_SECRET_ACCESS_KEY="..."
+S3_PUBLIC_BASE_URL="https://cdn.example.com"
+
+# App
 NODE_ENV="development"
 ```
 
-## Docker Compose
+## 9.3 Local Development Notes
 
-```yaml
-# docker-compose.yml
-services:
-  postgres:
-    image: postgres:17-alpine
-    ports:
-      - '5432:5432'
-    environment:
-      POSTGRES_USER: decisioner
-      POSTGRES_PASSWORD: decisioner
-      POSTGRES_DB: decisioner
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+1. 啟動前確認 DB 可連線
+2. migration 先跑再啟動 API
+3. S3 可先用測試 bucket 與 lifecycle policy
+4. CI 應包含 lint + typecheck + test
 
-volumes:
-  pgdata:
-```
+## 9.4 Quality Gate
+
+1. 單元 + 整合 + E2E 目標覆蓋率 80%+
+2. 針對隱私與權限需有整合測試
+3. 針對 past workout edit 需有回歸測試（metrics 重算）

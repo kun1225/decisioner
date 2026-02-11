@@ -1,31 +1,32 @@
-# 11. Example Decision
+# 11. Example Workout
 
-**Title:** Should I learn Rust in 2024?
+## User Story
 
-**Description:** Considering investing 2-3 months to learn Rust for systems programming.
+使用者在 2026-02-08 做胸部訓練，採用 `Chest A` template，地點為 `Downtown Gym`。
 
-**Context:** Current stack is TypeScript. Interested in performance-critical code. Rust jobs increasing.
+## Session Timeline
 
-**Hypotheses:**
+1. 建立 session：`IN_PROGRESS`
+2. 原課表第一動作：Barbell Bench Press
+3. 因器材占用改成 Dumbbell Bench Press（`origin_type = REPLACED`）
+4. 完成訓練後 `finish` -> `COMPLETED`
+5. 系統計算該動作：
+   - `max_weight = 36kg`
+   - `max_weight_reps = 8`
+   - `volume = 1080`
 
-1. Learning Rust will make me better at memory management (Confidence: 80%)
-2. I can ship a side project in Rust within 3 months (Confidence: 45%)
-3. Rust knowledge will be relevant to my career in 2 years (Confidence: 60%)
+## Historical Edit Example
 
-**Expected Outcome:** If I learn Rust:
+1. 2026-02-10 使用者發現第二組重量記錯
+2. 進入 `/workouts/history`，點擊 2026-02-08 的紀錄
+3. 在 `/train/$sessionId` 修正 set weight：`34kg -> 32kg`
+4. 儲存後：
+   - session 狀態仍為 `COMPLETED`
+   - 新增一筆 `workout_session_revisions`
+   - 重新計算 metrics 與相關成就
 
-- Should be able to understand systems-level code
-- Might contribute to a Rust OSS project
-- Better mental model for performance
+## Expected Outcome
 
-**Final Choice (on freeze):** Yes, will start with Rustlings
-
-**Review (6 months later):**
-
-- Outcome: Completed Rustlings, built a CLI tool. Did not ship side project.
-- H1: Confirmed - much better understanding of ownership
-- H2: Wrong - took 5 months and still not "shipped"
-- H3: Too early to tell
-- Lesson: I consistently underestimate learning curves for new paradigms
-
----
+1. 歷史資料可回補修正
+2. 修正行為可追溯
+3. 圖表與最佳紀錄反映最新正確數據
