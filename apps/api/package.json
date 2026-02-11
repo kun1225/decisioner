@@ -11,13 +11,17 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.4",
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
     "@repo/auth": "workspace:*",
     "@repo/database": "workspace:*",
+    "@repo/eslint-config": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.3",
     "eslint": "^9.39.1",
