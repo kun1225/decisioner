@@ -20,6 +20,15 @@ importers:
 
   apps/api:
     dependencies:
+      '@repo/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@repo/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
@@ -30,18 +39,9 @@ importers:
         specifier: ^5.2.1
         version: 5.2.1
     devDependencies:
-      '@repo/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
-      '@repo/database':
-        specifier: workspace:*
-        version: link:../../packages/database
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@repo/shared':
-        specifier: workspace:*
-        version: link:../../packages/shared
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../../packages/typescript-config

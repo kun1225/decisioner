@@ -11,15 +11,15 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@repo/auth": "workspace:*",
+    "@repo/database": "workspace:*",
+    "@repo/shared": "workspace:*",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.4",
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "@repo/auth": "workspace:*",
-    "@repo/database": "workspace:*",
     "@repo/eslint-config": "workspace:*",
-    "@repo/shared": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
