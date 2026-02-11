@@ -1,44 +1,36 @@
-# Product Requirements Document: Decision Log
+# Product Requirements Document: Decisioner Fitness
 
-> **Version:** 1.0.1
+> **Version:** 2.1.0
 > **Status:** Draft
-> **Last Updated:** 2026-02-06
+> **Last Updated:** 2026-02-11
 > **Author:** Kun
 
 ---
 
 ## Executive Summary
 
-Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決策時記錄當下的判斷依據，並在事後誠實回顧決策品質。核心價值在於**防止事後美化歷史**——透過「凍結」機制鎖定決策當下的思考脈絡，讓未來的自己能客觀檢視過去的判斷模式。
+Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是：
 
-### Why Now?
+1. 針對不同健身房與器材差異，提供可比較紀錄
+2. 用 template 加速訓練，同時保留當日調整彈性
+3. 支援朋友協作與可控隱私
+4. 透過圖表與成就系統回饋長期進步
 
-1. **認知偏誤的普遍性**：後見之明偏誤讓人難以從決策中學習，市面上缺乏專注於「保存決策當下狀態」的工具
-2. **個人知識管理趨勢**：隨著 Second Brain、PKM 工具普及，決策記錄是尚未被充分解決的垂直領域
-3. **技術學習機會**：作為 TanStack Start + Express + PostgreSQL monorepo 的實戰專案
+---
+
+## Why Now
+
+1. 既有重訓 app 對跨 gym/equipment 差異支援不足
+2. 使用者已明確有共享課表與社交訓練需求
+3. 現有專案基礎可快速落地 MVP
 
 ---
 
 ## Problem Statement
 
-### The Core Problem
-
-人們在回顧過去的決策時，會不自覺地：
-
-- **重寫記憶**：根據結果調整對「當初想法」的回憶
-- **後見之明**：認為結果是可預見的，低估當時的不確定性
-- **選擇性記憶**：只記得支持最終選擇的理由
-
-這導致我們**無法從決策中真正學習**，因為我們比較的不是「當初的判斷 vs 實際結果」，而是「被結果污染的記憶 vs 實際結果」。
-
-### User Pain Points
-
-| Pain Point               | Current Workaround | Why It Fails             |
-| ------------------------ | ------------------ | ------------------------ |
-| 忘記當初為什麼做這個決定 | 筆記軟體隨手記     | 沒有結構化，難以回顧比較 |
-| 事後美化當初的判斷       | 信任自己的記憶     | 記憶會被結果污染         |
-| 不知道自己的決策盲點     | 憑感覺反思         | 缺乏跨決策的模式識別     |
-| 記錄太麻煩所以不記       | 放棄記錄           | 失去學習機會             |
+1. 同動作在不同 gym/equipment 重量不可直接比較
+2. 現場器材占用常需臨時換動作
+3. 長期缺乏可追蹤進步與社交激勵
 
 ---
 
@@ -46,360 +38,185 @@ Decision Log 是一個個人決策記錄系統，幫助使用者在做重要決�
 
 ### Goals
 
-| Priority | Goal                               | Success Signal               |
-| -------- | ---------------------------------- | ---------------------------- |
-| P0       | 讓使用者在決策時記錄假設與信心程度 | 使用者願意填寫假設與信心值   |
-| P0       | 透過「凍結」機制防止事後修改       | 凍結後的決策內容不可編輯     |
-| P1       | 支援事後回顧與學習記錄             | 使用者在決策後會回來新增回顧 |
-| P1       | 保存完整的決策歷史軌跡             | 能看到假設信心的變化過程     |
-| P2       | 支援跨決策的模式識別               | 使用者能從多個決策中發現規律 |
+| Priority | Goal |
+| --- | --- |
+| P0 | 支援跨健身房/器材的訓練紀錄與比較 |
+| P0 | 提供 template + 當日可替換/新增動作 |
+| P0 | 訓練中顯示同動作上次與最佳紀錄 |
+| P0 | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯 |
+| P1 | 朋友共用 template，多人協作編輯保留歷史 |
+| P1 | 朋友訓練可見性可設定（預設好友可見） |
+| P1 | 動作進步圖表（最大重量趨勢、訓練量趨勢） |
+| P1 | 成就系統提升持續訓練動機 |
 
-### Non-Goals (Explicitly Out of Scope)
+### Non-Goals (MVP)
 
-- **評分或評判決策好壞**：系統不做價值判斷
-- **協作功能**：MVP 階段只支援個人使用
-- **任務管理**：不是待辦清單或專案管理
-- **AI 輔助建議**：不在 MVP 範圍
-- **公開分享**：不在 MVP 範圍
+1. 飲食與營養追蹤
+2. 體脂硬體同步
+3. AI 自動排課
+4. 即時姿勢辨識
 
 ---
 
 ## Target Users
 
-### Primary Persona: The Reflective Decision Maker
-
-**Profile:**
-
-- 會做需要回顧的決策（技術選型、職涯、投資、產品方向）
-- 有自我反思的習慣，但缺乏系統化方法
-- 願意面對「我可能判斷錯了」的現實
-- 對認知偏誤有基本認識
-
-**Behaviors:**
-
-- 傾向用文字整理思緒
-- 會回頭檢視過去的決定
-- 對「當初怎麼想的」這件事有興趣
-
-**Frustrations:**
-
-- 事後才發現當初的判斷有盲點，但記不清原本怎麼想的
-- 想從過去學習，但缺乏可靠的記錄
-
-### User Scale (MVP)
-
-- **Initial:** 自己 + 2-5 位早期測試者
-- **Authentication:** 需要基本帳戶系統
-- **Multi-tenancy:** 資料隔離，各人只看自己的決策
+1. 多場館訓練者
+2. 課表化訓練者
+3. 社交訓練者
 
 ---
 
-## User Scenarios & Flows (Summary)
+## Product Scope
 
-- Scenario A: Record a decision in progress (create draft + deadline)
-- Scenario B: Add evidence and adjust confidence before deadline
-- Scenario C: Freeze the decision to lock content
-- Scenario D: Deadline notification and extension (reason required)
-- Scenario E: Post-decision review and lessons learned
-- Scenario F: Reconsider after new evidence (new DRAFT, copies evidence)
-- Scenario G: Cross-decision pattern review
+### 1. Gym / Equipment-aware 記錄
 
-Full flows: `docs/specs/ux-flows.md`
+1. 建立多個 gym 與 equipment
+2. 每次訓練綁定 gym + equipment
+3. 同動作可依 gym/equipment 分開比較
 
-## Core Use Cases
+### 2. Template 系統
 
-### UC-01: Create Decision
+1. 建立 template（胸/背/腿）
+2. 可加預設或自建動作
+3. 自建動作可上傳圖片（S3）
+4. 群組共享 template 支援多人編輯
+5. 所有編輯保留版本歷史
 
-| Attribute     | Value                                                                                                                                                                                                                                                                           |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Authenticated User                                                                                                                                                                                                                                                              |
-| Precondition  | User is logged in                                                                                                                                                                                                                                                               |
-| Trigger       | User clicks "New Decision"                                                                                                                                                                                                                                                      |
-| Main Flow     | 1. System displays empty decision form<br>2. User enters title (required)<br>3. User enters description/context<br>4. User adds hypotheses with confidence (0-100%)<br>5. User defines expected outcomes<br>6. User sets decision deadline (required)<br>7. User saves decision |
-| Postcondition | Decision created with status DRAFT                                                                                                                                                                                                                                              |
-| Validation    | Title is required, max 200 chars<br>Decision deadline is required and must be in the future<br>At least one hypothesis recommended                                                                                                                                              |
+### 3. 訓練 Session（當日可調整）
 
-### UC-02: Edit Draft Decision
+1. 由 template 啟動訓練
+2. 現場可替換、刪除、新增動作
+3. 當日修改只影響 session，不直接覆蓋 template
 
-| Attribute     | Value                                                                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                                                                                 |
-| Precondition  | Decision exists with status DRAFT                                                                                                                                                              |
-| Trigger       | User opens decision and edits                                                                                                                                                                  |
-| Main Flow     | 1. User modifies any field (including decision deadline)<br>2. If deadline changes, user provides reason<br>3. System records change with timestamp<br>4. Previous values preserved in history |
-| Postcondition | Decision updated, history preserved                                                                                                                                                            |
-| Constraint    | Not allowed if status ≠ DRAFT or decision deadline has passed (except Extend Deadline)                                                                                                         |
+### 4. 即時歷史參考
 
-### UC-03: Add Evidence
+1. 顯示同動作上次紀錄
+2. 顯示同動作最佳紀錄（以最大重量為主，含該次數/組數）
 
-| Attribute     | Value                                                                                                                                       |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                              |
-| Precondition  | Decision status is DRAFT (before decision deadline) or ACTIVE                                                                               |
-| Trigger       | User clicks "Add Evidence"                                                                                                                  |
-| Main Flow     | 1. User enters evidence (link, note, file reference)<br>2. User optionally links to specific hypothesis<br>3. System records with timestamp |
-| Postcondition | Evidence appended (never overwrites)                                                                                                        |
-| Note          | Evidence can be added even after freeze, but not after close; in DRAFT it is only allowed before deadline                                   |
+### 5. 訓練歷史與可編輯
 
-### UC-04: Adjust Confidence
+1. 使用者可查看自己的歷史訓練列表
+2. 列表顯示日期與 template
+3. 可點進訓練頁編輯過往紀錄
+4. 編輯後需保留 revision 並重算統計
 
-| Attribute     | Value                                                                                                                                          |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                                 |
-| Precondition  | Decision status is DRAFT and before decision deadline                                                                                          |
-| Trigger       | User changes confidence value                                                                                                                  |
-| Main Flow     | 1. User selects hypothesis<br>2. User enters new confidence (0-100%)<br>3. User provides reason for change<br>4. System records as new version |
-| Postcondition | New confidence recorded, old value in history                                                                                                  |
-| Constraint    | Not allowed after freeze or after decision deadline                                                                                            |
+### 6. 朋友與隱私
 
-### UC-05: Freeze Decision
+1. 可加好友、建立 crew
+2. 可查看朋友最近訓練日期與紀錄（受隱私控制）
+3. 預設可見性為好友可見
 
-| Attribute       | Value                                                                                                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor           | Decision Owner                                                                                                                                                                            |
-| Precondition    | Decision status is DRAFT                                                                                                                                                                  |
-| Trigger         | User clicks "Freeze Decision"                                                                                                                                                             |
-| Main Flow       | 1. System shows confirmation with implications<br>2. User confirms<br>3. User optionally records final choice<br>4. System changes status to ACTIVE<br>5. System records freeze timestamp |
-| Postcondition   | Decision frozen, content immutable                                                                                                                                                        |
-| Irreversibility | Cannot unfreeze                                                                                                                                                                           |
-| Note            | If decision deadline has passed, user must freeze before further edits                                                                                                                    |
+### 7. 進步圖表
 
-### UC-06: Add Review
+1. 最大重量趨勢圖
+x 軸：時間
+y 軸：最大重量
+附加資訊：該最大重量出現時的次數與第幾組
 
-| Attribute     | Value                                                                                                                                                                                     |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                                                                            |
-| Precondition  | Decision status is ACTIVE or CLOSED                                                                                                                                                       |
-| Trigger       | User clicks "Add Review"                                                                                                                                                                  |
-| Main Flow     | 1. User views original (frozen) content<br>2. User records actual outcome<br>3. User assesses each hypothesis<br>4. User records lessons learned<br>5. System saves review with timestamp |
-| Postcondition | Review added to decision                                                                                                                                                                  |
-| Note          | Multiple reviews allowed over time                                                                                                                                                        |
+2. 訓練量趨勢圖
+x 軸：時間
+y 軸：重量乘次數（volume）
 
-### UC-07: View Decision History
+### 8. 成就系統
 
-| Attribute     | Value                                                                                                        |
-| ------------- | ------------------------------------------------------------------------------------------------------------ |
-| Actor         | Decision Owner                                                                                               |
-| Precondition  | Decision exists                                                                                              |
-| Trigger       | User clicks "View History"                                                                                   |
-| Main Flow     | 1. System displays timeline of all changes<br>2. User can see any past state<br>3. User can compare versions |
-| Postcondition | None (read-only)                                                                                             |
-| Note          | History includes deadline changes and extension reasons                                                      |
-
-### UC-08: Close Decision
-
-| Attribute     | Value                                                                     |
-| ------------- | ------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                            |
-| Precondition  | Decision status is ACTIVE                                                 |
-| Trigger       | User clicks "Close Decision"                                              |
-| Main Flow     | 1. User marks decision as concluded<br>2. System changes status to CLOSED |
-| Postcondition | Decision archived, still viewable                                         |
-| Note          | Can still add reviews after closing                                       |
-
-### UC-09: Reconsider Decision
-
-| Attribute     | Value                                                                                                                                                                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                                                                                                                                                      |
-| Precondition  | Decision status is ACTIVE or CLOSED                                                                                                                                                                                                                                 |
-| Trigger       | User clicks "Reconsider"                                                                                                                                                                                                                                            |
-| Main Flow     | 1. System shows frozen content and existing evidence (read-only)<br>2. User provides reconsider reason<br>3. User sets new decision deadline<br>4. System creates new decision in DRAFT by copying content and evidence<br>5. System links new decision to original |
-| Postcondition | New decision created; original decision remains unchanged                                                                                                                                                                                                           |
-| Note          | New decision can be edited and frozen independently                                                                                                                                                                                                                 |
-
-### UC-10: Extend Decision Deadline
-
-| Attribute     | Value                                                                                                                                                                             |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actor         | Decision Owner                                                                                                                                                                    |
-| Precondition  | Decision status is DRAFT                                                                                                                                                          |
-| Trigger       | User selects "Extend deadline" (from decision page or notification page)                                                                                                          |
-| Main Flow     | 1. User selects Extend<br>2. User enters new deadline and reason<br>3. System validates new deadline is in the future<br>4. System updates deadline and records reason in history |
-| Postcondition | Deadline extended; decision remains DRAFT                                                                                                                                         |
-| Constraint    | Reason is required for every extension                                                                                                                                            |
-| Note          | Can be used before deadline; if deadline has passed, other edits remain blocked until the user extends the deadline or freezes the decision                                       |
+1. 第 X 次重訓
+2. 突破個人最大重量 X 次
+3. 與朋友一起重訓 X 次
 
 ---
 
-## Product Principles
+## Functional Requirements
 
-### 1. Immutable History 不可改寫歷史
+### FR-01 動作與媒體
 
-> 凍結後的內容是神聖的。系統設計的首要目標是防止事後美化。
+1. 系統提供預設動作庫
+2. 使用者可建立自訂動作
+3. 圖片上傳使用 S3 pre-signed URL
 
-**Implementation:**
+### FR-02 Template 與版本歷史
 
-- DRAFT 狀態下的編輯會創建新版本，不覆蓋舊值
-- 凍結後，核心欄位變為 read-only
-- 重大改變透過 Reconsider 建立新決策，不回寫原決策
-- Deadline 延長需填寫原因並寫入歷史（每次）
-- 資料庫層面不提供 UPDATE 凍結內容的 API
+1. template 支援 CRUD
+2. crew 成員可共同編輯
+3. 每次編輯建立不可變版本快照
 
-### 2. Low-Friction Recording 低摩擦記錄
+### FR-03 Session 流程
 
-> 記錄應該比寫長文更輕量，否則使用者不會持續使用。
+1. 開始訓練時建立 session 快照
+2. 可在 session 內替換/新增動作
+3. set 至少包含重量、次數、組序、時間
 
-**Implementation:**
+### FR-04 上次/最佳查詢
 
-- 只有 title 是必填
-- 假設可以先列點，之後補細節
-- 支援漸進式完善（先 draft，慢慢補充）
+1. 上次：同動作最近一次完成 session
+2. 最佳：同動作最大重量最高的一組
+3. 同重量 tie-break：次數高者優先，再取較新時間
 
-### 3. No Value Judgment 不做價值判斷
+### FR-05 歷史訓練可編輯
 
-> 系統不評斷決策好壞，只保存事實。評價是使用者自己的事。
+1. 提供歷史列表 API（日期、template）
+2. completed session 可進入訓練頁編輯
+3. 編輯後保留 revision
+4. 編輯後重算 metrics 與成就
 
-**Implementation:**
+### FR-06 社交與隱私
 
-- 沒有「決策評分」功能
-- Hypothesis Assessment 由使用者自行判定
-- Pattern Review 只呈現數據，不給建議
+1. 好友狀態至少含 pending/accepted/blocked
+2. 日期與詳細紀錄分開控制可見性
 
-### 4. Retrospection Over Real-time 支援回顧，而非即時指導
+### FR-07 成就引擎
 
-> 價值來自時間差。系統不在決策當下給建議，而是幫助未來回顧。
-
-**Implementation:**
-
-- 不提供「這個決定好不好」的即時反饋
-- 重點功能是凍結和回顧
-- Review 功能鼓勵在時間過後回來
-
-### 5. Time-Boxed Decisions 有截止時間
-
-> 沒有期限就很難做出決定。每個決策必須有時間界線。
-
-**Implementation:**
-
-- `decision_deadline` 為必填欄位
-- Extend Deadline 可在 DRAFT 任何時間使用，且每次需填寫原因
-- deadline 到期後，DRAFT 僅能 Freeze 或 Extend Deadline
-- UI 顯示倒數與逾期提醒
+1. 規則可配置
+2. 完成訓練或突破紀錄時觸發
+3. 發放需去重
 
 ---
 
-## Success Metrics
+## Success Metrics (90 Days)
 
-### Primary Metrics (MVP)
-
-| Metric              | Definition                                   | Target |
-| ------------------- | -------------------------------------------- | ------ |
-| Freeze Rate         | % of decisions that get frozen               | > 60%  |
-| Review Rate         | % of frozen decisions with at least 1 review | > 40%  |
-| Hypothesis Richness | Avg hypotheses per decision                  | ≥ 2    |
-| Return Usage        | Users who add review after 7+ days           | > 30%  |
-
-### Secondary Metrics
-
-| Metric                 | Definition                                  | Signal             |
-| ---------------------- | ------------------------------------------- | ------------------ |
-| Draft Completion       | % of started decisions that reach freeze    | Usability          |
-| Confidence Adjustments | Avg adjustments per decision before freeze  | Engagement         |
-| Review Depth           | Avg words in lessons learned                | Reflection quality |
-| Pattern View Usage     | % of users who use cross-decision view      | Feature value      |
-| Deadline Compliance    | % of decisions frozen by deadline           | Commitment         |
-| Reconsider Rate        | % of frozen decisions that are reconsidered | Learning loop      |
-
-### Anti-Metrics (What NOT to Optimize)
-
-- Decision count（多不代表好）
-- Time spent in app（不是 engagement 型產品）
-- Decision success rate（不是系統要管的事）
+1. WAU
+2. 每人每週完成 session 次數
+3. template 啟動訓練佔比
+4. 朋友互動率
+5. 30 日留存率
 
 ---
 
-## MVP Scope (4-Week Target)
+## Milestones
 
-### Week 1-2: Core Decision Flow
+### Phase 1 (Core)
 
-- [ ] **Authentication** (basic email/password/google oauth)
-- [ ] **UC-01**: Create Decision
-- [ ] **UC-02**: Edit Draft Decision
-- [ ] **UC-04**: Adjust Confidence (with history)
-- [ ] **UC-05**: Freeze Decision
-- [ ] Decision deadline field + validation
-- [ ] **UC-10**: Extend Decision Deadline (with reason)
-- [ ] Deadline notification (at deadline)
-- [ ] Basic decision list view
+1. template + workout + history list + past edit
+2. last/best + 基礎 progress
 
-### Week 3: Review & History
+### Phase 2 (Social)
 
-- [ ] **UC-06**: Add Review
-- [ ] **UC-07**: View Decision History
-- [ ] **UC-03**: Add Evidence
-- [ ] **UC-08**: Close Decision
+1. friends + crews + template share
+2. privacy controls
 
-### Week 4: Polish & Patterns
+### Phase 3 (Insights)
 
-- [ ] **Flow 7**: Cross-decision view (simplified)
-- [ ] Category/tagging system
-- [ ] **UC-09**: Reconsider Decision
-- [ ] UI polish and responsive design
-- [ ] Bug fixes and edge cases
-
-### Deferred to V1.1
-
-- AI-assisted pattern detection
-- Export/backup functionality
-- Advanced filtering and search
-- Reminder notifications for reviews
-- Dark mode
-
----
-
-## Open Questions
-
-| Question          | Options                       | Decision Needed By | Status                          |
-| ----------------- | ----------------------------- | ------------------ | ------------------------------- |
-| Auth provider?    | DIY, Lucia, Clerk, Auth.js    | Week 1             | **Decided: DIY (bcrypt + JWT)** |
-| ORM choice?       | Prisma, Drizzle               | Week 1             | **Decided: Drizzle ORM**        |
-| Deploy target?    | Vercel, Railway, VPS          | Week 3             | Open                            |
-| Hypothesis order? | User-defined vs chronological | Week 2             | Open                            |
-
-### Decision Records
-
-**Auth: DIY (bcrypt + JWT)**
-
-- Clerk: Managed service，MVP 階段 overkill
-- Auth.js (NextAuth): 主要為 Next.js 設計，Express 整合不自然
-- Lucia: 作者已建議改為 DIY（官網公告）
-- **DIY**: 用 bcrypt（密碼雜湊）+ jsonwebtoken（JWT）成熟套件，Express 上最直接
-- JWT token-based 適合 SPA (TanStack Start) + API (Express) 分離架構，API server 不需維護 session 狀態
-
-**ORM: Drizzle**
-
-- 更輕量（~35KB vs Prisma ~2MB）
-- 完整 SQL 控制力
-- 無 code generation 步驟
-- Monorepo 整合更簡單
+1. charts + achievements
+2. 查詢與快取優化
 
 ---
 
 ## Risks & Mitigations
 
-| Risk                           | Likelihood | Impact | Mitigation                           |
-| ------------------------------ | ---------- | ------ | ------------------------------------ |
-| Users don't return for reviews | Medium     | High   | Add optional reminder system in V1.1 |
-| Recording feels too heavy      | Medium     | High   | Start with minimal required fields   |
-| Freeze feels too permanent     | Low        | Medium | Clear confirmation UX, show benefits |
-| History view too complex       | Medium     | Medium | Simple timeline first, enhance later |
+1. 多人編輯衝突
+對策：版本號 + optimistic concurrency
+
+2. 歷史訓練編輯造成統計錯誤
+對策：revision + deterministic recompute
+
+3. 隱私洩漏
+對策：統一 privacy guard + integration tests
 
 ---
 
-## Appendices
+## Confirmed Decisions
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full spec index. Key references:
-
-- `docs/specs/3-data-model.md` - Data model and design notes
-- `docs/specs/4-api-design.md` - REST API endpoints
-- `docs/specs/5-state-machine.md` - Decision state machine and transition rules
-- `docs/specs/10-ux-flows.md` - Full user scenarios and flows
-- `docs/specs/11-example-decision.md` - Example decision walkthrough
-
-## Revision History
-
-| Version | Date       | Author | Changes          |
-| ------- | ---------- | ------ | ---------------- |
-| 1.0.1   | 2026-02-06 | -      | Split appendices |
-| 1.0.0   | 2026-02-05 | -      | Initial PRD      |
+1. 最大重量圖：以最大重量為主，並顯示該次數/組數
+2. 預設可見性：好友可見
+3. 圖片儲存：S3
+4. 群組 template：允許成員編輯，保留歷史紀錄
+5. 使用者可查看並編輯過往訓練（經歷史列表進入）
