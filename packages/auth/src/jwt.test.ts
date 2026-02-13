@@ -53,23 +53,19 @@ describe('Refresh Token', () => {
   const familyId = 'family-abc';
 
   it('should sign and verify a valid refresh token', () => {
-    const token = signRefreshToken(userId, familyId);
+    const { token, jti } = signRefreshToken(userId, familyId);
     const decoded = verifyRefreshToken(token);
 
     expect(decoded.userId).toBe(userId);
     expect(decoded.familyId).toBe(familyId);
-    expect(decoded.jti).toBeDefined();
-    expect(typeof decoded.jti).toBe('string');
+    expect(decoded.jti).toBe(jti);
   });
 
   it('should generate unique jti for each token', () => {
-    const token1 = signRefreshToken(userId, familyId);
-    const token2 = signRefreshToken(userId, familyId);
+    const result1 = signRefreshToken(userId, familyId);
+    const result2 = signRefreshToken(userId, familyId);
 
-    const decoded1 = verifyRefreshToken(token1);
-    const decoded2 = verifyRefreshToken(token2);
-
-    expect(decoded1.jti).not.toBe(decoded2.jti);
+    expect(result1.jti).not.toBe(result2.jti);
   });
 
   it('should throw on invalid token', () => {
@@ -94,8 +90,8 @@ describe('Refresh Token', () => {
   });
 
   it('should not verify refresh token as access token', () => {
-    const refreshToken = signRefreshToken(userId, familyId);
+    const { token } = signRefreshToken(userId, familyId);
 
-    expect(() => verifyAccessToken(refreshToken)).toThrow();
+    expect(() => verifyAccessToken(token)).toThrow();
   });
 });

@@ -24,9 +24,14 @@ export function verifyAccessToken(token: string): AccessTokenPayload {
   return jwt.verify(token, getAccessSecret()) as AccessTokenPayload;
 }
 
-export function signRefreshToken(userId: string, familyId: string): string {
-  const payload: RefreshTokenPayload = { userId, jti: randomUUID(), familyId };
-  return jwt.sign(payload, getRefreshSecret(), { expiresIn: '30d' });
+export function signRefreshToken(
+  userId: string,
+  familyId: string,
+): { token: string; jti: string } {
+  const jti = randomUUID();
+  const payload: RefreshTokenPayload = { userId, jti, familyId };
+  const token = jwt.sign(payload, getRefreshSecret(), { expiresIn: '30d' });
+  return { token, jti };
 }
 
 export function verifyRefreshToken(token: string): RefreshTokenPayload {
