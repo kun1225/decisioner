@@ -10,3 +10,4 @@ if (!DATABASE_URL) {
 
 export const db = drizzle(DATABASE_URL)
 export * from './schema'
+export { and, asc, desc, eq, isNull, sql } from 'drizzle-orm'
