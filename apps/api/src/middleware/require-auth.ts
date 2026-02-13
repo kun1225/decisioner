@@ -2,7 +2,7 @@ import type { RequestHandler } from 'express';
 
 import { verifyAccessToken } from '@repo/auth/jwt';
 
-import { ApiError } from '../utils/api-error.js';
+import { ApiError } from '@/utils/api-error.js';
 
 export const requireAuth: RequestHandler = (req, _res, next) => {
   const header = req.headers.authorization;

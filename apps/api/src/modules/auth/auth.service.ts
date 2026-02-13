@@ -9,7 +9,7 @@ import {
 import { hashPassword } from '@repo/auth/password';
 import { db, eq, refreshTokens, users } from '@repo/database/index';
 
-import { ApiError } from '../../utils/api-error.js';
+import { ApiError } from '@/utils/api-error.js';
 
 // *** User Operations ***
 
