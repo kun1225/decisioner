@@ -74,3 +74,16 @@
 2. 朋友頁若無權限，明確顯示「對方未開放此資訊」
 3. template 編輯衝突時顯示版本衝突提示並要求重新載入
 4. crews 頁需顯示免費限制：每人最多 1 群、每群最多 2 人
+
+## 8.5 Frontend Stack Snapshot (`apps/web/package.json`)
+
+| Layer             | Packages                                                                                                    | Notes                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| App Runtime       | `react`, `react-dom`, `@tanstack/react-start`, `@tanstack/react-router`, `@tanstack/router-plugin`, `nitro` | React 19 + TanStack Start + Vite runtime |
+| Data and Routing  | `@tanstack/react-query`, `@tanstack/react-router-ssr-query`                                                 | Query cache + loader/prefetch 整合       |
+| UI System         | `shadcn`, `@base-ui/react`, `tailwindcss`, `@tailwindcss/vite`, `tw-animate-css`                            | shadcn (Base UI 版本) + Tailwind CSS v4  |
+| UI Utilities      | `class-variance-authority`, `clsx`, `tailwind-merge`                                                        | immutable class composition 與 variants  |
+| Icons/Typography  | `lucide-react`, `@tabler/icons-react`, `@fontsource-variable/geist`                                         | 前端視覺資產                             |
+| Testing and Lint  | `vitest`, `@testing-library/react`, `@testing-library/dom`, `jsdom`, `eslint`, `@tanstack/eslint-config`    | 單元/整合測試與靜態檢查                  |
+| TypeScript and DX | `typescript`, `vite`, `@vitejs/plugin-react`, `vite-tsconfig-paths`, `babel-plugin-react-compiler`          | 型別、建置、路徑 alias、React compiler   |
+| Devtools          | `@tanstack/react-devtools`, `@tanstack/react-query-devtools`, `@tanstack/react-router-devtools`             | 本地開發調試                             |

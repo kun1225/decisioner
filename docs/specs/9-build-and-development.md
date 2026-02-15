@@ -10,6 +10,21 @@ pnpm lint
 pnpm check-types
 pnpm test
 
+# web (TanStack Start)
+pnpm --filter web dev        # vite dev --port 3000
+pnpm --filter web build      # vite build
+pnpm --filter web lint
+pnpm --filter web check-type
+pnpm --filter web test       # vitest run
+pnpm --filter web preview    # vite preview
+
+# api (Express)
+pnpm --filter api dev
+pnpm --filter api build
+pnpm --filter api lint
+pnpm --filter api check-types
+pnpm --filter api test
+
 # database
 pnpm db:generate
 pnpm db:migrate
@@ -25,6 +40,7 @@ DATABASE_URL="postgresql://..."
 # API
 PORT=4000
 API_URL="http://localhost:4000"
+WEB_URL="http://localhost:3000"
 
 # JWT
 ACCESS_TOKEN_SECRET="..."
@@ -48,8 +64,10 @@ NODE_ENV="development"
 
 1. 啟動前確認 DB 可連線
 2. migration 先跑再啟動 API
-3. S3 可先用測試 bucket 與 lifecycle policy
-4. CI 應包含 lint + typecheck + test
+3. 前端目前無強制 `VITE_*` 環境變數，可先以固定 API endpoint 進行整合
+4. `apps/web` 為 TanStack Start + Vite（預設 `3000`），`apps/api` 預設 `4000`
+5. S3 可先用測試 bucket 與 lifecycle policy
+6. CI 應包含 lint + typecheck + test
 
 ## 9.4 Quality Gate
 

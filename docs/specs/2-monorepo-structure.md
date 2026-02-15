@@ -5,7 +5,7 @@
 ```text
 decisioner/
 ├── apps/
-│   ├── web/                                      # TanStack Start frontend
+│   ├── web/                                      # TanStack Start frontend (shadcn/Base UI + Tailwind CSS v4)
 │   │   ├── src/
 │   │   │   ├── routes/
 │   │   │   │   ├── __root.tsx                   # App shell + auth bootstrap
