@@ -15,6 +15,13 @@
       "when": 1770697459407,
       "tag": "0001_swift_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771162505818,
+      "tag": "0002_fancy_marauders",
+      "breakpoints": true
     }
   ]
 }
