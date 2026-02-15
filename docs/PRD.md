@@ -1,6 +1,6 @@
 # Product Requirements Document: Decisioner Fitness
 
-> **Version:** 2.2.0
+> **Version:** 2.3.0
 > **Status:** Draft
 > **Last Updated:** 2026-02-15
 > **Author:** Kun
@@ -44,9 +44,9 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 | P0       | 提供 template + 當日可替換/新增動作                                   |
 | P0       | 訓練中顯示同動作上次與最佳紀錄                                        |
 | P0       | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯                  |
-| P1       | 朋友共用 template，多人協作編輯保留歷史                               |
+| P0       | 朋友健身（免費版 Lite）：支援好友互動與群組，但限制每群最多 2 人、每人最多 1 群 |
 | P1       | 朋友訓練可見性可設定（預設好友可見）                                  |
-| P1       | 教練導向進步圖表（max weight、volume、e1RM、肌群週訓練量、adherence） |
+| P1       | 教練導向進步圖表（e1RM、肌群週訓練量、adherence、RPE/RIR）作為付費進階功能 |
 | P1       | 成就系統提升持續訓練動機                                              |
 
 ### Non-Goals (MVP)
@@ -105,6 +105,8 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 1. 可加好友、建立 crew
 2. 可查看朋友最近訓練日期與紀錄（受隱私控制）
 3. 預設可見性為好友可見
+4. MVP 免費版限制：每位使用者最多建立 1 個 crew
+5. MVP 免費版限制：每個 crew 最多 2 位成員（owner + 1）
 
 ### 7. 進步圖表
 
@@ -117,23 +119,21 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
    x 軸：時間
    y 軸：重量乘次數（volume）
 
-3. e1RM 趨勢圖（Epley）
+### 8. 付費進階分析（Pro）
+
+1. e1RM 趨勢圖（Epley）
    x 軸：時間
    y 軸：estimated 1RM
 
-4. 肌群週訓練量趨勢圖
+2. 肌群週訓練量趨勢圖
    x 軸：週
    y 軸：該肌群總 volume（預設 primary muscle）
 
-5. 每週訓練 adherence 圖
+3. 每週訓練 adherence 圖
    x 軸：週
    y 軸：完成率（completed sessions / weekly target）
 
-### 8. 主觀負荷與目標
-
-1. 每組可選填 RPE 與 RIR
-2. 使用者可設定每週訓練目標次數（預設 3）
-3. 目標值用於 adherence 計算
+4. 每組可選填 RPE 與 RIR（記錄與分析皆為 Pro）
 
 ### 9. 成就系統
 
@@ -162,7 +162,6 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 1. 開始訓練時建立 session 快照
 2. 可在 session 內替換/新增動作
 3. set 至少包含重量、次數、組序、時間
-4. set 可選填 RPE / RIR
 
 ### FR-04 上次/最佳查詢
 
@@ -181,18 +180,20 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 1. 好友狀態至少含 pending/accepted/blocked
 2. 日期與詳細紀錄分開控制可見性
+3. 免費版限制：每位使用者最多建立 1 個 crew
+4. 免費版限制：每個 crew 最多 2 位成員（owner + 1）
 
 ### FR-07 Progress Insights
 
-1. 提供 max weight / volume / e1RM 三種單動作趨勢
+1. MVP 免費版提供 max weight / volume 兩種單動作趨勢
+2. `last/best` 維持 MVP 免費能力
+
+### FR-08 Pro Analytics（付費）
+
+1. 提供 e1RM 趨勢圖（Epley）
 2. 提供按肌群的 weekly volume 趨勢
 3. 提供 weekly adherence（completed / target）
-
-### FR-08 目標設定（Adherence）
-
-1. 每位使用者有 weekly workout target（預設 3）
-2. adherence mode 預設為 `WEEKLY_TARGET`
-3. 保留未來切換到 `TEMPLATE_SCHEDULE` 的彈性
+4. 提供 RPE/RIR 記錄與分析
 
 ### FR-09 成就引擎
 
@@ -209,7 +210,7 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 3. template 啟動訓練佔比
 4. 朋友互動率
 5. 30 日留存率
-6. 每人 weekly adherence 達標率
+6. Pro 轉換率（升級進階分析）
 
 ---
 
@@ -218,17 +219,19 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 ### Phase 1 (Core)
 
 1. template + workout + history list + past edit
-2. last/best + 基礎 progress（max weight / volume / e1RM / adherence）
+2. last/best + 基礎 progress（max weight / volume）
+3. social lite（friends + crews）：每人最多 1 群、每群最多 2 人
 
 ### Phase 2 (Social)
 
-1. friends + crews + template share
-2. privacy controls
+1. privacy controls 完整化
+2. social 配額/權限策略擴充（超出 Lite 限制）
 
 ### Phase 3 (Insights)
 
-1. charts + achievements
-2. 查詢與快取優化
+1. Pro analytics（e1RM / weekly muscle volume / adherence / RPE-RIR）
+2. charts + achievements
+3. 查詢與快取優化
 
 ---
 
@@ -252,7 +255,7 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 3. 圖片儲存：S3
 4. 群組 template：允許成員編輯，保留歷史紀錄
 5. 使用者可查看並編輯過往訓練（經歷史列表進入）
-6. 主觀負荷：每組同時支援 `RPE` + `RIR`
+6. 進階分析（e1RM / weekly muscle volume / adherence / RPE-RIR）不納入 MVP，定位為 Pro
 7. e1RM 公式固定採 `Epley`
-8. 肌群維度採中粒度 10 群（chest/back/shoulders/biceps/triceps/quads/hamstrings/glutes/calves/core）
-9. adherence 預設採 `WEEKLY_TARGET`，保留未來 mode 擴充
+8. 肌群維度採中粒度 10 群（chest/back/shoulders/biceps/triceps/quads/hamstrings/glutes/calves/core），僅 Pro 啟用
+9. 朋友健身納入 MVP 免費版，但限制每位使用者最多建立 1 群、每群最多 2 人

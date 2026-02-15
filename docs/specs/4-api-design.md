@@ -63,8 +63,8 @@
 | PATCH  | `/api/workouts/:sessionId`               | Update session meta/date                       | Yes  |
 | PATCH  | `/api/workouts/:sessionId/items/:itemId` | Replace/update session item                    | Yes  |
 | POST   | `/api/workouts/:sessionId/items`         | Add manual item                                | Yes  |
-| POST   | `/api/workouts/:sessionId/sets`          | Add set（weight/reps/unit + optional rpe/rir） | Yes  |
-| PATCH  | `/api/workouts/:sessionId/sets/:setId`   | Edit set（含 optional rpe/rir）                | Yes  |
+| POST   | `/api/workouts/:sessionId/sets`          | Add set（MVP: weight/reps/unit；Pro 可含 rpe/rir） | Yes  |
+| PATCH  | `/api/workouts/:sessionId/sets/:setId`   | Edit set（MVP: weight/reps/unit；Pro 可含 rpe/rir） | Yes  |
 | DELETE | `/api/workouts/:sessionId/sets/:setId`   | Delete set                                     | Yes  |
 | POST   | `/api/workouts/:sessionId/finish`        | Mark session completed                         | Yes  |
 | GET    | `/api/workouts/history`                  | List past sessions (date/template)             | Yes  |
@@ -94,11 +94,18 @@
 
 ## 4.8 Progress
 
+### MVP Free
+
 | Method | Endpoint                                                  | Description                     | Auth |
 | ------ | --------------------------------------------------------- | ------------------------------- | ---- |
 | GET    | `/api/progress/exercises/:exerciseId/last-best`           | Last + best summary             | Yes  |
 | GET    | `/api/progress/exercises/:exerciseId/charts/max-weight`   | Max weight over time            | Yes  |
 | GET    | `/api/progress/exercises/:exerciseId/charts/volume`       | Volume over time                | Yes  |
+
+### Pro (Paid)
+
+| Method | Endpoint                                                  | Description                     | Auth |
+| ------ | --------------------------------------------------------- | ------------------------------- | ---- |
 | GET    | `/api/progress/exercises/:exerciseId/charts/e1rm`         | Estimated 1RM over time (Epley) | Yes  |
 | GET    | `/api/progress/muscles/:muscleGroup/charts/weekly-volume` | Weekly volume by muscle group   | Yes  |
 | GET    | `/api/progress/adherence/weekly`                          | Weekly adherence summary        | Yes  |
@@ -154,6 +161,8 @@
 | GET    | `/api/goals/training` | Get weekly training target + adherence mode    | Yes  |
 | PUT    | `/api/goals/training` | Update weekly training target + adherence mode | Yes  |
 
+> 僅 Pro 可用（MVP 免費版不開放）
+
 ### `PUT /api/goals/training` body (example)
 
 ```json
@@ -163,13 +172,22 @@
 }
 ```
 
-## 4.10 Social
+## 4.10 Social (MVP Free-Lite)
 
 | Method | Endpoint                                | Description           | Auth |
 | ------ | --------------------------------------- | --------------------- | ---- |
 | POST   | `/api/friends/invite`                   | Send friend request   | Yes  |
 | POST   | `/api/friends/:friendId/accept`         | Accept friend request | Yes  |
 | GET    | `/api/friends/:friendId/latest-workout` | Friend latest workout | Yes  |
+| POST   | `/api/crews`                            | Create crew           | Yes  |
+| GET    | `/api/crews`                            | List own crews        | Yes  |
+| POST   | `/api/crews/:crewId/members`            | Add member to crew    | Yes  |
+
+### Free-Lite limits (enforced by API)
+
+1. 每位使用者最多建立 1 個 crew
+2. 每個 crew 最多 2 位成員（owner + 1）
+3. 超限回傳 `422`（`FREE_TIER_LIMIT_EXCEEDED`）
 
 ## 4.11 Privacy
 

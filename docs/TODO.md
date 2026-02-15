@@ -27,15 +27,12 @@
   - [ ] `sessionStatus`: IN_PROGRESS | COMPLETED
   - [ ] `sessionItemOrigin`: TEMPLATE | REPLACED | MANUAL
   - [ ] `weightUnit`: KG | LB
-  - [ ] `muscleGroup`: CHEST | BACK | SHOULDERS | BICEPS | TRICEPS | QUADS | HAMSTRINGS | GLUTES | CALVES | CORE
-  - [ ] `adherenceMode`: WEEKLY_TARGET | TEMPLATE_SCHEDULE
   - [ ] Move `authProvider` from user.ts to enums.ts
 - [ ] B.2: Gyms & Equipment (`gym.ts`)
   - [ ] `gyms` table
   - [ ] `gymEquipments` table
 - [ ] B.3: Exercises (`exercise.ts`)
   - [ ] `exercises` table (with soft delete)
-  - [ ] Add `primary_muscle_group` + `secondary_muscle_groups`
 - [ ] B.4: Templates (`template.ts`)
   - [ ] `templates` table
   - [ ] `templateItems` table
@@ -45,13 +42,9 @@
   - [ ] `workoutSessions` table
   - [ ] `workoutSessionItems` table
   - [ ] `workoutSets` table
-  - [ ] Add optional `rpe` + `rir` on `workoutSets`
   - [ ] `workoutSessionRevisions` table
 - [ ] B.6: Metrics (`metric.ts`)
   - [ ] `exerciseSessionMetrics` table
-  - [ ] Add `estimated_1rm`
-- [ ] B.6+: Goals (`goal.ts`)
-  - [ ] `userTrainingGoals` table (`weekly_workout_target`, `adherence_mode`)
 - [ ] B.7: Indexes (per spec 3.4)
 - [ ] B.8: `pnpm db:generate` + `pnpm db:migrate`
 
@@ -64,7 +57,6 @@
 - [ ] `packages/shared/src/schemas/template.ts`
 - [ ] `packages/shared/src/schemas/workout.ts`
 - [ ] `packages/shared/src/schemas/progress.ts`
-- [ ] `packages/shared/src/schemas/adherence.ts`
 
 ---
 
@@ -113,7 +105,7 @@
   - [ ] `templates.service.ts` (CRUD + versioning)
   - [ ] `templates.controller.ts`
   - [ ] `templates.routes.ts`
-  - [ ] 9 endpoints (CRUD + items + versions, no share in Phase 1)
+  - [ ] 9 endpoints (CRUD + items + versions + share)
 - [ ] E.T: Unit + integration tests
   - [ ] `templates.service.test.ts`
   - [ ] Integration: CRUD + items + versioning flow
@@ -127,7 +119,6 @@
   - [ ] `workouts.controller.ts`
   - [ ] `workouts.routes.ts`
   - [ ] 10 endpoints
-  - [ ] Set payload supports optional `rpe` + `rir`
 - [ ] F.T: Unit + integration tests
   - [ ] `workouts.service.test.ts`
   - [ ] Integration: full workout flow (spec 11)
@@ -144,27 +135,27 @@
 ## Phase G: API Module — Progress
 
 - [ ] `apps/api/src/modules/progress/`
-  - [ ] `progress.service.ts` (last/best, max-weight, volume, e1rm, weekly muscle volume, weekly adherence)
+  - [ ] `progress.service.ts` (last/best, max-weight, volume)
   - [ ] `progress.controller.ts`
   - [ ] `progress.routes.ts`
-  - [ ] 6 endpoints
+  - [ ] 3 endpoints
 - [ ] G.T: Unit + integration tests
   - [ ] `progress.service.test.ts`
   - [ ] Integration: last/best returns correct data after workout
   - [ ] Integration: chart data correct after multiple sessions
-  - [ ] Integration: e1RM uses Epley and tie-break rules
-  - [ ] Integration: weekly muscle volume (primary-only) aggregates correctly
-  - [ ] Integration: weekly adherence respects `weekly_workout_target`
 
 ---
 
-## Phase G.5: API Module — Goals (Adherence Settings)
+## Phase G.5: API Module — Social Lite (MVP Free)
 
-- [ ] `apps/api/src/modules/goals/`
-  - [ ] `goals.service.ts`
-  - [ ] `goals.controller.ts`
-  - [ ] `goals.routes.ts`
-  - [ ] Endpoints: GET/PUT weekly workout target + adherence mode
+- [ ] `apps/api/src/modules/social/`
+  - [ ] `social.service.ts`
+  - [ ] `social.controller.ts`
+  - [ ] `social.routes.ts`
+  - [ ] Endpoints: friends invite/accept/latest-workout + crews create/list/add-member
+  - [ ] Free-Lite guard: max 1 crew per owner
+  - [ ] Free-Lite guard: max 2 members per crew
+  - [ ] Over-limit error contract: `422 FREE_TIER_LIMIT_EXCEEDED`
 
 ---
 
@@ -224,7 +215,7 @@
 
 - [ ] K.1: `/train/start` — select gym + template, start session
 - [ ] K.2: `/train/$sessionId` — training editor
-  - [ ] Set logging (weight, reps, unit, optional RPE, optional RIR per set)
+  - [ ] Set logging (weight, reps, unit per set)
   - [ ] Add/replace/remove exercises mid-session
   - [ ] Last/best display per exercise (GET /api/progress/.../last-best)
   - [ ] Finish session button
@@ -246,18 +237,24 @@
 - [ ] L.2: `/progress` — exercise progress charts
   - [ ] Max weight trend chart (x: date, y: weight)
   - [ ] Volume trend chart (x: date, y: volume)
-  - [ ] e1RM trend chart (x: date, y: e1rm)
-  - [ ] Weekly muscle volume chart (x: week, y: volume)
-  - [ ] Weekly adherence chart (x: week, y: adherence rate)
   - [ ] Exercise selector
-  - [ ] Muscle group selector
-  - [ ] Adherence target editor (weekly workout target)
 - [ ] L.E2E: History & progress journey (Playwright)
   - [ ] View history list → click into past session
   - [ ] Edit past session → confirm revision warning → save
   - [ ] Progress charts render with data
-  - [ ] Set editor persists optional RPE/RIR
-  - [ ] Weekly adherence updates after target change
+
+---
+
+## Phase L.5: Frontend — Social Lite (MVP Free)
+
+- [ ] `/friends` — invite/accept/list basic friend activity
+- [ ] `/crews` — create/list/add-member
+  - [ ] 顯示免費限制提示（每人最多 1 群、每群最多 2 人）
+  - [ ] 超限時顯示 API 錯誤文案（`FREE_TIER_LIMIT_EXCEEDED`）
+- [ ] L.5.E2E: Social Lite journey (Playwright)
+  - [ ] Create first crew succeeds
+  - [ ] Create second crew blocked by free limit
+  - [ ] Add second member succeeds, third member blocked by free limit
 
 ---
 
@@ -265,7 +262,9 @@
 
 - [ ] Google OAuth (`POST /api/auth/google`)
 - [ ] Media/S3 upload (custom exercise images)
-- [ ] Social (friends, crews, template share) — PRD Phase 2
+- [ ] Pro analytics: e1RM chart, weekly muscle volume, weekly adherence
+- [ ] Pro logging: RPE/RIR set logging + analytics
+- [ ] Pro goals module: weekly target + adherence mode
 - [ ] Achievements — PRD Phase 3
 - [ ] Rate limiting
 - [ ] Dashboard (`/` — quick actions, recent workouts)

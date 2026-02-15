@@ -2,17 +2,17 @@
 
 ## 8.1 Route Structure
 
-| Route               | Purpose                                            |
-| ------------------- | -------------------------------------------------- |
-| `/`                 | Dashboard                                          |
-| `/templates`        | Template list/create/edit                          |
-| `/train/start`      | Select gym/template and start session              |
-| `/train/$sessionId` | Training editor (in-progress + past edit)          |
-| `/workouts/history` | Past workout list (date + template)                |
-| `/progress`         | Charts and records (exercise + muscle + adherence) |
-| `/friends`          | Friend list and recent activity                    |
-| `/crews`            | Crew management and shared templates               |
-| `/settings/privacy` | Visibility settings                                |
+| Route               | Purpose                                                              |
+| ------------------- | -------------------------------------------------------------------- |
+| `/`                 | Dashboard                                                            |
+| `/templates`        | Template list/create/edit                                            |
+| `/train/start`      | Select gym/template and start session                                |
+| `/train/$sessionId` | Training editor (in-progress + past edit)                            |
+| `/workouts/history` | Past workout list (date + template)                                  |
+| `/progress`         | Charts and records (MVP: max-weight/volume; Pro: advanced analytics) |
+| `/friends`          | Friend list and recent activity                                      |
+| `/crews`            | Crew management and shared templates                                 |
+| `/settings/privacy` | Visibility settings                                                  |
 
 ## 8.2 Key Screen Contracts
 
@@ -33,8 +33,9 @@
 
 1. `IN_PROGRESS`：正常記錄模式
 2. `COMPLETED`：顯示「編輯歷史訓練」模式（仍可編輯）
-3. set 編輯欄位包含：`weight`, `reps`, `unit`, optional `rpe`, optional `rir`
-4. 送出變更後提示已更新歷史版本
+3. set 編輯欄位包含：`weight`, `reps`, `unit`
+4. Pro 可開啟進階欄位：`rpe`, `rir`
+5. 送出變更後提示已更新歷史版本
 
 ### `/progress`
 
@@ -42,11 +43,12 @@
    - Last/Best（單動作）
    - Max Weight（單動作）
    - Volume（單動作）
+2. Pro 版本才顯示：
    - e1RM（單動作）
    - Weekly Muscle Volume（肌群）
    - Weekly Adherence（週完成率）
-2. `Weekly Muscle Volume` 預設以 `primary_muscle_group` 統計
-3. `Weekly Adherence` 顯示：completed sessions、weekly target、rate
+   - RPE/RIR 相關分析
+3. 免費版顯示升級提示，不回傳 Pro 圖表資料
 
 ## 8.3 Data Fetching Strategy
 
@@ -60,12 +62,13 @@
 2. `['workout-session', sessionId]`
 3. `['exercise-last-best', exerciseId, gymId]`
 4. `['progress-chart', exerciseId, chartType, from, to, gymId]`
-5. `['progress-e1rm', exerciseId, from, to, gymId]`
-6. `['progress-muscle-weekly-volume', muscleGroup, from, to, includeSecondary]`
-7. `['progress-adherence-weekly', from, to]`
+5. `['progress-e1rm', exerciseId, from, to, gymId]`（Pro）
+6. `['progress-muscle-weekly-volume', muscleGroup, from, to, includeSecondary]`（Pro）
+7. `['progress-adherence-weekly', from, to]`（Pro）
 
 ## 8.4 UX Guards
 
 1. 編輯 completed session 前，提示將重算個人統計
 2. 朋友頁若無權限，明確顯示「對方未開放此資訊」
 3. template 編輯衝突時顯示版本衝突提示並要求重新載入
+4. crews 頁需顯示免費限制：每人最多 1 群、每群最多 2 人

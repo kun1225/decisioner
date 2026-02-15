@@ -44,3 +44,9 @@ ARCHIVED --restore--> ACTIVE
 
 1. template item 可編輯，但每次變更都要產生新 version
 2. shared template 由 crew member 編輯時也套用相同版本規則
+
+## 5.4 Free-Lite Social Limits (MVP)
+
+1. 每位使用者最多建立 1 個 crew
+2. 每個 crew 最多 2 位成員（owner + 1）
+3. 超出限制時拒絕狀態轉移，回傳 `422 FREE_TIER_LIMIT_EXCEEDED`

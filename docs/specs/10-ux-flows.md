@@ -15,7 +15,7 @@
 1. 使用者進入 `/train/start`，選 gym + template
 2. 系統建立 `workout_session` + `workout_session_items` 快照
 3. 因器材占用，使用者替換某動作
-4. 使用者記錄每組重量/次數，並可選填 `RPE`、`RIR`
+4. 使用者記錄每組重量/次數
 5. template 本身不被改動
 
 ## Scenario C: 訓練中查看上次/最佳
@@ -37,9 +37,10 @@
 ## Scenario E: 與朋友共享 Template 協作
 
 1. 使用者建立 crew 並邀請朋友
-2. 將 template 分享到 crew
-3. 成員可編輯 template
-4. 系統保留每次編輯版本與編輯者
+2. 免費版限制：每位使用者最多建立 1 個 crew、每個 crew 最多 2 位成員
+3. 將 template 分享到 crew
+4. 成員可編輯 template
+5. 系統保留每次編輯版本與編輯者
 
 ## Scenario F: 查看朋友訓練與隱私控制
 
@@ -48,17 +49,14 @@
 3. 若 A 關閉「訓練紀錄可見」，B 仍可能只看得到日期
 4. 若 A 關閉「日期可見」，B 完全看不到最近訓練日期
 
-## Scenario G: Progress 分析（動作 + 肌群 + adherence）
+## Scenario G: Progress 分析（MVP 免費）
 
 1. 使用者進入 `/progress`
-2. 選擇某動作，查看 Max Weight / Volume / e1RM 趨勢
-3. 切換到 `Weekly Muscle Volume`，選肌群（預設 primary only）
-4. 切換到 `Weekly Adherence`，查看每週完成次數 / 目標次數 / 達成率
-5. 使用者依結果調整下週訓練安排
+2. 選擇某動作，查看 Max Weight / Volume 趨勢
+3. 使用者依結果調整下週訓練安排
 
-## Scenario H: 設定每週訓練目標次數
+## Scenario H: Pro 進階分析（付費）
 
-1. 使用者進入設定頁，調整每週目標次數（預設 3）
-2. 系統儲存到 `user_training_goals`
-3. `/progress` 的 adherence 圖表即時反映新目標
-4. 後續版本可新增 adherence mode 切換（例如 template schedule）
+1. 使用者升級後可使用 e1RM / 肌群週訓練量 / adherence
+2. 使用者可在 set 記錄 `RPE`、`RIR`
+3. 使用者可設定每週訓練目標次數（adherence）

@@ -51,16 +51,6 @@
 2. `max_weight_reps`
 3. `max_weight_set_index`
 4. `volume = sum(weight * reps)`
-5. `estimated_1rm`（Epley 公式）
-
-`estimated_1rm` 規則：
-
-1. 每組先算 `set_e1rm = weight * (1 + reps / 30)`
-2. 取該 exercise 在該 session 的最大 `set_e1rm` 作為 `estimated_1rm`
-3. 若 e1RM 相同，依序取：
-   - reps 較高者
-   - set_index 較前者
-   - created_at 較新者
 
 ## 6.6 Chart Aggregation
 
@@ -71,27 +61,31 @@
 2. Volume Chart
    - x 軸：`session_date`
    - y 軸：`volume`
-3. e1RM Chart
-   - x 軸：`session_date`
-   - y 軸：`estimated_1rm`
-4. Weekly Muscle Volume Chart
+
+## 6.7 Pro Analytics Add-ons (Paid)
+
+1. e1RM Chart
+   - 每組先算 `set_e1rm = weight * (1 + reps / 30)`（Epley）
+   - 取該 exercise 在該 session 的最大 `set_e1rm` 作為 `estimated_1rm`
+   - 若 e1RM 相同，依序取 `reps` 較高、`set_index` 較前、`created_at` 較新
+2. Weekly Muscle Volume Chart
    - x 軸：`week_start`
    - y 軸：`sum(weight * reps)`（按 muscle group 聚合）
    - 預設只算 `primary_muscle_group`
+3. Subjective Load Capture
+   - 每組 set 可選填 `rpe`、`rir`
+   - `rpe` 與 `rir` 皆可同時存在
+4. Weekly Adherence
+   - 以週為單位計算 `completed_sessions / weekly_workout_target`
+   - `completed_sessions` 只計 `session_status = COMPLETED`
+   - 目標值來源：`user_training_goals.weekly_workout_target`
+   - mode 預設 `WEEKLY_TARGET`，保留 `TEMPLATE_SCHEDULE` 擴充點
 
-## 6.7 Subjective Load Capture (RPE / RIR)
+## 6.8 Free-Lite Social Limits
 
-1. 每組 set 可選填 `rpe`、`rir`
-2. `rpe` 與 `rir` 皆可同時存在
-3. Phase 1 先做紀錄與展示，不作為排行榜或成就條件
-
-## 6.8 Adherence Computation
-
-1. 以週為單位計算 `completed_sessions / weekly_workout_target`
-2. `completed_sessions` 只計 `session_status = COMPLETED`
-3. 目標值來源：`user_training_goals.weekly_workout_target`
-4. mode 預設為 `WEEKLY_TARGET`
-5. 保留 `TEMPLATE_SCHEDULE` mode 擴充點（Phase 1 不啟用）
+1. 每位使用者最多建立 1 個 crew
+2. 每個 crew 最多 2 位成員（owner + 1）
+3. 超限時 API 回傳 `422` + `FREE_TIER_LIMIT_EXCEEDED`
 
 ## 6.9 Privacy Guard
 

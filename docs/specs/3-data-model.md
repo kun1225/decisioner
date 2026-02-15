@@ -156,9 +156,9 @@
 
 ---
 
-## 3.1.1 Phase 1 Progress Extensions
+## 3.1.1 Pro Analytics Extensions (Non-MVP)
 
-為支援教練導向進步分析（e1RM、肌群週訓練量、adherence、主觀負荷），在既有 ERD 上補充：
+以下欄位屬於付費進階分析（Pro），不納入 MVP 免費版：
 
 1. `exercises`
    - `primary_muscle_group`（enum, required）
@@ -183,7 +183,7 @@
 1. `users`
 2. `refresh_tokens`
 
-### Workout Core
+### Workout Core (MVP Free)
 
 1. `gyms`
 2. `gym_equipments`
@@ -198,7 +198,10 @@
 11. `workout_sets`
 12. `workout_session_revisions`
 13. `exercise_session_metrics`
-14. `user_training_goals`
+
+### Pro Analytics (Paid)
+
+1. `user_training_goals`
 
 ### Social / Privacy
 
@@ -224,7 +227,10 @@
 4. `workout_session_revisions(session_id, revision_no)` unique
 5. `exercise_session_metrics` 需可追溯到 `session_id`
 6. completed session 可編輯，但必須寫 revision
-7. `user_training_goals.user_id` unique（每人一筆）
+7. `user_training_goals.user_id` unique（每人一筆, Pro）
+8. 免費版社交限制由服務層控管：
+   - 每位使用者最多建立 1 個 `crew`
+   - 每個 `crew` 最多 2 位成員
 
 ---
 
@@ -238,8 +244,8 @@
 6. `exercise_session_metrics(user_id, exercise_id, max_weight desc)`
 7. `template_versions(template_id, version_no desc)`
 8. `workout_session_items(exercise_id)`
-9. `exercises(primary_muscle_group)`
-10. `exercise_session_metrics(user_id, exercise_id, estimated_1rm desc)`
+9. `exercises(primary_muscle_group)`（Pro）
+10. `exercise_session_metrics(user_id, exercise_id, estimated_1rm desc)`（Pro）
 
 ---
 
@@ -252,8 +258,8 @@
 5. `crew_role`: `OWNER | MEMBER`
 6. `visibility_level`: `PRIVATE | FRIENDS | PUBLIC`
 7. `media_status`: `UPLOADING | READY | FAILED`
-8. `muscle_group`: `CHEST | BACK | SHOULDERS | BICEPS | TRICEPS | QUADS | HAMSTRINGS | GLUTES | CALVES | CORE`
-9. `adherence_mode`: `WEEKLY_TARGET | TEMPLATE_SCHEDULE`（Phase 1 僅啟用 `WEEKLY_TARGET`）
+8. `muscle_group`: `CHEST | BACK | SHOULDERS | BICEPS | TRICEPS | QUADS | HAMSTRINGS | GLUTES | CALVES | CORE`（Pro）
+9. `adherence_mode`: `WEEKLY_TARGET | TEMPLATE_SCHEDULE`（Pro）
 
 ---
 
@@ -283,3 +289,5 @@
 
 輸入：`user_id` + week range
 輸出：`weekly_completed_sessions`, `weekly_workout_target`, `adherence_rate`
+
+> 註：`e1RM Trend`、`Weekly Muscle Volume`、`Weekly Adherence` 皆為 Pro 查詢契約。
