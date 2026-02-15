@@ -1,5 +1,5 @@
 {
-  "name": "decisioner",
+  "name": "joygym",
   "private": true,
   "scripts": {
     "build": "turbo run build",

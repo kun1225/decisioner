@@ -51,7 +51,7 @@ GOOGLE_CLIENT_ID="..."
 
 # S3 Media
 S3_REGION="ap-northeast-1"
-S3_BUCKET="decisioner-fitness-assets"
+S3_BUCKET="joygym-assets"
 S3_ACCESS_KEY_ID="..."
 S3_SECRET_ACCESS_KEY="..."
 S3_PUBLIC_BASE_URL="https://cdn.example.com"

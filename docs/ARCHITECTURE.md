@@ -1,4 +1,4 @@
-# Decisioner Fitness - Architecture Index
+# 揪Gym (JoyGym) - Architecture Index
 
 > **Version:** 2.2.1
 > **Status:** Proposed
@@ -8,7 +8,7 @@
 
 ## Overview
 
-Decisioner Fitness 採用 monorepo 架構：
+揪Gym (JoyGym) 採用 monorepo 架構：
 
 1. `apps/web`：TanStack Start 前端（React 19 + Vite + shadcn/Base UI + Tailwind CSS v4）
 2. `apps/api`：Express API
@@ -51,7 +51,7 @@ Decisioner Fitness 採用 monorepo 架構：
 
 | Version | Date       | Changes                                                                                  |
 | ------- | ---------- | ---------------------------------------------------------------------------------------- |
-| 2.2.1   | 2026-02-15 | 同步 web 技術堆疊文件（TanStack Start + shadcn/Base UI + Tailwind v4）                  |
+| 2.2.1   | 2026-02-15 | 同步 web 技術堆疊文件（TanStack Start + shadcn/Base UI + Tailwind v4）                   |
 | 2.2.0   | 2026-02-15 | 定義 MVP Free 與 Pro 邊界：進階分析改為 Pro；朋友健身改為 MVP Free-Lite（1 群/2 人上限） |
 | 2.1.0   | 2026-02-11 | 將細節下放 specs，ARCHITECTURE 改為精簡索引；新增「過往訓練可編輯」                      |
 | 2.0.0   | 2026-02-11 | 首版 Fitness 架構草案                                                                    |

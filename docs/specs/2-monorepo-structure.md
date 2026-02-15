@@ -3,7 +3,7 @@
 ## 2.1 Workspace Layout
 
 ```text
-decisioner/
+joygym/
 ├── apps/
 │   ├── web/                                      # TanStack Start frontend (shadcn/Base UI + Tailwind CSS v4)
 │   │   ├── src/

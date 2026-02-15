@@ -4,9 +4,9 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_USER: decisioner
-      POSTGRES_PASSWORD: decisioner
-      POSTGRES_DB: decisioner
+      POSTGRES_USER: joygym
+      POSTGRES_PASSWORD: joygym
+      POSTGRES_DB: joygym
     volumes:
       - pgdata:/var/lib/postgresql/data
 

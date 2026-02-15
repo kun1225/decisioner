@@ -82,7 +82,7 @@
 > 在第一組 API module 完成後建立，後續 Phase 共用。
 
 - [ ] D+.1: Test infrastructure
-  - [ ] Test DB setup (separate `decisioner_test` database)
+  - [ ] Test DB setup (separate `joygym_test` database)
   - [ ] Migration runner for test DB
   - [ ] `createTestApp()` helper (in-process supertest)
   - [ ] DB cleanup between tests (truncate all tables)

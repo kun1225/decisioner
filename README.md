@@ -1,8 +1,8 @@
-# Turborepo starter
+# 揪Gym (JoyGym)
 
-This Turborepo starter is maintained by the Turborepo core team.
+重量訓練記錄 App，專注於進步追蹤與協作。
 
-## Using this example
+## Getting Started
 
 Run the following command:
 
