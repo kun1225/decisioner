@@ -58,6 +58,14 @@
   - [x] `exerciseSessionMetrics` table
 - [x] B.7: Indexes (per spec 3.4)
 - [x] B.8: `pnpm db:generate` + `pnpm db:migrate`
+- [ ] B.9: Social/Engagement Schema (MVP)
+  - [ ] `workout_checkins`（daily check-in + streak）
+  - [ ] `activity_feed_events`
+  - [ ] `activity_likes` + unique index `(event_id, user_id)`
+  - [ ] `reminder_settings`
+  - [ ] `share_card_templates` + `share_card_renders`
+  - [ ] Enums: `activityEventType`, `reminderType`, `reminderScheduleType`
+  - [ ] `pnpm db:generate` + `pnpm db:migrate`
 
 ---
 
@@ -68,6 +76,12 @@
 - [ ] `packages/shared/src/schemas/template.ts`
 - [ ] `packages/shared/src/schemas/workout.ts`
 - [ ] `packages/shared/src/schemas/progress.ts`
+- [ ] `packages/shared/src/schemas/checkin.ts`
+- [ ] `packages/shared/src/schemas/feed.ts`
+- [ ] `packages/shared/src/schemas/reminder.ts`
+- [ ] `packages/shared/src/schemas/share-card.ts`
+- [ ] `packages/shared/src/schemas/dashboard.ts`
+- [ ] `packages/shared/src/schemas/profile.ts`
 
 ---
 
@@ -107,6 +121,10 @@
   - [ ] Create gym → list gyms
   - [ ] Create custom exercise → get by id
   - [ ] List preset exercises
+- [ ] D+.4: Social/Engagement integration baseline
+  - [ ] Test fixture: friendship relation + privacy setting seed
+  - [ ] Test fixture: completed workout + check-in seed
+  - [ ] Test fixture: feed event + like seed
 
 ---
 
@@ -157,16 +175,58 @@
 
 ---
 
-## Phase G.5: API Module — Social Lite (MVP Free)
+## Phase G.5: API Modules — Social & Engagement (MVP)
 
-- [ ] `apps/api/src/modules/social/`
+- [ ] G.5.1: Friends/Crews/Privacy (`apps/api/src/modules/social/`)
   - [ ] `social.service.ts`
   - [ ] `social.controller.ts`
   - [ ] `social.routes.ts`
   - [ ] Endpoints: friends invite/accept/latest-workout + crews create/list/add-member
+  - [ ] Endpoint: `PUT /api/privacy-settings`
   - [ ] Free-Lite guard: max 1 crew per owner
   - [ ] Free-Lite guard: max 2 members per crew
   - [ ] Over-limit error contract: `422 FREE_TIER_LIMIT_EXCEEDED`
+- [ ] G.5.2: Check-in & Dashboard (`apps/api/src/modules/engagement/`)
+  - [ ] `engagement.service.ts`
+  - [ ] `engagement.controller.ts`
+  - [ ] `engagement.routes.ts`
+  - [ ] Endpoint: `POST /api/checkins`（idempotent per day）
+  - [ ] Endpoint: `GET /api/checkins`
+  - [ ] Endpoint: `GET /api/dashboard`
+  - [ ] Streak computation + aggregation query
+- [ ] G.5.3: Activity Feed & Likes (`apps/api/src/modules/feed/`)
+  - [ ] `feed.service.ts`
+  - [ ] `feed.controller.ts`
+  - [ ] `feed.routes.ts`
+  - [ ] Endpoint: `GET /api/feed`（cursor pagination）
+  - [ ] Endpoint: `POST /api/feed/:eventId/likes`
+  - [ ] Endpoint: `DELETE /api/feed/:eventId/likes`
+  - [ ] Feed event producer: workout started/completed + check-in created
+- [ ] G.5.4: Profile (`apps/api/src/modules/profile/`)
+  - [ ] `profile.service.ts`
+  - [ ] `profile.controller.ts`
+  - [ ] `profile.routes.ts`
+  - [ ] Endpoint: `GET /api/users/:userId/profile`（privacy-scoped）
+- [ ] G.5.5: Reminders (`apps/api/src/modules/reminders/`)
+  - [ ] `reminders.service.ts`
+  - [ ] `reminders.controller.ts`
+  - [ ] `reminders.routes.ts`
+  - [ ] Endpoint: `GET /api/reminders`
+  - [ ] Endpoint: `PUT /api/reminders/:reminderId`
+- [ ] G.5.6: Share Cards (`apps/api/src/modules/share-cards/`)
+  - [ ] `share-cards.service.ts`
+  - [ ] `share-cards.controller.ts`
+  - [ ] `share-cards.routes.ts`
+  - [ ] Endpoint: `GET /api/share-cards/templates`（plan-aware）
+  - [ ] Endpoint: `POST /api/share-cards/render`
+  - [ ] Plan guard: free = FREE templates only
+- [ ] G.5.T: Unit + integration tests
+  - [ ] Check-in idempotency + streak transitions
+  - [ ] Feed visibility respects privacy settings
+  - [ ] Like deduplication `(event_id, user_id)` unique
+  - [ ] Dashboard summary aggregation correctness
+  - [ ] Reminder update validation + timezone handling
+  - [ ] Share card template entitlement (FREE/PRO)
 
 ---
 
@@ -256,16 +316,44 @@
 
 ---
 
-## Phase L.5: Frontend — Social Lite (MVP Free)
+## Phase L.5: Frontend — Social & Engagement (MVP)
 
-- [ ] `/friends` — invite/accept/list basic friend activity
-- [ ] `/crews` — create/list/add-member
+- [ ] L.5.1: `/friends` + `/crews`
+  - [ ] 邀請/接受好友流程
+  - [ ] crew create/list/add-member
   - [ ] 顯示免費限制提示（每人最多 1 群、每群最多 2 人）
   - [ ] 超限時顯示 API 錯誤文案（`FREE_TIER_LIMIT_EXCEEDED`）
-- [ ] L.5.E2E: Social Lite journey (Playwright)
+- [ ] L.5.2: `/feed`
+  - [ ] 好友動態流（開始重訓、完成訓練、打卡）
+  - [ ] 愛心 like/unlike
+  - [ ] cursor loading + 空狀態
+- [ ] L.5.3: `/checkins`
+  - [ ] 每日打卡操作（可綁定 session）
+  - [ ] 連續天數（streak）展示
+  - [ ] 打卡成功後動態提示
+- [ ] L.5.4: `/` dashboard
+  - [ ] 週訓練次數、streak、最近活動摘要
+  - [ ] 快速入口：打卡、分享卡片
+- [ ] L.5.5: `/users/$userId`
+  - [ ] 簡單個人頁（頭像、簡介、最近訓練）
+  - [ ] 依隱私設定顯示或遮罩內容
+- [ ] L.5.6: `/settings/privacy` + `/settings/reminders`
+  - [ ] 可見性設定（日期/紀錄）
+  - [ ] 基礎提醒設定（時段、開關、時區）
+- [ ] L.5.7: 分享卡片（MVP）
+  - [ ] 打卡成功頁分享入口
+  - [ ] 訓練完成頁分享入口
+  - [ ] 模板選擇（free/pro 分層提示）
+- [ ] L.5.E2E: Social & engagement journey (Playwright)
   - [ ] Create first crew succeeds
   - [ ] Create second crew blocked by free limit
   - [ ] Add second member succeeds, third member blocked by free limit
+  - [ ] Check-in once/day + streak increments across days
+  - [ ] Feed shows friend workout/check-in events
+  - [ ] Like/unlike toggles and count updates
+  - [ ] Privacy setting blocks profile/feed details as expected
+  - [ ] Reminder settings save and rehydrate correctly
+  - [ ] Share card free template usable; pro template shows upgrade prompt
 
 ---
 
@@ -273,9 +361,11 @@
 
 - [ ] Google OAuth (`POST /api/auth/google`)
 - [ ] Media/S3 upload (custom exercise images)
+- [ ] MVP 2: weekly challenges
+- [ ] MVP 2: achievement progression experience
+- [ ] MVP 2: friends leaderboard
+- [ ] MVP 3: profile customization (paid)
 - [ ] Pro analytics: e1RM chart, weekly muscle volume, weekly adherence
 - [ ] Pro logging: RPE/RIR set logging + analytics
 - [ ] Pro goals module: weekly target + adherence mode
-- [ ] Achievements — PRD Phase 3
 - [ ] Rate limiting
-- [ ] Dashboard (`/` — quick actions, recent workouts)
