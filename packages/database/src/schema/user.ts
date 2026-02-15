@@ -1,6 +1,6 @@
-import { pgEnum, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-export const authProviderEnum = pgEnum('auth_provider', ['LOCAL', 'GOOGLE'])
+import { authProviderEnum } from './enums.js';
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -13,4 +13,4 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
-})
+});

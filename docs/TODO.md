@@ -22,12 +22,12 @@
 
 ## Phase B: Fitness Core DB Schema
 
-- [ ] B.1: Enums (`packages/database/src/schema/enums.ts`)
-  - [ ] `exerciseSource`: PRESET | CUSTOM
-  - [ ] `sessionStatus`: IN_PROGRESS | COMPLETED
-  - [ ] `sessionItemOrigin`: TEMPLATE | REPLACED | MANUAL
-  - [ ] `weightUnit`: KG | LB
-  - [ ] Move `authProvider` from user.ts to enums.ts
+- [x] B.1: Enums (`packages/database/src/schema/enums.ts`)
+  - [x] `exerciseSource`: PRESET | CUSTOM
+  - [x] `sessionStatus`: IN_PROGRESS | COMPLETED
+  - [x] `sessionItemOrigin`: TEMPLATE | REPLACED | MANUAL
+  - [x] `weightUnit`: KG | LB
+  - [x] Move `authProvider` from user.ts to enums.ts
 - [ ] B.2: Gyms & Equipment (`gym.ts`)
   - [ ] `gyms` table
   - [ ] `gymEquipments` table
