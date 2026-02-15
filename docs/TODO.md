@@ -28,24 +28,24 @@
   - [x] `sessionItemOrigin`: TEMPLATE | REPLACED | MANUAL
   - [x] `weightUnit`: KG | LB
   - [x] Move `authProvider` from user.ts to enums.ts
-- [ ] B.2: Gyms (`gym.ts`)
-  - [ ] `gyms` table
-- [ ] B.3: Exercises (`exercise.ts`)
-  - [ ] `exercises` table (with soft delete)
-- [ ] B.4: Templates (`template.ts`)
-  - [ ] `templates` table
-  - [ ] `templateItems` table
-  - [ ] `templateVersions` table
-  - [ ] `templateVersionItems` table
-- [ ] B.5: Workouts (`workout.ts`)
-  - [ ] `workoutSessions` table
-  - [ ] `workoutSessionItems` table
-  - [ ] `workoutSets` table
-  - [ ] `workoutSessionRevisions` table
-- [ ] B.6: Metrics (`metric.ts`)
-  - [ ] `exerciseSessionMetrics` table
-- [ ] B.7: Indexes (per spec 3.4)
-- [ ] B.8: `pnpm db:generate` + `pnpm db:migrate`
+- [x] B.2: Gyms (`gym.ts`)
+  - [x] `gyms` table
+- [x] B.3: Exercises (`exercise.ts`)
+  - [x] `exercises` table (with soft delete)
+- [x] B.4: Templates (`template.ts`)
+  - [x] `templates` table
+  - [x] `templateItems` table
+  - [x] `templateVersions` table
+  - [x] `templateVersionItems` table
+- [x] B.5: Workouts (`workout.ts`)
+  - [x] `workoutSessions` table
+  - [x] `workoutSessionItems` table
+  - [x] `workoutSets` table
+  - [x] `workoutSessionRevisions` table
+- [x] B.6: Metrics (`metric.ts`)
+  - [x] `exerciseSessionMetrics` table
+- [x] B.7: Indexes (per spec 3.4)
+- [x] B.8: `pnpm db:generate` + `pnpm db:migrate`
 
 ---
 
