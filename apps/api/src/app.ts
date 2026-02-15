@@ -1,13 +1,27 @@
-import express from 'express'
+import cookieParser from 'cookie-parser';
+import express from 'express';
+
+import { errorHandler } from '@/middleware/error-handler.js';
+
+import { authRoutes } from './modules/auth/auth.routes.js';
 
 export function createApp(): express.Express {
-  const app = express()
+  const app = express();
 
-  app.use(express.json())
+  // *** Global middleware ***
+  app.use(express.json());
+  app.use(cookieParser());
 
+  // *** Health check ***
   app.get('/health', (_req, res) => {
-    res.status(200).json({ status: 'ok' })
-  })
+    res.status(200).json({ status: 'ok' });
+  });
 
-  return app
+  // *** Routes ***
+  app.use('/api/auth', authRoutes);
+
+  // *** Error handler (must be last) ***
+  app.use(errorHandler);
+
+  return app;
 }

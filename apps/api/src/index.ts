@@ -1,8 +1,10 @@
-import { createApp } from './app.js'
+import 'dotenv/config';
 
-const port = Number(process.env.PORT ?? 4000)
-const app = createApp()
+import { createApp } from './app.js';
+
+const port = Number(process.env.PORT ?? 4000);
+const app = createApp();
 
 app.listen(port, () => {
-  console.info(`[api] listening on :${port}`)
-})
+  console.info(`[api] listening on :${port}`);
+});
