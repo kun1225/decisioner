@@ -18,7 +18,45 @@
 | `/settings/privacy`     | Visibility settings                                                  |
 | `/settings/reminders`   | Reminder settings                                                    |
 
-## 8.2 Key Screen Contracts
+## 8.2 Component Architecture (Feature-based)
+
+採用 **Feature-based** 結構組織元件，避免 `src/components` 過度膨脹。
+
+```text
+src/
+├── components/          # Shared generic UI (buttons, inputs, layouts)
+│   ├── ui/              # shadcn primitives
+│   └── shared/          # App-wide shared components (e.g., UserAvatar)
+├── features/            # Domain-specific logic & UI
+│   ├── auth/            # Login, register, guard
+│   ├── workouts/        # Session editor, history list, set row
+│   ├── templates/       # Template builder, version history
+│   ├── progress/        # Charts, stats cards
+│   ├── social/          # Feed, friends list, crew management
+│   ├── dashboard/       # Dashboard widgets, check-in modal
+│   └── settings/        # Privacy, reminders form
+├── hooks/               # Global hooks (useAuth, useTheme)
+├── routes/              # TanStack Router definitions
+└── lib/                 # Utilities, API client
+```
+
+### 8.2.1 Feature Directory Structure Example
+
+```text
+src/features/workouts/
+├── components/
+│   ├── SessionEditor.tsx
+│   ├── SetRow.tsx
+│   └── ExercisePicker.tsx
+├── hooks/
+│   └── useSessionTimer.ts
+├── api/
+│   ├── queries.ts       # TanStack Query keys & fetchers
+│   └── mutations.ts
+└── types.ts             # Feature-specific types
+```
+
+## 8.3 Key Screen Contracts
 
 ### `/workouts/history`
 
@@ -43,6 +81,8 @@
 6. 送出變更後提示已更新歷史版本
 
 ### `/progress`
+
+> 詳細 Pro 圖表邏輯請參閱 **[12-pro-features.md](./12-pro-features.md)**
 
 1. 分頁/切換至少包含：
    - Last/Best（單動作）
@@ -72,7 +112,7 @@
 1. 顯示基本個人頁（頭像、簡介、近期訓練摘要）
 2. 受 `privacy_settings` 控制字段可見性
 
-## 8.3 Data Fetching Strategy
+## 8.4 Data Fetching Strategy
 
 1. 伺服器狀態：TanStack Query
 2. 路由資料：TanStack Router loader
@@ -96,7 +136,7 @@
 14. `['reminders', userId]`
 15. `['share-card-templates', planTier]`
 
-## 8.4 UX Guards
+## 8.5 UX Guards
 
 1. 編輯 completed session 前，提示將重算個人統計
 2. 朋友頁若無權限，明確顯示「對方未開放此資訊」
@@ -104,7 +144,7 @@
 4. crews 頁需顯示免費限制：每人最多 1 群、每群最多 2 人
 5. 分享卡片若使用 Pro 模板，免費版需顯示升級引導
 
-## 8.5 Frontend Stack Snapshot (`apps/web/package.json`)
+## 8.6 Frontend Stack Snapshot (`apps/web/package.json`)
 
 | Layer             | Packages                                                                                                    | Notes                                    |
 | ----------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------- |

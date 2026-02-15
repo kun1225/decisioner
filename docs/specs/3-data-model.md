@@ -70,7 +70,6 @@
                                     │ edited_by (FK -> users)│            │ sort_order              │
                                     │ snapshot_json          │            │ note                    │
                                     │ created_at             │            └────────────────────────┘
-                                    └──────────────────────┘
 
 ┌──────────────────────────┐      N:1      ┌──────────────────┐
 │ workout_session_revisions│───────────────│ workout_sessions │
@@ -113,11 +112,10 @@
 │      crews       │───────────│   crew_members   │───────────│      users       │
 ├──────────────────┤           ├──────────────────┤           └──────────────────┘
 │ id (PK)          │           │ id (PK)          │
-│ owner_id (FK)    │           │ crew_id (FK)     │
-│ name             │           │ user_id (FK)     │
-│ created_at       │           │ role enum        │
-└──────────────────┘           │ joined_at        │
-                               └──────────────────┘
+│ owner_id (FK)    │           │ user_id (FK)     │
+│ name             │           │ role enum        │
+│ created_at       │           │ joined_at        │
+└──────────────────┘           └──────────────────┘
 
 ┌──────────────────────┐   N:1   ┌──────────────────┐
 │   template_shares    │─────────│    templates     │
@@ -155,29 +153,16 @@
 
 ---
 
-## 3.1.1 Pro Analytics Extensions (Non-MVP)
+## 3.1.1 Pro Analytics Extensions (Paid)
 
-以下欄位屬於付費進階分析（Pro），不納入 MVP 免費版：
+> 完整欄位定義請參閱 **[12-pro-features.md](./12-pro-features.md)**
 
-1. `exercises`
-   - `primary_muscle_group`（enum, required）
-   - `secondary_muscle_groups`（array/json, optional）
-2. `workout_sets`
-   - `rpe`（numeric, nullable；建議範圍 1.0 ~ 10.0）
-   - `rir`（smallint, nullable；建議範圍 0 ~ 5）
-3. `exercise_session_metrics`
-   - `estimated_1rm`（numeric；由該 session 每個 exercise 的最佳組推導）
+涉及資料表：
+1. `exercises` (muscle groups)
+2. `workout_sets` (rpe/rir)
+3. `exercise_session_metrics` (estimated_1rm)
 4. `user_training_goals`
-   - `user_id`（FK -> users, unique）
-   - `adherence_mode`（enum，Phase 1 預設 `WEEKLY_TARGET`）
-   - `weekly_workout_target`（int, default 3）
-   - `created_at`, `updated_at`
 5. `user_gym_exercise_adjustments`
-   - `user_id`（FK -> users）
-   - `gym_id`（FK -> gyms）
-   - `exercise_id`（FK -> exercises）
-   - `adjustment_ratio`（numeric）
-   - `created_at`, `updated_at`
 
 ## 3.1.2 Social Growth Extensions
 
@@ -352,28 +337,6 @@
 輸入：`user_id` + `exercise_id` + optional `gym_id`
 輸出：上次紀錄 + 最佳紀錄（`max_weight`, `max_weight_reps`, `max_weight_set_index`）
 
-### e1RM Trend
-
-輸入：`user_id` + `exercise_id` + date range
-輸出：按 `session_date` 的 `estimated_1rm` 序列
-
-### Weekly Muscle Volume
-
-輸入：`user_id` + `muscle_group` + week range
-輸出：每週 `total_volume`
-
-### Weekly Adherence
-
-輸入：`user_id` + week range
-輸出：`weekly_completed_sessions`, `weekly_workout_target`, `adherence_rate`
-
-### Suggested Load (Simple Auto-conversion)
-
-輸入：`user_id` + `gym_id` + `exercise_id`
-輸出：`last_in_this_gym`, `last_in_other_gyms`, `suggested_weight`
-
-> 註：`e1RM Trend`、`Weekly Muscle Volume`、`Weekly Adherence`、`Suggested Load` 皆為 Pro 查詢契約。
-
 ### Dashboard Summary
 
 輸入：`user_id` + optional week range
@@ -388,3 +351,7 @@
 
 輸入：`viewer_user_id` + `target_user_id`
 輸出：受隱私設定裁切後的 `profile_basic`, `recent_workouts`, `dashboard_summary`
+
+### Pro Queries
+
+> e1RM Trend, Weekly Muscle Volume, Weekly Adherence, Suggested Load 皆為 Pro 查詢契約，詳見 **[12-pro-features.md](./12-pro-features.md)**

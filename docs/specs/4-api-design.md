@@ -91,9 +91,7 @@
 2. 編輯後狀態仍維持 `COMPLETED`
 3. 系統建立 `workout_session_revisions`，並重算 metrics/achievements
 
-## 4.8 Progress
-
-### MVP Free
+## 4.8 Progress (MVP Free)
 
 | Method | Endpoint                                                | Description          | Auth |
 | ------ | ------------------------------------------------------- | -------------------- | ---- |
@@ -101,82 +99,9 @@
 | GET    | `/api/progress/exercises/:exerciseId/charts/max-weight` | Max weight over time | Yes  |
 | GET    | `/api/progress/exercises/:exerciseId/charts/volume`     | Volume over time     | Yes  |
 
-### Pro (Paid)
-
-| Method | Endpoint                                                  | Description                     | Auth |
-| ------ | --------------------------------------------------------- | ------------------------------- | ---- |
-| GET    | `/api/progress/exercises/:exerciseId/charts/e1rm`         | Estimated 1RM over time (Epley) | Yes  |
-| GET    | `/api/progress/muscles/:muscleGroup/charts/weekly-volume` | Weekly volume by muscle group   | Yes  |
-| GET    | `/api/progress/adherence/weekly`                          | Weekly adherence summary        | Yes  |
-| GET    | `/api/progress/exercises/:exerciseId/suggested-load`      | Suggested load for current gym  | Yes  |
-
-### Progress query parameters
-
-1. Charts support `from`, `to` (ISO date, optional；預設最近 12 週)
-2. Exercise charts support optional `gymId`
-3. Weekly muscle volume supports optional `includeSecondary=true|false`（預設 `false`）
-
-### `GET /api/progress/exercises/:exerciseId/charts/e1rm` response (example)
-
-```json
-{
-  "items": [
-    { "sessionDate": "2026-02-01", "estimated1rm": 92.4 },
-    { "sessionDate": "2026-02-08", "estimated1rm": 95.6 }
-  ]
-}
-```
-
-### `GET /api/progress/muscles/:muscleGroup/charts/weekly-volume` response (example)
-
-```json
-{
-  "items": [
-    { "weekStart": "2026-02-02", "muscleGroup": "CHEST", "totalVolume": 10240 },
-    { "weekStart": "2026-02-09", "muscleGroup": "CHEST", "totalVolume": 11280 }
-  ]
-}
-```
-
-### `GET /api/progress/adherence/weekly` response (example)
-
-```json
-{
-  "items": [
-    {
-      "weekStart": "2026-02-02",
-      "completedSessions": 3,
-      "weeklyTarget": 4,
-      "adherenceRate": 0.75
-    }
-  ],
-  "mode": "WEEKLY_TARGET"
-}
-```
-
-### `GET /api/progress/exercises/:exerciseId/suggested-load` response (example)
-
-```json
-{
-  "gymId": "g_123",
-  "exerciseId": "e_456",
-  "lastInThisGym": { "weight": 80, "reps": 6, "sessionDate": "2026-02-01" },
-  "lastInOtherGyms": {
-    "weight": 85,
-    "reps": 6,
-    "gymId": "g_789",
-    "sessionDate": "2026-02-08"
-  },
-  "suggestedWeight": 82.5,
-  "source": "GYM_ADJUSTMENT"
-}
-```
-
-### Pro simple auto-conversion rule
-
-1. 只做 `user + gym + exercise` 層級換算
-2. 不支援器材層級（`gymEquipment`）換算規則
-3. 不提供自訂公式編輯，僅提供「記住此 gym 差異」的簡化體驗
+> **Pro (Paid)**
+>
+> 詳見 **[12-pro-features.md](./12-pro-features.md)** 包含 e1RM, Weekly Muscle Volume, Adherence, Suggested Load API endpoints.
 
 ## 4.9 Dashboard / Check-in / Feed (MVP)
 
@@ -202,21 +127,7 @@
 
 ## 4.10 Goals
 
-| Method | Endpoint              | Description                                    | Auth |
-| ------ | --------------------- | ---------------------------------------------- | ---- |
-| GET    | `/api/goals/training` | Get weekly training target + adherence mode    | Yes  |
-| PUT    | `/api/goals/training` | Update weekly training target + adherence mode | Yes  |
-
-> 僅 Pro 可用（MVP 免費版不開放）
-
-### `PUT /api/goals/training` body (example)
-
-```json
-{
-  "weeklyWorkoutTarget": 4,
-  "mode": "WEEKLY_TARGET"
-}
-```
+> 僅 Pro 可用，詳見 **[12-pro-features.md](./12-pro-features.md)**
 
 ## 4.11 Social (MVP Free-Lite)
 
