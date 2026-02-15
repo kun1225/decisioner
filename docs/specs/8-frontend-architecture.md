@@ -2,17 +2,21 @@
 
 ## 8.1 Route Structure
 
-| Route               | Purpose                                                              |
-| ------------------- | -------------------------------------------------------------------- |
-| `/`                 | Dashboard                                                            |
-| `/templates`        | Template list/create/edit                                            |
-| `/train/start`      | Select gym/template and start session                                |
-| `/train/$sessionId` | Training editor (in-progress + past edit)                            |
-| `/workouts/history` | Past workout list (date + template)                                  |
-| `/progress`         | Charts and records (MVP: max-weight/volume; Pro: advanced analytics) |
-| `/friends`          | Friend list and recent activity                                      |
-| `/crews`            | Crew management and shared templates                                 |
-| `/settings/privacy` | Visibility settings                                                  |
+| Route                   | Purpose                                                              |
+| ----------------------- | -------------------------------------------------------------------- |
+| `/`                     | Dashboard                                                            |
+| `/feed`                 | Friend activity feed and interactions                                |
+| `/templates`            | Template list/create/edit                                            |
+| `/train/start`          | Select gym/template and start session                                |
+| `/train/$sessionId`     | Training editor (in-progress + past edit)                            |
+| `/workouts/history`     | Past workout list (date + template)                                  |
+| `/checkins`             | Daily check-ins and streak history                                   |
+| `/progress`             | Charts and records (MVP: max-weight/volume; Pro: advanced analytics) |
+| `/friends`              | Friend list and recent activity                                      |
+| `/users/$userId`        | Basic profile page (privacy-scoped)                                  |
+| `/crews`                | Crew management and shared templates                                 |
+| `/settings/privacy`     | Visibility settings                                                  |
+| `/settings/reminders`   | Reminder settings                                                    |
 
 ## 8.2 Key Screen Contracts
 
@@ -51,6 +55,23 @@
    - RPE/RIR 相關分析
 3. 免費版顯示升級提示，不回傳 Pro 圖表資料
 
+### `/` (dashboard)
+
+1. 顯示本週訓練次數、目前 streak、最近打卡日期
+2. 顯示近期好友互動摘要（受隱私控制）
+3. 可快速入口到「立即打卡」與「分享卡片」
+
+### `/feed`
+
+1. 顯示好友 `WORKOUT_STARTED/COMPLETED/CHECKIN_CREATED` 事件流
+2. 卡片支援 like/unlike
+3. 被隱私限制的內容需降級顯示或隱藏
+
+### `/users/$userId`
+
+1. 顯示基本個人頁（頭像、簡介、近期訓練摘要）
+2. 受 `privacy_settings` 控制字段可見性
+
 ## 8.3 Data Fetching Strategy
 
 1. 伺服器狀態：TanStack Query
@@ -67,6 +88,13 @@
 6. `['progress-muscle-weekly-volume', muscleGroup, from, to, includeSecondary]`（Pro）
 7. `['progress-adherence-weekly', from, to]`（Pro）
 8. `['suggested-load', exerciseId, gymId]`（Pro）
+9. `['dashboard', userId, weekStart]`
+10. `['checkins', userId, cursor]`
+11. `['feed', userId, cursor]`
+12. `['feed-like-state', eventId]`
+13. `['user-profile', targetUserId, viewerUserId]`
+14. `['reminders', userId]`
+15. `['share-card-templates', planTier]`
 
 ## 8.4 UX Guards
 
@@ -74,6 +102,7 @@
 2. 朋友頁若無權限，明確顯示「對方未開放此資訊」
 3. template 編輯衝突時顯示版本衝突提示並要求重新載入
 4. crews 頁需顯示免費限制：每人最多 1 群、每群最多 2 人
+5. 分享卡片若使用 Pro 模板，免費版需顯示升級引導
 
 ## 8.5 Frontend Stack Snapshot (`apps/web/package.json`)
 

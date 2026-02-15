@@ -1,6 +1,6 @@
 # 揪Gym (JoyGym) - Architecture Index
 
-> **Version:** 2.2.1
+> **Version:** 2.3.0
 > **Status:** Proposed
 > **Last Updated:** 2026-02-15
 
@@ -22,10 +22,12 @@
 2. template 建立、共享與版本歷史
 3. 訓練中動態替換動作
 4. 上次/最佳表現與基礎圖表（max-weight / volume）
-5. 朋友協作與隱私控制（MVP Free-Lite：每人最多 1 群、每群最多 2 人）
-6. 可回看並編輯過往訓練（日期 + template）
-7. Pro 進階分析（e1RM / 肌群週訓練量 / adherence / RPE-RIR）
-8. 成就系統
+5. 可回看並編輯過往訓練（日期 + template）
+6. MVP 1 社交打卡層：打卡、儀表板、好友動態、愛心、提醒、分享卡
+7. 朋友協作與隱私控制（MVP Free-Lite：每人最多 1 群、每群最多 2 人）
+8. MVP 2：週挑戰、成就、好友排行
+9. Pro 進階分析（e1RM / 肌群週訓練量 / adherence / RPE-RIR）
+10. MVP 3（Pro）：個人頁客製化
 
 ---
 
@@ -49,9 +51,10 @@
 
 ## Change Log
 
-| Version | Date       | Changes                                                                                  |
-| ------- | ---------- | ---------------------------------------------------------------------------------------- |
-| 2.2.1   | 2026-02-15 | 同步 web 技術堆疊文件（TanStack Start + shadcn/Base UI + Tailwind v4）                   |
-| 2.2.0   | 2026-02-15 | 定義 MVP Free 與 Pro 邊界：進階分析改為 Pro；朋友健身改為 MVP Free-Lite（1 群/2 人上限） |
-| 2.1.0   | 2026-02-11 | 將細節下放 specs，ARCHITECTURE 改為精簡索引；新增「過往訓練可編輯」                      |
-| 2.0.0   | 2026-02-11 | 首版 Fitness 架構草案                                                                    |
+| Version | Date       | Changes                                                                                      |
+| ------- | ---------- | -------------------------------------------------------------------------------------------- |
+| 2.3.0   | 2026-02-15 | 新增 MVP 1/2/3 路線：打卡與好友動態、週挑戰/排行、Pro 個人頁客製化；保留既有 gym/charts 規格 |
+| 2.2.1   | 2026-02-15 | 同步 web 技術堆疊文件（TanStack Start + shadcn/Base UI + Tailwind v4）                       |
+| 2.2.0   | 2026-02-15 | 定義 MVP Free 與 Pro 邊界：進階分析改為 Pro；朋友健身改為 MVP Free-Lite（1 群/2 人上限）     |
+| 2.1.0   | 2026-02-11 | 將細節下放 specs，ARCHITECTURE 改為精簡索引；新增「過往訓練可編輯」                          |
+| 2.0.0   | 2026-02-11 | 首版 Fitness 架構草案                                                                        |

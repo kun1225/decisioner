@@ -4,6 +4,18 @@
 
 ---
 
+## MVP Delivery Order
+
+1. `MVP 1`（當前開發範圍）
+   - 打卡功能、好友動態（含愛心）、簡單個人頁、隱私設定、基礎提醒、分享卡片
+   - 保留既有 gym-aware 記錄、圖表、template/workout/history 編輯能力
+2. `MVP 2`
+   - 週挑戰、成就系統、好友排行
+3. `MVP 3`
+   - 個人頁客製化（付費）
+
+---
+
 ## Phase A: Auth API
 
 - [x] A.1: API Middleware

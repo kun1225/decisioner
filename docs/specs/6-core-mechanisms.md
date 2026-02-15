@@ -118,3 +118,46 @@
 2. Client 直傳 S3
 3. Client 呼叫完成 API 綁定 `exercise_media`
 4. API 僅保存 `object_key` + `public_url`
+
+## 6.12 Check-in and Streak Computation (MVP)
+
+1. `POST /api/checkins` 建立當日打卡（可選擇綁定 `session_id`）
+2. 每位使用者每天僅允許一筆打卡，重複建立採 upsert
+3. `streak_count` 計算規則：
+   - 若 `checkin_date = last_checkin_date + 1 day`，streak +1
+   - 若相同日期，維持原 streak
+   - 否則重置為 1
+4. Dashboard 從 `workout_checkins` + `workout_sessions` 聚合
+
+## 6.13 Friend Feed Event Pipeline (MVP)
+
+事件來源：
+
+1. `WORKOUT_STARTED`
+2. `WORKOUT_COMPLETED`
+3. `CHECKIN_CREATED`
+
+規則：
+
+1. 寫入 `activity_feed_events` 時即保存 `visibility_level`
+2. 讀取 feed 前再經過 `privacy guard` 二次過濾
+3. 支援 cursor-based pagination（`created_at`, `id`）
+
+## 6.14 Like Deduplication (MVP)
+
+1. `activity_likes(event_id, user_id)` unique，避免重複按愛心
+2. 取消愛心採 hard delete 即可
+3. like 計數由聚合查詢或快取維護
+
+## 6.15 Reminder Scheduler (MVP)
+
+1. `reminder_settings` 由使用者維護提醒規則（時區 + 時間）
+2. 排程器依 `enabled=true` + `timezone` 產生下一次觸發時間
+3. 提醒發送失敗需記錄重試，避免重複發送
+
+## 6.16 Share Card Rendering and Plan Guard (MVP)
+
+1. 分享卡渲染流程：載入模板 -> 套資料 -> 輸出圖片 URL
+2. 模板依 `share_card_templates.tier` 做方案授權檢查
+3. 免費版僅允許 `FREE` 模板；Pro 可用 `FREE + PRO`
+4. 不符合權限時回傳 `403 PLAN_REQUIRED`

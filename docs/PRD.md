@@ -1,6 +1,6 @@
-# Product Requirements Document: Decisioner Fitness
+# Product Requirements Document: 揪Gym (JoyGym)
 
-> **Version:** 2.3.0
+> **Version:** 2.4.0
 > **Status:** Draft
 > **Last Updated:** 2026-02-15
 > **Author:** Kun
@@ -9,12 +9,12 @@
 
 ## Executive Summary
 
-Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是：
+揪Gym (JoyGym) 是一個專注於社交與重量訓練記錄的 app，核心價值是：
 
-1. 針對不同健身房與器材差異，提供可比較紀錄
+1. 針對不同健身房與器材差異，提供可比較紀錄（gym-aware）
 2. 用 template 加速訓練，同時保留當日調整彈性
-3. 支援朋友協作與可控隱私
-4. 透過圖表與成就系統回饋長期進步
+3. 透過打卡、好友動態、愛心互動形成訓練回饋循環
+4. 透過儀表板、圖表與成就系統回饋長期進步
 
 ---
 
@@ -31,6 +31,7 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 1. 同動作在不同 gym 的器材差異下，重量不可直接比較
 2. 現場器材占用常需臨時換動作
 3. 長期缺乏可追蹤進步與社交激勵
+4. 沒有持續打卡與社交回饋時，訓練習慣難以維持
 
 ---
 
@@ -38,16 +39,20 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 ### Goals
 
-| Priority | Goal                                                                            |
-| -------- | ------------------------------------------------------------------------------- |
-| P0       | 支援跨健身房的訓練紀錄與比較                                                    |
-| P0       | 提供 template + 當日可替換/新增動作                                             |
-| P0       | 訓練中顯示同動作上次與最佳紀錄                                                  |
-| P0       | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯                            |
-| P0       | 朋友健身（免費版 Lite）：支援好友互動與群組，但限制每群最多 2 人、每人最多 1 群 |
-| P1       | 朋友訓練可見性可設定（預設好友可見）                                            |
-| P1       | 教練導向進步圖表（e1RM、肌群週訓練量、adherence、RPE/RIR）作為付費進階功能      |
-| P1       | 成就系統提升持續訓練動機                                                        |
+| Priority | Goal                                                                       |
+| -------- | -------------------------------------------------------------------------- |
+| P0       | 支援跨健身房的訓練紀錄與比較（保留既有 gym-aware 與 gym 差異建議）         |
+| P0       | 提供 template + 當日可替換/新增動作                                        |
+| P0       | 訓練中顯示同動作上次與最佳紀錄                                             |
+| P0       | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯                       |
+| P0       | 打卡功能（含連續天數）與首頁儀表板                                         |
+| P0       | 好友動態（顯示開始重訓）、簡單個人頁、按愛心互動                           |
+| P0       | 朋友訓練可見性可設定（預設好友可見）                                       |
+| P0       | 基礎提醒（固定時段提醒打卡/訓練）                                          |
+| P0       | 分享卡片（免費模板 + 付費進階模板）                                        |
+| P1       | 教練導向進步圖表（e1RM、肌群週訓練量、adherence、RPE/RIR）作為付費進階功能 |
+| P1       | 週挑戰、成就系統、好友排行以提升留存與互動                                 |
+| P1       | 個人頁客製化（付費）                                                       |
 
 ### Non-Goals (MVP)
 
@@ -68,13 +73,13 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 ## Product Scope
 
-### 1. Gym-aware 記錄
+### 1. Gym-aware 記錄（完整保留）
 
 1. 建立多個 gym
 2. 每次訓練綁定 gym
 3. 同動作可依 gym 分開比較
 
-### 2. Template 系統
+### 2. Template 系統（完整保留）
 
 1. 建立 template（胸/背/腿）
 2. 可加預設或自建動作
@@ -82,25 +87,37 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 4. 群組共享 template 支援多人編輯
 5. 所有編輯保留版本歷史
 
-### 3. 訓練 Session（當日可調整）
+### 3. 訓練 Session（當日可調整）（完整保留）
 
 1. 由 template 啟動訓練
 2. 現場可替換、刪除、新增動作
 3. 當日修改只影響 session，不直接覆蓋 template
 
-### 4. 即時歷史參考
+### 4. 即時歷史參考（完整保留）
 
 1. 顯示同動作上次紀錄
 2. 顯示同動作最佳紀錄（以最大重量為主，含該次數/組數）
 
-### 5. 訓練歷史與可編輯
+### 5. 訓練歷史與可編輯（完整保留）
 
 1. 使用者可查看自己的歷史訓練列表
 2. 列表顯示日期與 template
 3. 可點進訓練頁編輯過往紀錄
 4. 編輯後需保留 revision 並重算統計
 
-### 6. 朋友與隱私
+### 6. 打卡與儀表板（MVP 1 新增）
+
+1. 完成訓練後可快速打卡（可附簡短心得）
+2. 提供連續打卡天數（streak）
+3. 首頁儀表板顯示本週訓練次數、連續天數、最近活動摘要
+
+### 7. 好友動態與簡單個人頁（MVP 1 新增）
+
+1. 好友動態顯示「開始重訓/完成打卡」等事件
+2. 支援按愛心互動
+3. 提供簡易個人頁（頭像、簡介、最近訓練、基本儀表板）
+
+### 8. 朋友與隱私（MVP 1 擴充，保留既有）
 
 1. 可加好友、建立 crew
 2. 可查看朋友最近訓練日期與紀錄（受隱私控制）
@@ -108,7 +125,18 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 4. MVP 免費版限制：每位使用者最多建立 1 個 crew
 5. MVP 免費版限制：每個 crew 最多 2 位成員（owner + 1）
 
-### 7. 進步圖表
+### 9. 基礎提醒（MVP 1 新增）
+
+1. 可設定固定提醒時段（每日/每週）
+2. 可開關提醒與調整時區
+
+### 10. 分享卡片（MVP 1 新增，Free + Pro）
+
+1. 可將打卡/訓練成果產生分享卡片
+2. 免費版提供基礎模板
+3. Pro 提供進階模板與更多輸出選項
+
+### 11. 進步圖表（完整保留）
 
 1. 最大重量趨勢圖
    x 軸：時間
@@ -119,7 +147,7 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
    x 軸：時間
    y 軸：重量乘次數（volume）
 
-### 8. 付費進階分析（Pro）
+### 12. 付費進階分析（Pro，完整保留）
 
 1. e1RM 趨勢圖（Epley）
    x 軸：時間
@@ -139,60 +167,65 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
    - 使用者可啟用「記住此 gym 差異」，之後自動給出建議重量
    - 不提供器材層級管理，不提供複雜換算規則編輯
 
-### 9. 成就系統
+### 13. MVP 2: 週挑戰、成就、好友排行
 
-1. 第 X 次重訓
-2. 突破個人最大重量 X 次
-3. 與朋友一起重訓 X 次
+1. 週挑戰（可加入/退出）
+2. 成就系統（沿用既有事件，擴充展示與進度）
+3. 好友排行（可選擇加入，避免隱私壓力）
+
+### 14. MVP 3: 個人頁客製化（Pro）
+
+1. 自訂個人頁主題/封面
+2. 自訂展示區塊排序與置頂成果
 
 ---
 
 ## Functional Requirements
 
-### FR-01 動作與媒體
+### FR-01 動作與媒體（MVP）
 
 1. 系統提供預設動作庫
 2. 使用者可建立自訂動作
 3. 圖片上傳使用 S3 pre-signed URL
 
-### FR-02 Template 與版本歷史
+### FR-02 Template 與版本歷史（MVP）
 
 1. template 支援 CRUD
 2. crew 成員可共同編輯
 3. 每次編輯建立不可變版本快照
 
-### FR-03 Session 流程
+### FR-03 Session 流程（MVP）
 
 1. 開始訓練時建立 session 快照
 2. 可在 session 內替換/新增動作
 3. set 至少包含重量、次數、組序、時間
 
-### FR-04 上次/最佳查詢
+### FR-04 上次/最佳查詢（MVP）
 
 1. 上次：同動作最近一次完成 session
 2. 最佳：同動作最大重量最高的一組
 3. 同重量 tie-break：次數高者優先，再取較新時間
 
-### FR-05 歷史訓練可編輯
+### FR-05 歷史訓練可編輯（MVP）
 
 1. 提供歷史列表 API（日期、template）
 2. completed session 可進入訓練頁編輯
 3. 編輯後保留 revision
 4. 編輯後重算 metrics 與成就
 
-### FR-06 社交與隱私
+### FR-06 社交與隱私（MVP）
 
 1. 好友狀態至少含 pending/accepted/blocked
 2. 日期與詳細紀錄分開控制可見性
 3. 免費版限制：每位使用者最多建立 1 個 crew
 4. 免費版限制：每個 crew 最多 2 位成員（owner + 1）
 
-### FR-07 Progress Insights
+### FR-07 Progress Insights（MVP）
 
 1. MVP 免費版提供 max weight / volume 兩種單動作趨勢
 2. `last/best` 維持 MVP 免費能力
 
-### FR-08 Pro Analytics（付費）
+### FR-08 Pro Analytics（Pro）
 
 1. 提供 e1RM 趨勢圖（Epley）
 2. 提供按肌群的 weekly volume 趨勢
@@ -200,43 +233,75 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 4. 提供 RPE/RIR 記錄與分析
 5. 提供 gym-level 簡單自動換算（不含器材層級設定）
 
-### FR-09 成就引擎
+### FR-09 打卡與儀表板（MVP）
 
-1. 規則可配置
-2. 完成訓練或突破紀錄時觸發
-3. 發放需去重
+1. 打卡可綁定已完成 session，亦可建立輕量紀錄
+2. 系統維護連續打卡天數
+3. 儀表板提供本週訓練與互動摘要
+
+### FR-10 好友動態與互動（MVP）
+
+1. 動態至少包含 `WORKOUT_STARTED`、`WORKOUT_COMPLETED`、`CHECKIN_CREATED`
+2. 每則動態可按愛心（同使用者對同事件不可重複按）
+3. 個人頁需受隱私設定控制可見內容
+
+### FR-11 基礎提醒（MVP）
+
+1. 使用者可設定提醒頻率與時間
+2. 提醒可個別啟用/停用
+3. 系統依使用者時區排程
+
+### FR-12 分享卡片（MVP）
+
+1. 系統依打卡或訓練摘要生成分享卡
+2. 免費版僅可用基礎模板
+3. Pro 可用進階模板
+
+### FR-13 週挑戰與好友排行
+
+1. 週挑戰可定義目標（例如本週完成 X 次訓練）
+2. 成就系統沿用事件觸發並可顯示進度
+3. 排行榜支援好友範圍，且使用者可 opt-in/out
+
+### FR-14 個人頁客製化（Pro）
+
+1. 提供多個個人頁主題與展示區塊配置
+2. 客製化設定僅 Pro 可編輯
 
 ---
 
 ## Success Metrics (90 Days)
 
-1. WAU
+1. WAU（至少一次打卡或訓練紀錄）
 2. 每人每週完成 session 次數
-3. template 啟動訓練佔比
-4. 朋友互動率
-5. 30 日留存率
-6. Pro 轉換率（升級進階分析）
+3. 打卡連續 7 天達成率
+4. 朋友互動率（愛心/每位活躍用戶）
+5. 分享卡片使用率
+6. 30 日留存率
+7. Pro 轉換率（進階分析 + 進階分享 + 客製化）
 
 ---
 
 ## Milestones
 
-### Phase 1 (Core)
+### MVP 1（在現有基礎上新增社交打卡層）
 
-1. template + workout + history list + past edit
-2. last/best + 基礎 progress（max weight / volume）
-3. social lite（friends + crews）：每人最多 1 群、每群最多 2 人
+1. 保留並交付既有核心：template + workout + history edit + gym-aware + max/volume 圖表
+2. 新增打卡、連續天數、首頁儀表板
+3. 新增好友動態、愛心互動、簡單個人頁
+4. 新增隱私設定強化、基礎提醒
+5. 新增分享卡片（免費基礎模板 + Pro 進階模板）
 
-### Phase 2 (Social)
+### MVP 2（留存與社交競合）
 
-1. privacy controls 完整化
-2. social 配額/權限策略擴充（超出 Lite 限制）
+1. 週挑戰
+2. 成就系統展示與任務化
+3. 好友排行（opt-in）
 
-### Phase 3 (Insights)
+### MVP 3（付費深化）
 
-1. Pro analytics（e1RM / weekly muscle volume / adherence / RPE-RIR）
-2. charts + achievements
-3. 查詢與快取優化
+1. 個人頁客製化（Pro）
+2. 與既有 Pro analytics 整合成完整付費體驗
 
 ---
 
@@ -251,6 +316,9 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 3. 隱私洩漏
    對策：統一 privacy guard + integration tests
 
+4. 社交功能造成噪音或壓力
+   對策：動態節流、排行榜 opt-in、可細化隱私控制
+
 ---
 
 ## Confirmed Decisions
@@ -260,8 +328,9 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 3. 圖片儲存：S3
 4. 群組 template：允許成員編輯，保留歷史紀錄
 5. 使用者可查看並編輯過往訓練（經歷史列表進入）
-6. 進階分析（e1RM / weekly muscle volume / adherence / RPE-RIR）不納入 MVP，定位為 Pro
+6. 進階分析（e1RM / weekly muscle volume / adherence / RPE-RIR）定位為 Pro
 7. e1RM 公式固定採 `Epley`
 8. 肌群維度採中粒度 10 群（chest/back/shoulders/biceps/triceps/quads/hamstrings/glutes/calves/core），僅 Pro 啟用
 9. 朋友健身納入 MVP 免費版，但限制每位使用者最多建立 1 群、每群最多 2 人
 10. Pro 只提供簡單自動換算，不做更細的換算規則與分析
+11. 分享卡片採 Free + Pro 分層，模板數量由營運策略配置

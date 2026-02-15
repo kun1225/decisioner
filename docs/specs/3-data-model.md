@@ -179,6 +179,56 @@
    - `adjustment_ratio`（numeric）
    - `created_at`, `updated_at`
 
+## 3.1.2 Social Growth Extensions
+
+以下欄位為本次新增功能所需資料模型，既有 gym-aware 與圖表模型維持不變：
+
+1. `workout_checkins`
+   - `id`（PK）
+   - `user_id`（FK -> users）
+   - `session_id`（FK -> workout_sessions, nullable）
+   - `checkin_date`（date, indexed）
+   - `note`（varchar, nullable）
+   - `streak_count`（int）
+   - `created_at`
+2. `activity_feed_events`
+   - `id`（PK）
+   - `actor_user_id`（FK -> users）
+   - `event_type`（enum）
+   - `ref_session_id`（FK -> workout_sessions, nullable）
+   - `ref_checkin_id`（FK -> workout_checkins, nullable）
+   - `visibility_level`（enum）
+   - `created_at`
+3. `activity_likes`
+   - `id`（PK）
+   - `event_id`（FK -> activity_feed_events）
+   - `user_id`（FK -> users）
+   - `created_at`
+4. `reminder_settings`
+   - `id`（PK）
+   - `user_id`（FK -> users）
+   - `reminder_type`（enum）
+   - `schedule_type`（enum）
+   - `time_of_day`（varchar, HH:mm）
+   - `weekdays`（array/json, nullable）
+   - `timezone`（varchar）
+   - `enabled`（boolean）
+   - `created_at`, `updated_at`
+5. `share_card_templates`（system）
+   - `id`（PK）
+   - `code`（unique）
+   - `tier`（enum: FREE|PRO）
+   - `name`
+   - `is_active`
+6. `share_card_renders`
+   - `id`（PK）
+   - `user_id`（FK -> users）
+   - `template_id`（FK -> share_card_templates）
+   - `ref_type`（enum: CHECKIN|SESSION）
+   - `ref_id`（uuid）
+   - `image_url`
+   - `created_at`
+
 ---
 
 ## 3.2 Table Groups
@@ -207,6 +257,15 @@
 
 1. `user_training_goals`
 2. `user_gym_exercise_adjustments`
+
+### Engagement / Social Growth
+
+1. `workout_checkins`
+2. `activity_feed_events`
+3. `activity_likes`
+4. `reminder_settings`
+5. `share_card_templates`
+6. `share_card_renders`
 
 ### Social / Privacy
 
@@ -237,6 +296,9 @@
    - 每位使用者最多建立 1 個 `crew`
    - 每個 `crew` 最多 2 位成員
 9. `user_gym_exercise_adjustments(user_id, gym_id, exercise_id)` unique（Pro）
+10. `workout_checkins(user_id, checkin_date)` unique（每日最多一筆打卡）
+11. `activity_likes(event_id, user_id)` unique（每人對同事件最多一個 like）
+12. `reminder_settings(user_id, reminder_type)` unique
 
 ---
 
@@ -253,6 +315,11 @@
 9. `exercises(primary_muscle_group)`（Pro）
 10. `exercise_session_metrics(user_id, exercise_id, estimated_1rm desc)`（Pro）
 11. `user_gym_exercise_adjustments(user_id, gym_id, exercise_id)`（Pro）
+12. `workout_checkins(user_id, checkin_date desc)`
+13. `activity_feed_events(actor_user_id, created_at desc)`
+14. `activity_feed_events(created_at desc)`
+15. `activity_likes(event_id)`
+16. `share_card_renders(user_id, created_at desc)`
 
 ---
 
@@ -267,6 +334,9 @@
 7. `media_status`: `UPLOADING | READY | FAILED`
 8. `muscle_group`: `CHEST | BACK | SHOULDERS | BICEPS | TRICEPS | QUADS | HAMSTRINGS | GLUTES | CALVES | CORE`（Pro）
 9. `adherence_mode`: `WEEKLY_TARGET | TEMPLATE_SCHEDULE`（Pro）
+10. `activity_event_type`: `WORKOUT_STARTED | WORKOUT_COMPLETED | CHECKIN_CREATED | ACHIEVEMENT_UNLOCKED`
+11. `reminder_type`: `WORKOUT_CHECKIN | WORKOUT_PLAN`
+12. `reminder_schedule_type`: `DAILY | WEEKLY`
 
 ---
 
@@ -303,3 +373,18 @@
 輸出：`last_in_this_gym`, `last_in_other_gyms`, `suggested_weight`
 
 > 註：`e1RM Trend`、`Weekly Muscle Volume`、`Weekly Adherence`、`Suggested Load` 皆為 Pro 查詢契約。
+
+### Dashboard Summary
+
+輸入：`user_id` + optional week range
+輸出：`weekly_workout_count`, `current_streak`, `last_checkin_date`, `recent_feed_events`
+
+### Friend Feed
+
+輸入：`user_id` + pagination
+輸出：`event_id`, `actor`, `event_type`, `summary`, `liked_by_me`, `like_count`, `created_at`
+
+### Public Profile View
+
+輸入：`viewer_user_id` + `target_user_id`
+輸出：受隱私設定裁切後的 `profile_basic`, `recent_workouts`, `dashboard_summary`

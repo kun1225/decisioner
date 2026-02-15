@@ -34,10 +34,10 @@
 
 ## 4.5 Gyms
 
-| Method | Endpoint                      | Description      | Auth |
-| ------ | ----------------------------- | ---------------- | ---- |
-| POST   | `/api/gyms`                   | Create gym       | Yes  |
-| GET    | `/api/gyms`                   | List own gyms    | Yes  |
+| Method | Endpoint    | Description   | Auth |
+| ------ | ----------- | ------------- | ---- |
+| POST   | `/api/gyms` | Create gym    | Yes  |
+| GET    | `/api/gyms` | List own gyms | Yes  |
 
 ## 4.6 Templates
 
@@ -55,18 +55,18 @@
 
 ## 4.7 Workouts
 
-| Method | Endpoint                                 | Description                                    | Auth |
-| ------ | ---------------------------------------- | ---------------------------------------------- | ---- |
-| POST   | `/api/workouts/start`                    | Start session from template/manual             | Yes  |
-| GET    | `/api/workouts/:sessionId`               | Session detail (editor source)                 | Yes  |
-| PATCH  | `/api/workouts/:sessionId`               | Update session meta/date                       | Yes  |
-| PATCH  | `/api/workouts/:sessionId/items/:itemId` | Replace/update session item                    | Yes  |
-| POST   | `/api/workouts/:sessionId/items`         | Add manual item                                | Yes  |
-| POST   | `/api/workouts/:sessionId/sets`          | Add set（MVP: weight/reps/unit；Pro 可含 rpe/rir） | Yes  |
+| Method | Endpoint                                 | Description                                         | Auth |
+| ------ | ---------------------------------------- | --------------------------------------------------- | ---- |
+| POST   | `/api/workouts/start`                    | Start session from template/manual                  | Yes  |
+| GET    | `/api/workouts/:sessionId`               | Session detail (editor source)                      | Yes  |
+| PATCH  | `/api/workouts/:sessionId`               | Update session meta/date                            | Yes  |
+| PATCH  | `/api/workouts/:sessionId/items/:itemId` | Replace/update session item                         | Yes  |
+| POST   | `/api/workouts/:sessionId/items`         | Add manual item                                     | Yes  |
+| POST   | `/api/workouts/:sessionId/sets`          | Add set（MVP: weight/reps/unit；Pro 可含 rpe/rir）  | Yes  |
 | PATCH  | `/api/workouts/:sessionId/sets/:setId`   | Edit set（MVP: weight/reps/unit；Pro 可含 rpe/rir） | Yes  |
-| DELETE | `/api/workouts/:sessionId/sets/:setId`   | Delete set                                     | Yes  |
-| POST   | `/api/workouts/:sessionId/finish`        | Mark session completed                         | Yes  |
-| GET    | `/api/workouts/history`                  | List past sessions (date/template)             | Yes  |
+| DELETE | `/api/workouts/:sessionId/sets/:setId`   | Delete set                                          | Yes  |
+| POST   | `/api/workouts/:sessionId/finish`        | Mark session completed                              | Yes  |
+| GET    | `/api/workouts/history`                  | List past sessions (date/template)                  | Yes  |
 
 ### `GET /api/workouts/history` response (example)
 
@@ -95,11 +95,11 @@
 
 ### MVP Free
 
-| Method | Endpoint                                                  | Description                     | Auth |
-| ------ | --------------------------------------------------------- | ------------------------------- | ---- |
-| GET    | `/api/progress/exercises/:exerciseId/last-best`           | Last + best summary             | Yes  |
-| GET    | `/api/progress/exercises/:exerciseId/charts/max-weight`   | Max weight over time            | Yes  |
-| GET    | `/api/progress/exercises/:exerciseId/charts/volume`       | Volume over time                | Yes  |
+| Method | Endpoint                                                | Description          | Auth |
+| ------ | ------------------------------------------------------- | -------------------- | ---- |
+| GET    | `/api/progress/exercises/:exerciseId/last-best`         | Last + best summary  | Yes  |
+| GET    | `/api/progress/exercises/:exerciseId/charts/max-weight` | Max weight over time | Yes  |
+| GET    | `/api/progress/exercises/:exerciseId/charts/volume`     | Volume over time     | Yes  |
 
 ### Pro (Paid)
 
@@ -161,7 +161,12 @@
   "gymId": "g_123",
   "exerciseId": "e_456",
   "lastInThisGym": { "weight": 80, "reps": 6, "sessionDate": "2026-02-01" },
-  "lastInOtherGyms": { "weight": 85, "reps": 6, "gymId": "g_789", "sessionDate": "2026-02-08" },
+  "lastInOtherGyms": {
+    "weight": 85,
+    "reps": 6,
+    "gymId": "g_789",
+    "sessionDate": "2026-02-08"
+  },
   "suggestedWeight": 82.5,
   "source": "GYM_ADJUSTMENT"
 }
@@ -173,7 +178,29 @@
 2. 不支援器材層級（`gymEquipment`）換算規則
 3. 不提供自訂公式編輯，僅提供「記住此 gym 差異」的簡化體驗
 
-## 4.9 Goals
+## 4.9 Dashboard / Check-in / Feed (MVP)
+
+| Method | Endpoint                     | Description                                     | Auth |
+| ------ | ---------------------------- | ----------------------------------------------- | ---- |
+| GET    | `/api/dashboard`             | Dashboard summary（週訓練、streak、近期活動）   | Yes  |
+| POST   | `/api/checkins`              | Create daily check-in（可綁 session）           | Yes  |
+| GET    | `/api/checkins`              | List own check-ins                              | Yes  |
+| GET    | `/api/feed`                  | Friend activity feed                            | Yes  |
+| POST   | `/api/feed/:eventId/likes`   | Like an activity event                          | Yes  |
+| DELETE | `/api/feed/:eventId/likes`   | Unlike an activity event                        | Yes  |
+| GET    | `/api/users/:userId/profile` | Basic profile page data（受隱私設定）           | Yes  |
+| GET    | `/api/reminders`             | List reminder settings                          | Yes  |
+| PUT    | `/api/reminders/:reminderId` | Update reminder settings                        | Yes  |
+| GET    | `/api/share-cards/templates` | List share card templates（依方案回傳可用模板） | Yes  |
+| POST   | `/api/share-cards/render`    | Render share card image                         | Yes  |
+
+### Share card entitlement rule
+
+1. 免費版僅可使用 `tier=FREE` 模板
+2. Pro 可使用 `tier=FREE|PRO` 模板
+3. 非法模板使用回傳 `403 PLAN_REQUIRED`
+
+## 4.10 Goals
 
 | Method | Endpoint              | Description                                    | Auth |
 | ------ | --------------------- | ---------------------------------------------- | ---- |
@@ -191,7 +218,7 @@
 }
 ```
 
-## 4.10 Social (MVP Free-Lite)
+## 4.11 Social (MVP Free-Lite)
 
 | Method | Endpoint                                | Description           | Auth |
 | ------ | --------------------------------------- | --------------------- | ---- |
@@ -208,20 +235,20 @@
 2. 每個 crew 最多 2 位成員（owner + 1）
 3. 超限回傳 `422`（`FREE_TIER_LIMIT_EXCEEDED`）
 
-## 4.11 Privacy
+## 4.12 Privacy
 
 | Method | Endpoint                | Description                        | Auth |
 | ------ | ----------------------- | ---------------------------------- | ---- |
 | PUT    | `/api/privacy-settings` | Update workout visibility settings | Yes  |
 
-## 4.12 Achievements
+## 4.13 Achievements
 
 | Method | Endpoint                     | Description          | Auth |
 | ------ | ---------------------------- | -------------------- | ---- |
 | GET    | `/api/achievements`          | List achievements    | Yes  |
 | GET    | `/api/achievements/timeline` | Achievement timeline | Yes  |
 
-## 4.13 Error Contract
+## 4.14 Error Contract
 
 | HTTP | Meaning                               |
 | ---- | ------------------------------------- |

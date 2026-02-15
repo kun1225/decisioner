@@ -50,3 +50,16 @@ ARCHIVED --restore--> ACTIVE
 1. 每位使用者最多建立 1 個 crew
 2. 每個 crew 最多 2 位成員（owner + 1）
 3. 超出限制時拒絕狀態轉移，回傳 `422 FREE_TIER_LIMIT_EXCEEDED`
+
+## 5.5 Check-in State (MVP)
+
+```text
+NONE --create checkin--> CHECKED_IN
+CHECKED_IN --next day--> NONE
+```
+
+| Current    | Action         | Next       | Notes                            |
+| ---------- | -------------- | ---------- | -------------------------------- |
+| NONE       | Create checkin | CHECKED_IN | 同日首次打卡成功                 |
+| CHECKED_IN | Create checkin | CHECKED_IN | 同日重複請求不新增（idempotent） |
+| CHECKED_IN | Day rollover   | NONE       | 進入新的一天                     |
