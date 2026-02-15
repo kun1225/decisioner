@@ -43,7 +43,6 @@
                      │ created_at       │   │ note              │  │ id (PK)               │
                      └─────────────────┘   └──────────────────┘  │ session_id (FK)        │
                                                                   │ exercise_id (FK)       │
-                                                                  │ gym_equipment_id (FK?) │
                                                                   │ origin_type enum       │
                                                                   │ sort_order             │
                                                                   └──────────────────────┘
@@ -173,6 +172,12 @@
    - `adherence_mode`（enum，Phase 1 預設 `WEEKLY_TARGET`）
    - `weekly_workout_target`（int, default 3）
    - `created_at`, `updated_at`
+5. `user_gym_exercise_adjustments`
+   - `user_id`（FK -> users）
+   - `gym_id`（FK -> gyms）
+   - `exercise_id`（FK -> exercises）
+   - `adjustment_ratio`（numeric）
+   - `created_at`, `updated_at`
 
 ---
 
@@ -186,22 +191,22 @@
 ### Workout Core (MVP Free)
 
 1. `gyms`
-2. `gym_equipments`
-3. `exercises`
-4. `exercise_media`
-5. `templates`
-6. `template_items`
-7. `template_versions`
-8. `template_version_items`
-9. `workout_sessions`
-10. `workout_session_items`
-11. `workout_sets`
-12. `workout_session_revisions`
-13. `exercise_session_metrics`
+2. `exercises`
+3. `exercise_media`
+4. `templates`
+5. `template_items`
+6. `template_versions`
+7. `template_version_items`
+8. `workout_sessions`
+9. `workout_session_items`
+10. `workout_sets`
+11. `workout_session_revisions`
+12. `exercise_session_metrics`
 
 ### Pro Analytics (Paid)
 
 1. `user_training_goals`
+2. `user_gym_exercise_adjustments`
 
 ### Social / Privacy
 
@@ -231,6 +236,7 @@
 8. 免費版社交限制由服務層控管：
    - 每位使用者最多建立 1 個 `crew`
    - 每個 `crew` 最多 2 位成員
+9. `user_gym_exercise_adjustments(user_id, gym_id, exercise_id)` unique（Pro）
 
 ---
 
@@ -246,6 +252,7 @@
 8. `workout_session_items(exercise_id)`
 9. `exercises(primary_muscle_group)`（Pro）
 10. `exercise_session_metrics(user_id, exercise_id, estimated_1rm desc)`（Pro）
+11. `user_gym_exercise_adjustments(user_id, gym_id, exercise_id)`（Pro）
 
 ---
 
@@ -290,4 +297,9 @@
 輸入：`user_id` + week range
 輸出：`weekly_completed_sessions`, `weekly_workout_target`, `adherence_rate`
 
-> 註：`e1RM Trend`、`Weekly Muscle Volume`、`Weekly Adherence` 皆為 Pro 查詢契約。
+### Suggested Load (Simple Auto-conversion)
+
+輸入：`user_id` + `gym_id` + `exercise_id`
+輸出：`last_in_this_gym`, `last_in_other_gyms`, `suggested_weight`
+
+> 註：`e1RM Trend`、`Weekly Muscle Volume`、`Weekly Adherence`、`Suggested Load` 皆為 Pro 查詢契約。

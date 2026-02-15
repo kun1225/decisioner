@@ -37,8 +37,7 @@
 | Method | Endpoint                      | Description      | Auth |
 | ------ | ----------------------------- | ---------------- | ---- |
 | POST   | `/api/gyms`                   | Create gym       | Yes  |
-| POST   | `/api/gyms/:gymId/equipments` | Create equipment | Yes  |
-| GET    | `/api/gyms/:gymId/equipments` | List equipment   | Yes  |
+| GET    | `/api/gyms`                   | List own gyms    | Yes  |
 
 ## 4.6 Templates
 
@@ -109,6 +108,7 @@
 | GET    | `/api/progress/exercises/:exerciseId/charts/e1rm`         | Estimated 1RM over time (Epley) | Yes  |
 | GET    | `/api/progress/muscles/:muscleGroup/charts/weekly-volume` | Weekly volume by muscle group   | Yes  |
 | GET    | `/api/progress/adherence/weekly`                          | Weekly adherence summary        | Yes  |
+| GET    | `/api/progress/exercises/:exerciseId/suggested-load`      | Suggested load for current gym  | Yes  |
 
 ### Progress query parameters
 
@@ -153,6 +153,25 @@
   "mode": "WEEKLY_TARGET"
 }
 ```
+
+### `GET /api/progress/exercises/:exerciseId/suggested-load` response (example)
+
+```json
+{
+  "gymId": "g_123",
+  "exerciseId": "e_456",
+  "lastInThisGym": { "weight": 80, "reps": 6, "sessionDate": "2026-02-01" },
+  "lastInOtherGyms": { "weight": 85, "reps": 6, "gymId": "g_789", "sessionDate": "2026-02-08" },
+  "suggestedWeight": 82.5,
+  "source": "GYM_ADJUSTMENT"
+}
+```
+
+### Pro simple auto-conversion rule
+
+1. 只做 `user + gym + exercise` 層級換算
+2. 不支援器材層級（`gymEquipment`）換算規則
+3. 不提供自訂公式編輯，僅提供「記住此 gym 差異」的簡化體驗
 
 ## 4.9 Goals
 

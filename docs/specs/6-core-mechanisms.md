@@ -80,6 +80,11 @@
    - `completed_sessions` 只計 `session_status = COMPLETED`
    - 目標值來源：`user_training_goals.weekly_workout_target`
    - mode 預設 `WEEKLY_TARGET`，保留 `TEMPLATE_SCHEDULE` 擴充點
+5. Simple Auto-conversion
+   - 以 `user + gym + exercise` 維度保存簡單調整係數（`adjustment_ratio`）
+   - 第一次在新 gym 訓練時，先顯示其他 gym 的最近紀錄
+   - 使用者啟用「記住此 gym 差異」後更新該維度調整係數
+   - 不做器材層級換算，不提供複雜公式編輯
 
 ## 6.8 Free-Lite Social Limits
 

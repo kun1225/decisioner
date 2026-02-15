@@ -35,7 +35,8 @@
 2. `COMPLETED`：顯示「編輯歷史訓練」模式（仍可編輯）
 3. set 編輯欄位包含：`weight`, `reps`, `unit`
 4. Pro 可開啟進階欄位：`rpe`, `rir`
-5. 送出變更後提示已更新歷史版本
+5. Pro 顯示 `suggested load` 與「記住此 gym 差異」切換
+6. 送出變更後提示已更新歷史版本
 
 ### `/progress`
 
@@ -65,6 +66,7 @@
 5. `['progress-e1rm', exerciseId, from, to, gymId]`（Pro）
 6. `['progress-muscle-weekly-volume', muscleGroup, from, to, includeSecondary]`（Pro）
 7. `['progress-adherence-weekly', from, to]`（Pro）
+8. `['suggested-load', exerciseId, gymId]`（Pro）
 
 ## 8.4 UX Guards
 

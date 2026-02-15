@@ -28,9 +28,8 @@
   - [x] `sessionItemOrigin`: TEMPLATE | REPLACED | MANUAL
   - [x] `weightUnit`: KG | LB
   - [x] Move `authProvider` from user.ts to enums.ts
-- [ ] B.2: Gyms & Equipment (`gym.ts`)
+- [ ] B.2: Gyms (`gym.ts`)
   - [ ] `gyms` table
-  - [ ] `gymEquipments` table
 - [ ] B.3: Exercises (`exercise.ts`)
   - [ ] `exercises` table (with soft delete)
 - [ ] B.4: Templates (`template.ts`)
@@ -71,7 +70,7 @@
   - [ ] `gyms.service.ts`
   - [ ] `gyms.controller.ts`
   - [ ] `gyms.routes.ts`
-  - [ ] Endpoints: POST /, POST /:gymId/equipments, GET /:gymId/equipments
+  - [ ] Endpoints: POST /, GET /
 - [ ] D.3: Unit tests
   - [ ] `exercises.service.test.ts`
   - [ ] `gyms.service.test.ts`
@@ -93,7 +92,7 @@
   - [ ] Duplicate email → 409
   - [ ] Refresh token reuse detection → family revoked
 - [ ] D+.3: Exercises & Gyms integration tests
-  - [ ] Create gym → create equipment → list equipments
+  - [ ] Create gym → list gyms
   - [ ] Create custom exercise → get by id
   - [ ] List preset exercises
 

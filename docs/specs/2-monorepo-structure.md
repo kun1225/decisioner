@@ -160,8 +160,7 @@ decisioner/
 ### Gyms
 
 1. `POST /api/gyms`
-2. `POST /api/gyms/:gymId/equipments`
-3. `GET /api/gyms/:gymId/equipments`
+2. `GET /api/gyms`
 
 ### Templates
 
@@ -196,6 +195,7 @@ decisioner/
 4. `GET /api/progress/exercises/:exerciseId/charts/e1rm` (Pro)
 5. `GET /api/progress/muscles/:muscleGroup/charts/weekly-volume` (Pro)
 6. `GET /api/progress/adherence/weekly` (Pro)
+7. `GET /api/progress/exercises/:exerciseId/suggested-load` (Pro, simple auto-conversion)
 
 ### Goals
 

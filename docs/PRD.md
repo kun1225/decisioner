@@ -20,7 +20,7 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 ## Why Now
 
-1. 既有重訓 app 對跨 gym/equipment 差異支援不足
+1. 既有重訓 app 對跨 gym 差異支援不足
 2. 使用者已明確有共享課表與社交訓練需求
 3. 現有專案基礎可快速落地 MVP
 
@@ -28,7 +28,7 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 ## Problem Statement
 
-1. 同動作在不同 gym/equipment 重量不可直接比較
+1. 同動作在不同 gym 的器材差異下，重量不可直接比較
 2. 現場器材占用常需臨時換動作
 3. 長期缺乏可追蹤進步與社交激勵
 
@@ -38,16 +38,16 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 ### Goals
 
-| Priority | Goal                                                                  |
-| -------- | --------------------------------------------------------------------- |
-| P0       | 支援跨健身房/器材的訓練紀錄與比較                                     |
-| P0       | 提供 template + 當日可替換/新增動作                                   |
-| P0       | 訓練中顯示同動作上次與最佳紀錄                                        |
-| P0       | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯                  |
+| Priority | Goal                                                                            |
+| -------- | ------------------------------------------------------------------------------- |
+| P0       | 支援跨健身房的訓練紀錄與比較                                                    |
+| P0       | 提供 template + 當日可替換/新增動作                                             |
+| P0       | 訓練中顯示同動作上次與最佳紀錄                                                  |
+| P0       | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯                            |
 | P0       | 朋友健身（免費版 Lite）：支援好友互動與群組，但限制每群最多 2 人、每人最多 1 群 |
-| P1       | 朋友訓練可見性可設定（預設好友可見）                                  |
-| P1       | 教練導向進步圖表（e1RM、肌群週訓練量、adherence、RPE/RIR）作為付費進階功能 |
-| P1       | 成就系統提升持續訓練動機                                              |
+| P1       | 朋友訓練可見性可設定（預設好友可見）                                            |
+| P1       | 教練導向進步圖表（e1RM、肌群週訓練量、adherence、RPE/RIR）作為付費進階功能      |
+| P1       | 成就系統提升持續訓練動機                                                        |
 
 ### Non-Goals (MVP)
 
@@ -68,11 +68,11 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 ## Product Scope
 
-### 1. Gym / Equipment-aware 記錄
+### 1. Gym-aware 記錄
 
-1. 建立多個 gym 與 equipment
-2. 每次訓練綁定 gym + equipment
-3. 同動作可依 gym/equipment 分開比較
+1. 建立多個 gym
+2. 每次訓練綁定 gym
+3. 同動作可依 gym 分開比較
 
 ### 2. Template 系統
 
@@ -134,6 +134,10 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
    y 軸：完成率（completed sessions / weekly target）
 
 4. 每組可選填 RPE 與 RIR（記錄與分析皆為 Pro）
+5. 簡單自動換算：
+   - 第一次在新 gym 練某動作時，顯示其他 gym 的歷史紀錄作為參考
+   - 使用者可啟用「記住此 gym 差異」，之後自動給出建議重量
+   - 不提供器材層級管理，不提供複雜換算規則編輯
 
 ### 9. 成就系統
 
@@ -194,6 +198,7 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 2. 提供按肌群的 weekly volume 趨勢
 3. 提供 weekly adherence（completed / target）
 4. 提供 RPE/RIR 記錄與分析
+5. 提供 gym-level 簡單自動換算（不含器材層級設定）
 
 ### FR-09 成就引擎
 
@@ -259,3 +264,4 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 7. e1RM 公式固定採 `Epley`
 8. 肌群維度採中粒度 10 群（chest/back/shoulders/biceps/triceps/quads/hamstrings/glutes/calves/core），僅 Pro 啟用
 9. 朋友健身納入 MVP 免費版，但限制每位使用者最多建立 1 群、每群最多 2 人
+10. Pro 只提供簡單自動換算，不做更細的換算規則與分析
