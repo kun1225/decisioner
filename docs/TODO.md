@@ -71,6 +71,30 @@
   - [ ] `gyms.controller.ts`
   - [ ] `gyms.routes.ts`
   - [ ] Endpoints: POST /, POST /:gymId/equipments, GET /:gymId/equipments
+- [ ] D.3: Unit tests
+  - [ ] `exercises.service.test.ts`
+  - [ ] `gyms.service.test.ts`
+
+---
+
+## Phase D+: Integration Test Infrastructure
+
+> 在第一組 API module 完成後建立，後續 Phase 共用。
+
+- [ ] D+.1: Test infrastructure
+  - [ ] Test DB setup (separate `decisioner_test` database)
+  - [ ] Migration runner for test DB
+  - [ ] `createTestApp()` helper (in-process supertest)
+  - [ ] DB cleanup between tests (truncate all tables)
+  - [ ] Auth helper (`registerAndLogin()` → returns accessToken + cookie)
+- [ ] D+.2: Auth integration tests
+  - [ ] Register → login → me → refresh → logout → refresh fails
+  - [ ] Duplicate email → 409
+  - [ ] Refresh token reuse detection → family revoked
+- [ ] D+.3: Exercises & Gyms integration tests
+  - [ ] Create gym → create equipment → list equipments
+  - [ ] Create custom exercise → get by id
+  - [ ] List preset exercises
 
 ---
 
@@ -81,6 +105,9 @@
   - [ ] `templates.controller.ts`
   - [ ] `templates.routes.ts`
   - [ ] 9 endpoints (CRUD + items + versions, no share in Phase 1)
+- [ ] E.T: Unit + integration tests
+  - [ ] `templates.service.test.ts`
+  - [ ] Integration: CRUD + items + versioning flow
 
 ---
 
@@ -91,6 +118,16 @@
   - [ ] `workouts.controller.ts`
   - [ ] `workouts.routes.ts`
   - [ ] 10 endpoints
+- [ ] F.T: Unit + integration tests
+  - [ ] `workouts.service.test.ts`
+  - [ ] Integration: full workout flow (spec 11)
+    - [ ] Start session from template → verify snapshot isolation
+    - [ ] Replace exercise mid-session (origin_type = REPLACED)
+    - [ ] Add sets → finish session → verify metrics computed
+  - [ ] Integration: history & past edit
+    - [ ] List history → verify session appears
+    - [ ] Edit completed session → verify revision created
+    - [ ] Verify metrics recomputed after edit
 
 ---
 
@@ -101,6 +138,10 @@
   - [ ] `progress.controller.ts`
   - [ ] `progress.routes.ts`
   - [ ] 3 endpoints
+- [ ] G.T: Unit + integration tests
+  - [ ] `progress.service.test.ts`
+  - [ ] Integration: last/best returns correct data after workout
+  - [ ] Integration: chart data correct after multiple sessions
 
 ---
 
@@ -121,12 +162,26 @@
 
 ---
 
+## Phase H+: Playwright E2E Infrastructure
+
+- [ ] H+.1: Playwright setup + config
+- [ ] H+.2: Test DB seed script (preset exercises, test user)
+- [ ] H+.3: API server + web dev server startup in `globalSetup`
+- [ ] H+.4: Auth fixture (`authenticatedPage` — pre-logged-in browser context)
+
+---
+
 ## Phase I: Frontend — Auth Pages
 
 - [ ] I.1: `/login` — email/password form, call `POST /api/auth/login`
 - [ ] I.2: `/register` — registration form with password confirmation
 - [ ] I.3: Redirect to `/` after successful auth
 - [ ] I.4: Logout button in app shell, call `POST /api/auth/logout`
+- [ ] I.E2E: Auth journey (Playwright)
+  - [ ] Register → redirect to dashboard
+  - [ ] Login → redirect to dashboard
+  - [ ] Visit protected page without auth → redirect to login
+  - [ ] Logout → redirect to login
 
 ---
 
@@ -136,6 +191,9 @@
 - [ ] J.2: `/templates/new` — create template form
 - [ ] J.3: `/templates/$templateId` — edit template (add/remove/reorder items)
 - [ ] J.4: `/templates/$templateId/versions` — version history timeline
+- [ ] J.E2E: Template journey (Playwright)
+  - [ ] Create template → add exercises → save → appears in list
+  - [ ] Edit template → verify version history updated
 
 ---
 
@@ -150,6 +208,10 @@
 - [ ] K.3: Completed session edit mode (same route, different UX)
   - [ ] Revision warning prompt
   - [ ] Save triggers revision + metrics recompute
+- [ ] K.E2E: Training journey (Playwright)
+  - [ ] Start session → log sets → finish → appears in history
+  - [ ] Replace exercise mid-session → verify UI updates
+  - [ ] Last/best display shows correct data during training
 
 ---
 
@@ -162,6 +224,10 @@
   - [ ] Max weight trend chart (x: date, y: weight)
   - [ ] Volume trend chart (x: date, y: volume)
   - [ ] Exercise selector
+- [ ] L.E2E: History & progress journey (Playwright)
+  - [ ] View history list → click into past session
+  - [ ] Edit past session → confirm revision warning → save
+  - [ ] Progress charts render with data
 
 ---
 
