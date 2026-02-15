@@ -2,13 +2,14 @@
   "name": "@repo/database",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "exports": {
     "./*": "./src/*.ts"
   },
   "scripts": {
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio",
+    "db:generate": "node --import tsx ./node_modules/drizzle-kit/bin.cjs generate --config=drizzle.config.ts",
+    "db:migrate": "node --import tsx ./node_modules/drizzle-kit/bin.cjs migrate --config=drizzle.config.ts",
+    "db:studio": "node --import tsx ./node_modules/drizzle-kit/bin.cjs studio --config=drizzle.config.ts",
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

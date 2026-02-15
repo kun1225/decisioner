@@ -1,6 +1,6 @@
-import { index, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
+import { index, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
 
-import { users } from './user'
+import { users } from './user.js';
 
 export const refreshTokens = pgTable(
   'refresh_tokens',
@@ -24,4 +24,4 @@ export const refreshTokens = pgTable(
     index('refresh_tokens_family_id_idx').on(table.familyId),
     index('refresh_tokens_expires_at_idx').on(table.expiresAt),
   ],
-)
+);
