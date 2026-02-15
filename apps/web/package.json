@@ -11,6 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@base-ui/react": "^1.2.0",
+    "@fontsource-variable/geist": "^5.2.8",
+    "@tabler/icons-react": "^3.36.1",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",
     "@tanstack/react-query": "^5.66.5",
@@ -20,11 +23,16 @@
     "@tanstack/react-router-ssr-query": "^1.131.7",
     "@tanstack/react-start": "^1.132.0",
     "@tanstack/router-plugin": "^1.132.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "lucide-react": "^0.561.0",
     "nitro": "npm:nitro-nightly@latest",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "shadcn": "^3.8.4",
+    "tailwind-merge": "^3.4.1",
     "tailwindcss": "^4.0.6",
+    "tw-animate-css": "^1.4.0",
     "vite-tsconfig-paths": "^6.0.2"
   },
   "devDependencies": {
@@ -39,12 +47,12 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^9.39.1",
     "jsdom": "^27.0.0",
     "prettier": "^3.5.3",
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
     "vitest": "^3.0.5",
-    "eslint": "^9.39.1",
     "web-vitals": "^5.1.0"
   }
 }
