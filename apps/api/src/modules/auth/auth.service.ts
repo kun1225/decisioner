@@ -43,7 +43,7 @@ export async function findUserByEmail(email: string) {
   return user ?? null;
 }
 
-async function findUserById(id: string) {
+export async function findUserById(id: string) {
   const [user] = await db.select().from(users).where(eq(users.id, id));
   return user ?? null;
 }

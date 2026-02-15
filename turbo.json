@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": ["NODE_ENV"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -15,11 +16,7 @@
     },
     "test": {
       "dependsOn": ["^test"],
-      "env": [
-        "DATABASE_URL",
-        "ACCESS_TOKEN_SECRET",
-        "REFRESH_TOKEN_SECRET"
-      ]
+      "env": ["DATABASE_URL", "ACCESS_TOKEN_SECRET", "REFRESH_TOKEN_SECRET"]
     },
     "dev": {
       "cache": false,
