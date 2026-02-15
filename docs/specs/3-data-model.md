@@ -158,6 +158,7 @@
 > 完整欄位定義請參閱 **[12-pro-features.md](./12-pro-features.md)**
 
 涉及資料表：
+
 1. `exercises` (muscle groups)
 2. `workout_sets` (rpe/rir)
 3. `exercise_session_metrics` (estimated_1rm)
