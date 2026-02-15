@@ -1,8 +1,8 @@
 # Product Requirements Document: Decisioner Fitness
 
-> **Version:** 2.1.0
+> **Version:** 2.2.0
 > **Status:** Draft
-> **Last Updated:** 2026-02-11
+> **Last Updated:** 2026-02-15
 > **Author:** Kun
 
 ---
@@ -38,16 +38,16 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 
 ### Goals
 
-| Priority | Goal |
-| --- | --- |
-| P0 | 支援跨健身房/器材的訓練紀錄與比較 |
-| P0 | 提供 template + 當日可替換/新增動作 |
-| P0 | 訓練中顯示同動作上次與最佳紀錄 |
-| P0 | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯 |
-| P1 | 朋友共用 template，多人協作編輯保留歷史 |
-| P1 | 朋友訓練可見性可設定（預設好友可見） |
-| P1 | 動作進步圖表（最大重量趨勢、訓練量趨勢） |
-| P1 | 成就系統提升持續訓練動機 |
+| Priority | Goal                                                                  |
+| -------- | --------------------------------------------------------------------- |
+| P0       | 支援跨健身房/器材的訓練紀錄與比較                                     |
+| P0       | 提供 template + 當日可替換/新增動作                                   |
+| P0       | 訓練中顯示同動作上次與最佳紀錄                                        |
+| P0       | 可查看過往訓練紀錄（日期、template）並進入訓練頁編輯                  |
+| P1       | 朋友共用 template，多人協作編輯保留歷史                               |
+| P1       | 朋友訓練可見性可設定（預設好友可見）                                  |
+| P1       | 教練導向進步圖表（max weight、volume、e1RM、肌群週訓練量、adherence） |
+| P1       | 成就系統提升持續訓練動機                                              |
 
 ### Non-Goals (MVP)
 
@@ -109,15 +109,33 @@ Decisioner Fitness 是一個專注於重量訓練記錄的 app，核心價值是
 ### 7. 進步圖表
 
 1. 最大重量趨勢圖
-x 軸：時間
-y 軸：最大重量
-附加資訊：該最大重量出現時的次數與第幾組
+   x 軸：時間
+   y 軸：最大重量
+   附加資訊：該最大重量出現時的次數與第幾組
 
 2. 訓練量趨勢圖
-x 軸：時間
-y 軸：重量乘次數（volume）
+   x 軸：時間
+   y 軸：重量乘次數（volume）
 
-### 8. 成就系統
+3. e1RM 趨勢圖（Epley）
+   x 軸：時間
+   y 軸：estimated 1RM
+
+4. 肌群週訓練量趨勢圖
+   x 軸：週
+   y 軸：該肌群總 volume（預設 primary muscle）
+
+5. 每週訓練 adherence 圖
+   x 軸：週
+   y 軸：完成率（completed sessions / weekly target）
+
+### 8. 主觀負荷與目標
+
+1. 每組可選填 RPE 與 RIR
+2. 使用者可設定每週訓練目標次數（預設 3）
+3. 目標值用於 adherence 計算
+
+### 9. 成就系統
 
 1. 第 X 次重訓
 2. 突破個人最大重量 X 次
@@ -144,6 +162,7 @@ y 軸：重量乘次數（volume）
 1. 開始訓練時建立 session 快照
 2. 可在 session 內替換/新增動作
 3. set 至少包含重量、次數、組序、時間
+4. set 可選填 RPE / RIR
 
 ### FR-04 上次/最佳查詢
 
@@ -163,7 +182,19 @@ y 軸：重量乘次數（volume）
 1. 好友狀態至少含 pending/accepted/blocked
 2. 日期與詳細紀錄分開控制可見性
 
-### FR-07 成就引擎
+### FR-07 Progress Insights
+
+1. 提供 max weight / volume / e1RM 三種單動作趨勢
+2. 提供按肌群的 weekly volume 趨勢
+3. 提供 weekly adherence（completed / target）
+
+### FR-08 目標設定（Adherence）
+
+1. 每位使用者有 weekly workout target（預設 3）
+2. adherence mode 預設為 `WEEKLY_TARGET`
+3. 保留未來切換到 `TEMPLATE_SCHEDULE` 的彈性
+
+### FR-09 成就引擎
 
 1. 規則可配置
 2. 完成訓練或突破紀錄時觸發
@@ -178,6 +209,7 @@ y 軸：重量乘次數（volume）
 3. template 啟動訓練佔比
 4. 朋友互動率
 5. 30 日留存率
+6. 每人 weekly adherence 達標率
 
 ---
 
@@ -186,7 +218,7 @@ y 軸：重量乘次數（volume）
 ### Phase 1 (Core)
 
 1. template + workout + history list + past edit
-2. last/best + 基礎 progress
+2. last/best + 基礎 progress（max weight / volume / e1RM / adherence）
 
 ### Phase 2 (Social)
 
@@ -203,13 +235,13 @@ y 軸：重量乘次數（volume）
 ## Risks & Mitigations
 
 1. 多人編輯衝突
-對策：版本號 + optimistic concurrency
+   對策：版本號 + optimistic concurrency
 
 2. 歷史訓練編輯造成統計錯誤
-對策：revision + deterministic recompute
+   對策：revision + deterministic recompute
 
 3. 隱私洩漏
-對策：統一 privacy guard + integration tests
+   對策：統一 privacy guard + integration tests
 
 ---
 
@@ -220,3 +252,7 @@ y 軸：重量乘次數（volume）
 3. 圖片儲存：S3
 4. 群組 template：允許成員編輯，保留歷史紀錄
 5. 使用者可查看並編輯過往訓練（經歷史列表進入）
+6. 主觀負荷：每組同時支援 `RPE` + `RIR`
+7. e1RM 公式固定採 `Epley`
+8. 肌群維度採中粒度 10 群（chest/back/shoulders/biceps/triceps/quads/hamstrings/glutes/calves/core）
+9. adherence 預設採 `WEEKLY_TARGET`，保留未來 mode 擴充

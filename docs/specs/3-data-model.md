@@ -156,6 +156,26 @@
 
 ---
 
+## 3.1.1 Phase 1 Progress Extensions
+
+為支援教練導向進步分析（e1RM、肌群週訓練量、adherence、主觀負荷），在既有 ERD 上補充：
+
+1. `exercises`
+   - `primary_muscle_group`（enum, required）
+   - `secondary_muscle_groups`（array/json, optional）
+2. `workout_sets`
+   - `rpe`（numeric, nullable；建議範圍 1.0 ~ 10.0）
+   - `rir`（smallint, nullable；建議範圍 0 ~ 5）
+3. `exercise_session_metrics`
+   - `estimated_1rm`（numeric；由該 session 每個 exercise 的最佳組推導）
+4. `user_training_goals`
+   - `user_id`（FK -> users, unique）
+   - `adherence_mode`（enum，Phase 1 預設 `WEEKLY_TARGET`）
+   - `weekly_workout_target`（int, default 3）
+   - `created_at`, `updated_at`
+
+---
+
 ## 3.2 Table Groups
 
 ### Identity
@@ -178,6 +198,7 @@
 11. `workout_sets`
 12. `workout_session_revisions`
 13. `exercise_session_metrics`
+14. `user_training_goals`
 
 ### Social / Privacy
 
@@ -203,6 +224,7 @@
 4. `workout_session_revisions(session_id, revision_no)` unique
 5. `exercise_session_metrics` 需可追溯到 `session_id`
 6. completed session 可編輯，但必須寫 revision
+7. `user_training_goals.user_id` unique（每人一筆）
 
 ---
 
@@ -215,6 +237,9 @@
 5. `exercise_session_metrics(user_id, exercise_id, session_date desc)`
 6. `exercise_session_metrics(user_id, exercise_id, max_weight desc)`
 7. `template_versions(template_id, version_no desc)`
+8. `workout_session_items(exercise_id)`
+9. `exercises(primary_muscle_group)`
+10. `exercise_session_metrics(user_id, exercise_id, estimated_1rm desc)`
 
 ---
 
@@ -227,6 +252,8 @@
 5. `crew_role`: `OWNER | MEMBER`
 6. `visibility_level`: `PRIVATE | FRIENDS | PUBLIC`
 7. `media_status`: `UPLOADING | READY | FAILED`
+8. `muscle_group`: `CHEST | BACK | SHOULDERS | BICEPS | TRICEPS | QUADS | HAMSTRINGS | GLUTES | CALVES | CORE`
+9. `adherence_mode`: `WEEKLY_TARGET | TEMPLATE_SCHEDULE`（Phase 1 僅啟用 `WEEKLY_TARGET`）
 
 ---
 
@@ -241,3 +268,18 @@
 
 輸入：`user_id` + `exercise_id` + optional `gym_id`
 輸出：上次紀錄 + 最佳紀錄（`max_weight`, `max_weight_reps`, `max_weight_set_index`）
+
+### e1RM Trend
+
+輸入：`user_id` + `exercise_id` + date range
+輸出：按 `session_date` 的 `estimated_1rm` 序列
+
+### Weekly Muscle Volume
+
+輸入：`user_id` + `muscle_group` + week range
+輸出：每週 `total_volume`
+
+### Weekly Adherence
+
+輸入：`user_id` + week range
+輸出：`weekly_completed_sessions`, `weekly_workout_target`, `adherence_rate`

@@ -2,17 +2,17 @@
 
 ## 8.1 Route Structure
 
-| Route               | Purpose                                   |
-| ------------------- | ----------------------------------------- |
-| `/`                 | Dashboard                                 |
-| `/templates`        | Template list/create/edit                 |
-| `/train/start`      | Select gym/template and start session     |
-| `/train/$sessionId` | Training editor (in-progress + past edit) |
-| `/workouts/history` | Past workout list (date + template)       |
-| `/progress`         | Charts and records                        |
-| `/friends`          | Friend list and recent activity           |
-| `/crews`            | Crew management and shared templates      |
-| `/settings/privacy` | Visibility settings                       |
+| Route               | Purpose                                            |
+| ------------------- | -------------------------------------------------- |
+| `/`                 | Dashboard                                          |
+| `/templates`        | Template list/create/edit                          |
+| `/train/start`      | Select gym/template and start session              |
+| `/train/$sessionId` | Training editor (in-progress + past edit)          |
+| `/workouts/history` | Past workout list (date + template)                |
+| `/progress`         | Charts and records (exercise + muscle + adherence) |
+| `/friends`          | Friend list and recent activity                    |
+| `/crews`            | Crew management and shared templates               |
+| `/settings/privacy` | Visibility settings                                |
 
 ## 8.2 Key Screen Contracts
 
@@ -33,7 +33,20 @@
 
 1. `IN_PROGRESS`：正常記錄模式
 2. `COMPLETED`：顯示「編輯歷史訓練」模式（仍可編輯）
-3. 送出變更後提示已更新歷史版本
+3. set 編輯欄位包含：`weight`, `reps`, `unit`, optional `rpe`, optional `rir`
+4. 送出變更後提示已更新歷史版本
+
+### `/progress`
+
+1. 分頁/切換至少包含：
+   - Last/Best（單動作）
+   - Max Weight（單動作）
+   - Volume（單動作）
+   - e1RM（單動作）
+   - Weekly Muscle Volume（肌群）
+   - Weekly Adherence（週完成率）
+2. `Weekly Muscle Volume` 預設以 `primary_muscle_group` 統計
+3. `Weekly Adherence` 顯示：completed sessions、weekly target、rate
 
 ## 8.3 Data Fetching Strategy
 
@@ -46,7 +59,10 @@
 1. `['workout-history', userId, cursor]`
 2. `['workout-session', sessionId]`
 3. `['exercise-last-best', exerciseId, gymId]`
-4. `['progress-chart', exerciseId, chartType]`
+4. `['progress-chart', exerciseId, chartType, from, to, gymId]`
+5. `['progress-e1rm', exerciseId, from, to, gymId]`
+6. `['progress-muscle-weekly-volume', muscleGroup, from, to, includeSecondary]`
+7. `['progress-adherence-weekly', from, to]`
 
 ## 8.4 UX Guards
 

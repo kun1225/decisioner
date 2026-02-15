@@ -43,24 +43,63 @@
 2. 若同重，選 `reps` 較高
 3. 若再同，選較新時間
 
-## 6.5 Chart Aggregation
+## 6.5 Exercise Metric Computation
+
+在 session 完成（或完成後被編輯）時，按每個 exercise 重算：
+
+1. `max_weight`
+2. `max_weight_reps`
+3. `max_weight_set_index`
+4. `volume = sum(weight * reps)`
+5. `estimated_1rm`（Epley 公式）
+
+`estimated_1rm` 規則：
+
+1. 每組先算 `set_e1rm = weight * (1 + reps / 30)`
+2. 取該 exercise 在該 session 的最大 `set_e1rm` 作為 `estimated_1rm`
+3. 若 e1RM 相同，依序取：
+   - reps 較高者
+   - set_index 較前者
+   - created_at 較新者
+
+## 6.6 Chart Aggregation
 
 1. Max Weight Chart
-   x 軸：`session_date`
-   y 軸：`max_weight`
-   tooltip：`max_weight_reps`、`max_weight_set_index`
-
+   - x 軸：`session_date`
+   - y 軸：`max_weight`
+   - tooltip：`max_weight_reps`、`max_weight_set_index`
 2. Volume Chart
-   x 軸：`session_date`
-   y 軸：`volume = sum(weight * reps)`
+   - x 軸：`session_date`
+   - y 軸：`volume`
+3. e1RM Chart
+   - x 軸：`session_date`
+   - y 軸：`estimated_1rm`
+4. Weekly Muscle Volume Chart
+   - x 軸：`week_start`
+   - y 軸：`sum(weight * reps)`（按 muscle group 聚合）
+   - 預設只算 `primary_muscle_group`
 
-## 6.6 Privacy Guard
+## 6.7 Subjective Load Capture (RPE / RIR)
+
+1. 每組 set 可選填 `rpe`、`rir`
+2. `rpe` 與 `rir` 皆可同時存在
+3. Phase 1 先做紀錄與展示，不作為排行榜或成就條件
+
+## 6.8 Adherence Computation
+
+1. 以週為單位計算 `completed_sessions / weekly_workout_target`
+2. `completed_sessions` 只計 `session_status = COMPLETED`
+3. 目標值來源：`user_training_goals.weekly_workout_target`
+4. mode 預設為 `WEEKLY_TARGET`
+5. 保留 `TEMPLATE_SCHEDULE` mode 擴充點（Phase 1 不啟用）
+
+## 6.9 Privacy Guard
 
 1. 所有朋友資料查詢先過 `privacy_settings`
 2. 日期與訓練細節分開判斷
 3. default 為 `FRIENDS`
 
-## 6.7 Achievement Trigger
+## 6.10 Achievement Trigger
 
 事件：
 
@@ -74,7 +113,7 @@
 2. 發放寫入 `user_achievements`
 3. 同條件發放需去重
 
-## 6.8 S3 Upload Lifecycle
+## 6.11 S3 Upload Lifecycle
 
 1. Client 取得 pre-signed URL
 2. Client 直傳 S3

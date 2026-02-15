@@ -27,12 +27,15 @@
   - [ ] `sessionStatus`: IN_PROGRESS | COMPLETED
   - [ ] `sessionItemOrigin`: TEMPLATE | REPLACED | MANUAL
   - [ ] `weightUnit`: KG | LB
+  - [ ] `muscleGroup`: CHEST | BACK | SHOULDERS | BICEPS | TRICEPS | QUADS | HAMSTRINGS | GLUTES | CALVES | CORE
+  - [ ] `adherenceMode`: WEEKLY_TARGET | TEMPLATE_SCHEDULE
   - [ ] Move `authProvider` from user.ts to enums.ts
 - [ ] B.2: Gyms & Equipment (`gym.ts`)
   - [ ] `gyms` table
   - [ ] `gymEquipments` table
 - [ ] B.3: Exercises (`exercise.ts`)
   - [ ] `exercises` table (with soft delete)
+  - [ ] Add `primary_muscle_group` + `secondary_muscle_groups`
 - [ ] B.4: Templates (`template.ts`)
   - [ ] `templates` table
   - [ ] `templateItems` table
@@ -42,9 +45,13 @@
   - [ ] `workoutSessions` table
   - [ ] `workoutSessionItems` table
   - [ ] `workoutSets` table
+  - [ ] Add optional `rpe` + `rir` on `workoutSets`
   - [ ] `workoutSessionRevisions` table
 - [ ] B.6: Metrics (`metric.ts`)
   - [ ] `exerciseSessionMetrics` table
+  - [ ] Add `estimated_1rm`
+- [ ] B.6+: Goals (`goal.ts`)
+  - [ ] `userTrainingGoals` table (`weekly_workout_target`, `adherence_mode`)
 - [ ] B.7: Indexes (per spec 3.4)
 - [ ] B.8: `pnpm db:generate` + `pnpm db:migrate`
 
@@ -56,6 +63,8 @@
 - [ ] `packages/shared/src/schemas/gym.ts`
 - [ ] `packages/shared/src/schemas/template.ts`
 - [ ] `packages/shared/src/schemas/workout.ts`
+- [ ] `packages/shared/src/schemas/progress.ts`
+- [ ] `packages/shared/src/schemas/adherence.ts`
 
 ---
 
@@ -118,6 +127,7 @@
   - [ ] `workouts.controller.ts`
   - [ ] `workouts.routes.ts`
   - [ ] 10 endpoints
+  - [ ] Set payload supports optional `rpe` + `rir`
 - [ ] F.T: Unit + integration tests
   - [ ] `workouts.service.test.ts`
   - [ ] Integration: full workout flow (spec 11)
@@ -134,14 +144,27 @@
 ## Phase G: API Module — Progress
 
 - [ ] `apps/api/src/modules/progress/`
-  - [ ] `progress.service.ts` (last/best, max-weight chart, volume chart)
+  - [ ] `progress.service.ts` (last/best, max-weight, volume, e1rm, weekly muscle volume, weekly adherence)
   - [ ] `progress.controller.ts`
   - [ ] `progress.routes.ts`
-  - [ ] 3 endpoints
+  - [ ] 6 endpoints
 - [ ] G.T: Unit + integration tests
   - [ ] `progress.service.test.ts`
   - [ ] Integration: last/best returns correct data after workout
   - [ ] Integration: chart data correct after multiple sessions
+  - [ ] Integration: e1RM uses Epley and tie-break rules
+  - [ ] Integration: weekly muscle volume (primary-only) aggregates correctly
+  - [ ] Integration: weekly adherence respects `weekly_workout_target`
+
+---
+
+## Phase G.5: API Module — Goals (Adherence Settings)
+
+- [ ] `apps/api/src/modules/goals/`
+  - [ ] `goals.service.ts`
+  - [ ] `goals.controller.ts`
+  - [ ] `goals.routes.ts`
+  - [ ] Endpoints: GET/PUT weekly workout target + adherence mode
 
 ---
 
@@ -201,7 +224,7 @@
 
 - [ ] K.1: `/train/start` — select gym + template, start session
 - [ ] K.2: `/train/$sessionId` — training editor
-  - [ ] Set logging (weight, reps, unit per set)
+  - [ ] Set logging (weight, reps, unit, optional RPE, optional RIR per set)
   - [ ] Add/replace/remove exercises mid-session
   - [ ] Last/best display per exercise (GET /api/progress/.../last-best)
   - [ ] Finish session button
@@ -223,11 +246,18 @@
 - [ ] L.2: `/progress` — exercise progress charts
   - [ ] Max weight trend chart (x: date, y: weight)
   - [ ] Volume trend chart (x: date, y: volume)
+  - [ ] e1RM trend chart (x: date, y: e1rm)
+  - [ ] Weekly muscle volume chart (x: week, y: volume)
+  - [ ] Weekly adherence chart (x: week, y: adherence rate)
   - [ ] Exercise selector
+  - [ ] Muscle group selector
+  - [ ] Adherence target editor (weekly workout target)
 - [ ] L.E2E: History & progress journey (Playwright)
   - [ ] View history list → click into past session
   - [ ] Edit past session → confirm revision warning → save
   - [ ] Progress charts render with data
+  - [ ] Set editor persists optional RPE/RIR
+  - [ ] Weekly adherence updates after target change
 
 ---
 

@@ -24,7 +24,7 @@ decisioner/
 │   │   │   │   ├── workouts/
 │   │   │   │   │   └── history.tsx              # Past workouts (date + template)
 │   │   │   │   ├── progress/
-│   │   │   │   │   └── index.tsx                # Max-weight/volume charts
+│   │   │   │   │   └── index.tsx                # Max-weight/volume/e1RM/muscle/adherence charts
 │   │   │   │   ├── achievements/
 │   │   │   │   │   └── index.tsx                # Achievement wall + timeline
 │   │   │   │   ├── friends/
@@ -81,6 +81,10 @@ decisioner/
 │       │   │   │   ├── progress.routes.ts
 │       │   │   │   ├── progress.controller.ts
 │       │   │   │   └── progress.service.ts
+│       │   │   ├── goals/
+│       │   │   │   ├── goals.routes.ts
+│       │   │   │   ├── goals.controller.ts
+│       │   │   │   └── goals.service.ts
 │       │   │   ├── social/
 │       │   │   │   ├── social.routes.ts
 │       │   │   │   ├── social.controller.ts
@@ -125,7 +129,7 @@ decisioner/
 | `/train/start`                    | `apps/web/src/routes/train/start.tsx`                    | Select gym/template and start session             | Yes  |
 | `/train/:sessionId`               | `apps/web/src/routes/train/$sessionId.tsx`               | Training editor (supports completed session edit) | Yes  |
 | `/workouts/history`               | `apps/web/src/routes/workouts/history.tsx`               | Past workouts list (date + template)              | Yes  |
-| `/progress`                       | `apps/web/src/routes/progress/index.tsx`                 | Exercise progress charts                          | Yes  |
+| `/progress`                       | `apps/web/src/routes/progress/index.tsx`                 | Exercise + muscle + adherence progress charts     | Yes  |
 | `/achievements`                   | `apps/web/src/routes/achievements/index.tsx`             | Achievements and timeline                         | Yes  |
 | `/friends`                        | `apps/web/src/routes/friends/index.tsx`                  | Friends and latest workout                        | Yes  |
 | `/crews`                          | `apps/web/src/routes/crews/index.tsx`                    | Crew management and shared templates              | Yes  |
@@ -189,6 +193,14 @@ decisioner/
 1. `GET /api/progress/exercises/:exerciseId/last-best`
 2. `GET /api/progress/exercises/:exerciseId/charts/max-weight`
 3. `GET /api/progress/exercises/:exerciseId/charts/volume`
+4. `GET /api/progress/exercises/:exerciseId/charts/e1rm`
+5. `GET /api/progress/muscles/:muscleGroup/charts/weekly-volume`
+6. `GET /api/progress/adherence/weekly`
+
+### Goals
+
+1. `GET /api/goals/training`
+2. `PUT /api/goals/training`
 
 ### Social
 
