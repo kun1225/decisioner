@@ -1,14 +1,14 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
 
-import { GoogleLoginButton } from '@/features/auth/_components/google-login-button'
-import { LoginForm } from '@/features/auth/_components/login-form'
+import { GoogleLoginButton } from '@/features/auth/_components/google-login-button';
+import { LoginForm } from '@/features/auth/_components/login-form';
 
 export function normalizeRedirectTarget(input?: string): string {
   if (!input || !input.startsWith('/') || input.startsWith('//')) {
-    return '/'
+    return '/';
   }
 
-  return input
+  return input;
 }
 
 export const Route = createFileRoute('/auth/login')({
@@ -19,11 +19,11 @@ export const Route = createFileRoute('/auth/login')({
         : '/',
   }),
   component: LoginPage,
-})
+});
 
 function LoginPage() {
-  const navigate = Route.useNavigate()
-  const { redirect } = Route.useSearch()
+  const navigate = Route.useNavigate();
+  const { redirect } = Route.useSearch();
 
   return (
     <main className="mx-auto w-full max-w-md p-6">
@@ -33,10 +33,10 @@ function LoginPage() {
       </p>
       <LoginForm
         onSuccess={async () => {
-          await navigate({ to: redirect })
+          await navigate({ to: redirect });
         }}
       />
       <GoogleLoginButton />
     </main>
-  )
+  );
 }

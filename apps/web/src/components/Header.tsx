@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import {
   ChevronDown,
   ChevronRight,
@@ -9,15 +9,15 @@ import {
   SquareFunction,
   StickyNote,
   X,
-} from 'lucide-react'
+} from 'lucide-react';
 
-import { LogoutButton } from '../features/auth/_components/logout-button'
+import { LogoutButton } from '../features/auth/_components/logout-button';
 
 export default function Header() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
   const [groupedExpanded, setGroupedExpanded] = useState<
     Record<string, boolean>
-  >({})
+  >({});
 
   return (
     <>
@@ -190,5 +190,5 @@ export default function Header() {
         </nav>
       </aside>
     </>
-  )
+  );
 }

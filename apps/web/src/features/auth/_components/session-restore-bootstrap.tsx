@@ -1,25 +1,25 @@
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
-import { useAuthSession } from '../_domain/auth-session-store'
-import { useSessionRestore } from '../_domain/use-session-restore'
+import { useAuthSession } from '../_domain/auth-session-store';
+import { useSessionRestore } from '../_domain/use-session-restore';
 
 export function SessionRestoreBootstrap({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   const {
     state: { status },
-  } = useAuthSession()
-  const restoreSession = useSessionRestore()
+  } = useAuthSession();
+  const restoreSession = useSessionRestore();
 
   useEffect(() => {
     if (status !== 'idle') {
-      return
+      return;
     }
 
-    void restoreSession()
-  }, [restoreSession, status])
+    void restoreSession();
+  }, [restoreSession, status]);
 
-  return <>{children}</>
+  return <>{children}</>;
 }

@@ -1,5 +1,5 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render } from '@testing-library/react';
 
 export function renderWithProviders(ui: React.ReactElement) {
   const queryClient = new QueryClient({
@@ -7,14 +7,14 @@ export function renderWithProviders(ui: React.ReactElement) {
       queries: { retry: false },
       mutations: { retry: false },
     },
-  })
+  });
 
   const rendered = render(
     <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
-  )
+  );
 
   return {
     ...rendered,
     queryClient,
-  }
+  };
 }

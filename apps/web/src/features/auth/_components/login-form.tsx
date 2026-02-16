@@ -1,47 +1,47 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-import { loginSchema } from '@repo/shared/auth'
+import { loginSchema } from '@repo/shared/auth';
 
-import { login } from '../_domain/auth-api'
-import { mapAuthApiError } from '../_domain/auth-errors'
-import { setAccessToken } from '../_domain/token-storage'
+import { login } from '../_domain/auth-api';
+import { mapAuthApiError } from '../_domain/auth-errors';
+import { setAccessToken } from '../_domain/token-storage';
 
 type LoginFormProps = {
-  onSuccess?: (accessToken: string) => Promise<void> | void
-}
+  onSuccess?: (accessToken: string) => Promise<void> | void;
+};
 
 type LoginFormValue = {
-  email: string
-  password: string
-}
+  email: string;
+  password: string;
+};
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const [value, setValue] = useState<LoginFormValue>({
     email: '',
     password: '',
-  })
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setErrorMessage(null)
+    event.preventDefault();
+    setErrorMessage(null);
 
-    const parsed = loginSchema.safeParse(value)
+    const parsed = loginSchema.safeParse(value);
     if (!parsed.success) {
-      setErrorMessage(parsed.error.issues[0]?.message ?? 'Validation failed')
-      return
+      setErrorMessage(parsed.error.issues[0]?.message ?? 'Validation failed');
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const result = await login(parsed.data)
-      setAccessToken(result.accessToken)
-      await onSuccess?.(result.accessToken)
+      const result = await login(parsed.data);
+      setAccessToken(result.accessToken);
+      await onSuccess?.(result.accessToken);
     } catch (error) {
-      setErrorMessage(mapAuthApiError(error).message)
+      setErrorMessage(mapAuthApiError(error).message);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -97,5 +97,5 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         {isSubmitting ? 'Signing In...' : 'Sign In'}
       </button>
     </form>
-  )
+  );
 }

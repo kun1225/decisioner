@@ -1,21 +1,21 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-import { registerSchema } from '@repo/shared/auth'
+import { registerSchema } from '@repo/shared/auth';
 
-import { register } from '../_domain/auth-api'
-import { mapAuthApiError } from '../_domain/auth-errors'
-import { setAccessToken } from '../_domain/token-storage'
+import { register } from '../_domain/auth-api';
+import { mapAuthApiError } from '../_domain/auth-errors';
+import { setAccessToken } from '../_domain/token-storage';
 
 type RegisterFormProps = {
-  onSuccess?: (accessToken: string) => Promise<void> | void
-}
+  onSuccess?: (accessToken: string) => Promise<void> | void;
+};
 
 type RegisterFormValue = {
-  email: string
-  name: string
-  password: string
-  confirmedPassword: string
-}
+  email: string;
+  name: string;
+  password: string;
+  confirmedPassword: string;
+};
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [value, setValue] = useState<RegisterFormValue>({
@@ -23,29 +23,29 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     name: '',
     password: '',
     confirmedPassword: '',
-  })
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setErrorMessage(null)
+    event.preventDefault();
+    setErrorMessage(null);
 
-    const parsed = registerSchema.safeParse(value)
+    const parsed = registerSchema.safeParse(value);
     if (!parsed.success) {
-      setErrorMessage(parsed.error.issues[0]?.message ?? 'Validation failed')
-      return
+      setErrorMessage(parsed.error.issues[0]?.message ?? 'Validation failed');
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const result = await register(parsed.data)
-      setAccessToken(result.accessToken)
-      await onSuccess?.(result.accessToken)
+      const result = await register(parsed.data);
+      setAccessToken(result.accessToken);
+      await onSuccess?.(result.accessToken);
     } catch (error) {
-      setErrorMessage(mapAuthApiError(error).message)
+      setErrorMessage(mapAuthApiError(error).message);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -80,7 +80,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         autoComplete="new-password"
         value={value.password}
         onChange={(event) =>
-          setValue((previous) => ({ ...previous, password: event.target.value }))
+          setValue((previous) => ({
+            ...previous,
+            password: event.target.value,
+          }))
         }
         className="border rounded-md px-3 py-2"
       />
@@ -114,5 +117,5 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         {isSubmitting ? 'Creating...' : 'Create Account'}
       </button>
     </form>
-  )
+  );
 }

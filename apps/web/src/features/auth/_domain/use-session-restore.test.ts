@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest';
 
-import { AuthApiError } from './auth-errors'
-import { restoreAuthSession } from './use-session-restore'
+import { AuthApiError } from './auth-errors';
+import { restoreAuthSession } from './use-session-restore';
 
 describe('restoreAuthSession', () => {
   it('uses existing token when /me succeeds', async () => {
@@ -9,9 +9,9 @@ describe('restoreAuthSession', () => {
       id: 'u-1',
       email: 'joy@example.com',
       name: 'Joy',
-    })
-    const refreshToken = vi.fn()
-    const readAccessToken = vi.fn().mockReturnValue('token-1')
+    });
+    const refreshToken = vi.fn();
+    const readAccessToken = vi.fn().mockReturnValue('token-1');
 
     const result = await restoreAuthSession({
       readAccessToken,
@@ -19,16 +19,16 @@ describe('restoreAuthSession', () => {
       clearAccessToken: vi.fn(),
       fetchMe,
       refreshToken,
-    })
+    });
 
-    expect(refreshToken).not.toHaveBeenCalled()
-    expect(fetchMe).toHaveBeenCalledWith('token-1')
+    expect(refreshToken).not.toHaveBeenCalled();
+    expect(fetchMe).toHaveBeenCalledWith('token-1');
     expect(result).toMatchObject({
       status: 'authenticated',
       accessToken: 'token-1',
       user: { email: 'joy@example.com' },
-    })
-  })
+    });
+  });
 
   it('refreshes token when existing token is unauthorized', async () => {
     const fetchMe = vi
@@ -44,9 +44,9 @@ describe('restoreAuthSession', () => {
         id: 'u-1',
         email: 'joy@example.com',
         name: 'Joy',
-      })
-    const refreshToken = vi.fn().mockResolvedValue({ accessToken: 'token-2' })
-    const saveAccessToken = vi.fn()
+      });
+    const refreshToken = vi.fn().mockResolvedValue({ accessToken: 'token-2' });
+    const saveAccessToken = vi.fn();
 
     const result = await restoreAuthSession({
       readAccessToken: vi.fn().mockReturnValue('token-1'),
@@ -54,19 +54,19 @@ describe('restoreAuthSession', () => {
       clearAccessToken: vi.fn(),
       fetchMe,
       refreshToken,
-    })
+    });
 
-    expect(refreshToken).toHaveBeenCalledTimes(1)
-    expect(saveAccessToken).toHaveBeenCalledWith('token-2')
-    expect(fetchMe).toHaveBeenNthCalledWith(2, 'token-2')
+    expect(refreshToken).toHaveBeenCalledTimes(1);
+    expect(saveAccessToken).toHaveBeenCalledWith('token-2');
+    expect(fetchMe).toHaveBeenNthCalledWith(2, 'token-2');
     expect(result).toMatchObject({
       status: 'authenticated',
       accessToken: 'token-2',
-    })
-  })
+    });
+  });
 
   it('returns guest and clears token when refresh fails', async () => {
-    const clearAccessToken = vi.fn()
+    const clearAccessToken = vi.fn();
 
     const result = await restoreAuthSession({
       readAccessToken: vi.fn().mockReturnValue('token-1'),
@@ -86,9 +86,9 @@ describe('restoreAuthSession', () => {
           message: 'revoked',
         }),
       ),
-    })
+    });
 
-    expect(clearAccessToken).toHaveBeenCalledTimes(1)
-    expect(result).toEqual({ status: 'guest' })
-  })
-})
+    expect(clearAccessToken).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ status: 'guest' });
+  });
+});

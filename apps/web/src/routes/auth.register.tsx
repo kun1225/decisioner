@@ -1,13 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
 
-import { RegisterForm } from '@/features/auth/_components/register-form'
+import { RegisterForm } from '@/features/auth/_components/register-form';
 
 export function normalizeRegisterRedirectTarget(input?: string): string {
   if (!input || !input.startsWith('/') || input.startsWith('//')) {
-    return '/'
+    return '/';
   }
 
-  return input
+  return input;
 }
 
 export const Route = createFileRoute('/auth/register')({
@@ -18,11 +18,11 @@ export const Route = createFileRoute('/auth/register')({
         : '/',
   }),
   component: RegisterPage,
-})
+});
 
 function RegisterPage() {
-  const navigate = Route.useNavigate()
-  const { redirect } = Route.useSearch()
+  const navigate = Route.useNavigate();
+  const { redirect } = Route.useSearch();
 
   return (
     <main className="mx-auto w-full max-w-md p-6">
@@ -32,9 +32,9 @@ function RegisterPage() {
       </p>
       <RegisterForm
         onSuccess={async () => {
-          await navigate({ to: redirect })
+          await navigate({ to: redirect });
         }}
       />
     </main>
-  )
+  );
 }

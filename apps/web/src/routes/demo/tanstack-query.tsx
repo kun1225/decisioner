@@ -1,22 +1,22 @@
-import { useCallback, useState } from 'react'
-import { useMutation,useQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { useCallback, useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/demo/tanstack-query')({
   component: TanStackQueryDemo,
-})
+});
 
 type Todo = {
-  id: number
-  name: string
-}
+  id: number;
+  name: string;
+};
 
 function TanStackQueryDemo() {
   const { data, refetch } = useQuery<Array<Todo>>({
     queryKey: ['todos'],
     queryFn: () => fetch('/demo/api/tq-todos').then((res) => res.json()),
     initialData: [],
-  })
+  });
 
   const { mutate: addTodo } = useMutation({
     mutationFn: (todo: string) =>
@@ -25,14 +25,14 @@ function TanStackQueryDemo() {
         body: JSON.stringify(todo),
       }).then((res) => res.json()),
     onSuccess: () => refetch(),
-  })
+  });
 
-  const [todo, setTodo] = useState('')
+  const [todo, setTodo] = useState('');
 
   const submitTodo = useCallback(async () => {
-    await addTodo(todo)
-    setTodo('')
-  }, [addTodo, todo])
+    await addTodo(todo);
+    setTodo('');
+  }, [addTodo, todo]);
 
   return (
     <div
@@ -61,7 +61,7 @@ function TanStackQueryDemo() {
             onChange={(e) => setTodo(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                submitTodo()
+                submitTodo();
               }
             }}
             placeholder="Enter a new todo..."
@@ -77,5 +77,5 @@ function TanStackQueryDemo() {
         </div>
       </div>
     </div>
-  )
+  );
 }

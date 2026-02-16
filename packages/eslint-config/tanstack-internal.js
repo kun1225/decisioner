@@ -1,8 +1,8 @@
-import pluginReactHooks from 'eslint-plugin-react-hooks'
-import pluginReact from 'eslint-plugin-react'
-import globals from 'globals'
-import { tanstackConfig } from '@tanstack/eslint-config'
-import { config as baseConfig } from './base.js'
+import pluginReactHooks from 'eslint-plugin-react-hooks';
+import pluginReact from 'eslint-plugin-react';
+import globals from 'globals';
+import { tanstackConfig } from '@tanstack/eslint-config';
+import { config as baseConfig } from './base.js';
 
 /**
  * A custom ESLint configuration for libraries that use React.
@@ -36,4 +36,4 @@ export const config = [
       'react/react-in-jsx-scope': 'off',
     },
   },
-]
+];
