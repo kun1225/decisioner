@@ -2,27 +2,27 @@
 
 ## Goals
 
-| Goals ID                       | Priority | Phase | Reference                                                             |
-| ------------------------------ | -------- | ----- | --------------------------------------------------------------------- |
-| `g-01-gym-aware-record`        | P0       | 1.0   | [G-01 Gym-aware Record](goals/g-01-gym-aware-record.md)               |
-| `g-02-template-versioning`     | P0       | 1.0   | [G-02 Template Versioning](goals/g-02-template-versioning.md)         |
-| `g-03-session-adjustment`      | P0       | 1.0   | [G-03 Session Adjustment](goals/g-03-session-adjustment.md)           |
-| `g-04-last-best-reference`     | P0       | 1.0   | [G-04 Last Best Reference](goals/g-04-last-best-reference.md)         |
-| `g-05-workout-history-edit`    | P0       | 1.0   | [G-05 Workout History Edit](goals/g-05-workout-history-edit.md)       |
-| `g-06-checkin-dashboard`       | P0       | 1.0   | [G-06 Checkin Dashboard](goals/g-06-checkin-dashboard.md)             |
-| `g-07-friend-feed-like`        | P0       | 1.0   | [G-07 Friend Feed Like](goals/g-07-friend-feed-like.md)               |
-| `g-08-privacy-social-limits`   | P1       | 1.0   | [G-08 Privacy Social Limits](goals/g-08-privacy-social-limits.md)     |
-| `g-09-reminder`                | P1       | 1.0   | [G-09 Reminder](goals/g-09-reminder.md)                               |
-| `g-10-share-card`              | P1       | 1.0   | [G-10 Share Card](goals/g-10-share-card.md)                           |
-| `g-11-progress-charts`         | P1       | 1.0   | [G-11 Progress Charts](goals/g-11-progress-charts.md)                 |
-| `g-12-pro-analytics`           | P1       | 1.1   | [G-12 Pro Analytics](goals/g-12-pro-analytics.md)                     |
-| `g-13-gym-load-conversion`     | P1       | 1.1   | [G-13 Gym Load Conversion](goals/g-13-gym-load-conversion.md)         |
-| `g-14-weekly-challenge`        | P2       | 2.0   | [G-14 Weekly Challenge](goals/g-14-weekly-challenge.md)               |
-| `g-15-achievement-progression` | P2       | 2.0   | [G-15 Achievement Progression](goals/g-15-achievement-progression.md) |
-| `g-16-friends-leaderboard`     | P2       | 2.0   | [G-16 Friends Leaderboard](goals/g-16-friends-leaderboard.md)         |
-| `g-17-profile-customization`   | P2       | 2.1   | [G-17 Profile Customization](goals/g-17-profile-customization.md)     |
+| Goal ID | Goal Name | Phase | Goal Detail |
+| ------- | --------- | ----- | ----------- |
+| `g-01` | Gym-aware record | 1.0 | [g-01](goals/g-01.md) |
+| `g-02` | Template versioning | 1.0 | [g-02](goals/g-02.md) |
+| `g-03` | Session adjustment | 1.0 | [g-03](goals/g-03.md) |
+| `g-04` | Last/best reference | 1.0 | [g-04](goals/g-04.md) |
+| `g-05` | Workout history edit | 1.0 | [g-05](goals/g-05.md) |
+| `g-06` | Check-in dashboard | 1.0 | [g-06](goals/g-06.md) |
+| `g-07` | Friend feed like | 1.0 | [g-07](goals/g-07.md) |
+| `g-08` | Privacy social limits | 1.0 | [g-08](goals/g-08.md) |
+| `g-09` | Reminder | 1.0 | [g-09](goals/g-09.md) |
+| `g-10` | Share card | 1.0 | [g-10](goals/g-10.md) |
+| `g-11` | Progress charts | 1.0 | [g-11](goals/g-11.md) |
+| `g-12` | Pro analytics | 1.1 | [g-12](goals/g-12.md) |
+| `g-13` | Gym load conversion | 1.1 | [g-13](goals/g-13.md) |
+| `g-14` | Weekly challenge | 2.0 | [g-14](goals/g-14.md) |
+| `g-15` | Achievement progression | 2.0 | [g-15](goals/g-15.md) |
+| `g-16` | Friends leaderboard | 2.0 | [g-16](goals/g-16.md) |
+| `g-17` | Profile customization | 2.1 | [g-17](goals/g-17.md) |
 
-## Non-Goals (MVP)
+## Non-Goals
 
 1. 飲食與營養追蹤
 2. 體脂硬體同步
