@@ -21,6 +21,7 @@
 | `g-15`  | Achievement progression | 2.0   | [g-15](goals/g-15.md) |
 | `g-16`  | Friends leaderboard     | 2.0   | [g-16](goals/g-16.md) |
 | `g-17`  | Profile customization   | 2.1   | [g-17](goals/g-17.md) |
+| `g-18`  | Authentication and session security | 1.0   | [g-18](goals/g-18.md) |
 
 ## Non-Goals
 
