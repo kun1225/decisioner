@@ -1,0 +1,25 @@
+# G-13 Gym Load Conversion
+
+## Goal Statement
+
+Pro 使用者在不同 gym 訓練同動作時，可取得簡化重量建議。
+
+## Requirement
+
+系統必須提供 `user + gym + exercise` 維度的 suggested load。
+
+## In Scope
+
+1. Suggested load 查詢
+2. 記住 gym 差異（更新 adjustment ratio）
+3. 新 gym 參考其他 gym 最近紀錄
+
+## Out Scope
+
+1. 器材層級換算
+2. 自訂換算公式
+
+## Acceptance Criteria
+
+- [ ] Given 使用者在新 gym 訓練某動作，When 請求 suggested load，Then 回傳建議重量與來源資訊。
+- [ ] Given 使用者啟用記住差異，When 下次請求 suggested load，Then 使用更新後的 adjustment ratio。

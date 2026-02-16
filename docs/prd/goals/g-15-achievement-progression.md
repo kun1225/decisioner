@@ -1,0 +1,25 @@
+# G-15 Achievement Progression
+
+## Goal Statement
+
+使用者可看到成就進度與解鎖結果，提升持續訓練動機。
+
+## Requirement
+
+系統必須支援成就事件觸發、進度追蹤與解鎖紀錄。
+
+## In Scope
+
+1. 成就規則觸發
+2. 成就解鎖紀錄
+3. 成就進度展示
+
+## Out Scope
+
+1. 成就獎勵商城
+2. NFT/外部徽章整合
+
+## Acceptance Criteria
+
+- [ ] Given 使用者達成門檻，When 事件觸發，Then 發放對應成就且不重複。
+- [ ] When 使用者查看成就頁，Then 可看到已解鎖與進度中項目。

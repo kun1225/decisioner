@@ -1,0 +1,25 @@
+# G-11 Progress Charts
+
+## Goal Statement
+
+使用者可查看免費版核心進步圖表（max weight / volume）。
+
+## Requirement
+
+系統必須提供單動作 Max Weight 與 Volume 趨勢圖。
+
+## In Scope
+
+1. Max Weight chart
+2. Volume chart
+3. 基本時間區間查詢
+
+## Out Scope
+
+1. 肌群維度聚合圖
+2. e1RM 與 adherence 圖
+
+## Acceptance Criteria
+
+- [ ] Given 使用者有多次訓練，When 開啟 progress，Then 可看到 max weight 趨勢。
+- [ ] Given 使用者有多次訓練，When 切換 volume，Then 可看到 volume 趨勢。

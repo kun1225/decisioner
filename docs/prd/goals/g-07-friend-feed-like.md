@@ -1,0 +1,25 @@
+# G-07 Friend Feed Like
+
+## Goal Statement
+
+使用者可在好友動態看到訓練/打卡事件並進行愛心互動。
+
+## Requirement
+
+系統必須提供好友動態 feed 與 like/unlike 行為。
+
+## In Scope
+
+1. Feed 事件：`WORKOUT_STARTED`、`WORKOUT_COMPLETED`、`CHECKIN_CREATED`
+2. Like / Unlike
+3. 基本個人頁入口（從 feed 點進）
+
+## Out Scope
+
+1. 留言與回覆
+2. 通知中心
+
+## Acceptance Criteria
+
+- [ ] Given 好友產生事件，When 使用者讀取 feed，Then 可看到該事件。
+- [ ] Given 使用者對事件按愛心，When 同事件重複按愛心，Then 不會重複計數。

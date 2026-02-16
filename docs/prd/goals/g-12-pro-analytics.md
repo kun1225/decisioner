@@ -1,0 +1,26 @@
+# G-12 Pro Analytics
+
+## Goal Statement
+
+Pro 使用者可使用進階分析（e1RM、肌群週訓練量、adherence、RPE/RIR）。
+
+## Requirement
+
+系統必須提供 Pro 分析資料與記錄欄位。
+
+## In Scope
+
+1. e1RM 趨勢
+2. Weekly muscle volume
+3. Weekly adherence
+4. Set-level RPE/RIR 記錄
+
+## Out Scope
+
+1. AI 分析建議
+2. 教練端報告匯出
+
+## Acceptance Criteria
+
+- [ ] Given Pro 使用者，When 開啟進階分析頁，Then 可讀取 e1RM/肌群/adherence 資料。
+- [ ] Given 非 Pro 使用者，When 請求進階分析，Then 回傳方案限制。
