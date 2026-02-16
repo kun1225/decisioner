@@ -2,6 +2,10 @@
 
 > Single execution board for current and planned goals.
 
+- `[ ]` means not progress
+- `[-]` means progress
+- `[x]` means done
+
 | Status | Reference                 | API Reference                              | Data                                         |
 | ------ | ------------------------- | ------------------------------------------ | -------------------------------------------- |
 | [ ]    | [g-18](prd/goals/g-18.md) | [g-18 api](specs/5-api-design.md#g-18-api) | [g-18 data](specs/6-data-model.md#g-18-data) |
