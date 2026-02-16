@@ -81,6 +81,9 @@ importers:
       '@fontsource-variable/geist':
         specifier: ^5.2.8
         version: 5.2.8
+      '@repo/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@tabler/icons-react':
         specifier: ^3.36.1
         version: 3.36.1(react@19.2.0)
