@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
+import { GoogleLoginButton } from '@/features/auth/_components/google-login-button'
 import { LoginForm } from '@/features/auth/_components/login-form'
 
 export function normalizeRedirectTarget(input?: string): string {
@@ -35,6 +36,7 @@ function LoginPage() {
           await navigate({ to: redirect })
         }}
       />
+      <GoogleLoginButton />
     </main>
   )
 }
