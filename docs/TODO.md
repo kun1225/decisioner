@@ -58,24 +58,43 @@
   - [x] `exerciseSessionMetrics` table
 - [x] B.7: Indexes (per spec 3.4)
 - [x] B.8: `pnpm db:generate` + `pnpm db:migrate`
-- [ ] B.9: Social/Engagement Schema (MVP)
-  - [ ] `workout_checkins`（daily check-in + streak）
+- [ ] B.9: Social/Privacy Schema (MVP)
+  - [ ] `friends` table + unique `(user_id, friend_user_id)`
+  - [ ] `crews` table
+  - [ ] `crew_members` table
+  - [ ] `template_shares` table
+  - [ ] `privacy_settings` table + unique `(user_id)`
+  - [ ] Enums: `friendStatus`, `crewRole`, `visibilityLevel`
+- [ ] B.10: Engagement Schema (MVP)
+  - [ ] `workout_checkins` + unique `(user_id, checkin_date)`
   - [ ] `activity_feed_events`
-  - [ ] `activity_likes` + unique index `(event_id, user_id)`
-  - [ ] `reminder_settings`
+  - [ ] `activity_likes` + unique `(event_id, user_id)`
+  - [ ] `reminder_settings` + unique `(user_id, reminder_type)`
   - [ ] `share_card_templates` + `share_card_renders`
   - [ ] Enums: `activityEventType`, `reminderType`, `reminderScheduleType`
-  - [ ] `pnpm db:generate` + `pnpm db:migrate`
+- [ ] B.11: Media Schema
+  - [ ] `exercise_media` table（spec 3.2）
+  - [ ] Enum: `mediaStatus` (UPLOADING | READY | FAILED)
+- [ ] B.12: Social/Engagement Indexes (spec 3.4 #12-16)
+  - [ ] `workout_checkins(user_id, checkin_date desc)`
+  - [ ] `activity_feed_events(actor_user_id, created_at desc)`
+  - [ ] `activity_feed_events(created_at desc)`
+  - [ ] `activity_likes(event_id)`
+  - [ ] `share_card_renders(user_id, created_at desc)`
+- [ ] B.13: `pnpm db:generate` + `pnpm db:migrate`
 
 ---
 
 ## Phase C: Shared Validation Schemas
 
+- [ ] `packages/shared/src/schemas/auth.ts`
 - [ ] `packages/shared/src/schemas/exercise.ts`
 - [ ] `packages/shared/src/schemas/gym.ts`
 - [ ] `packages/shared/src/schemas/template.ts`
 - [ ] `packages/shared/src/schemas/workout.ts`
 - [ ] `packages/shared/src/schemas/progress.ts`
+- [ ] `packages/shared/src/schemas/social.ts` (friends/crews)
+- [ ] `packages/shared/src/schemas/privacy.ts`
 - [ ] `packages/shared/src/schemas/checkin.ts`
 - [ ] `packages/shared/src/schemas/feed.ts`
 - [ ] `packages/shared/src/schemas/reminder.ts`
@@ -91,15 +110,21 @@
   - [ ] `exercises.service.ts`
   - [ ] `exercises.controller.ts`
   - [ ] `exercises.routes.ts`
-  - [ ] Endpoints: GET /preset, POST /custom, GET /:exerciseId
+  - [ ] Endpoints: `GET /api/exercises/preset`, `POST /api/exercises/custom`, `GET /api/exercises/:exerciseId`
 - [ ] D.2: Gyms Module (`apps/api/src/modules/gyms/`)
   - [ ] `gyms.service.ts`
   - [ ] `gyms.controller.ts`
   - [ ] `gyms.routes.ts`
-  - [ ] Endpoints: POST /, GET /
-- [ ] D.3: Unit tests
+  - [ ] Endpoints: `POST /api/gyms`, `GET /api/gyms`
+- [ ] D.3: Media Module (`apps/api/src/modules/media/`)
+  - [ ] `media.service.ts` (pre-signed URL + complete)
+  - [ ] `media.controller.ts`
+  - [ ] `media.routes.ts`
+  - [ ] Endpoints: `POST /api/media/upload-url`, `POST /api/media/complete`
+- [ ] D.4: Unit tests
   - [ ] `exercises.service.test.ts`
   - [ ] `gyms.service.test.ts`
+  - [ ] `media.service.test.ts`
 
 ---
 
@@ -121,6 +146,7 @@
   - [ ] Create gym → list gyms
   - [ ] Create custom exercise → get by id
   - [ ] List preset exercises
+  - [ ] Upload media URL → complete → bind to exercise
 - [ ] D+.4: Social/Engagement integration baseline
   - [ ] Test fixture: friendship relation + privacy setting seed
   - [ ] Test fixture: completed workout + check-in seed
@@ -134,7 +160,11 @@
   - [ ] `templates.service.ts` (CRUD + versioning)
   - [ ] `templates.controller.ts`
   - [ ] `templates.routes.ts`
-  - [ ] 9 endpoints (CRUD + items + versions + share)
+  - [ ] 9 endpoints per spec 4.6:
+    - POST / GET / GET /:id / PATCH /:id (template CRUD)
+    - POST /:id/items / PATCH /:id/items/:itemId / DELETE /:id/items/:itemId
+    - GET /:id/versions
+    - POST /:id/share
 - [ ] E.T: Unit + integration tests
   - [ ] `templates.service.test.ts`
   - [ ] Integration: CRUD + items + versioning flow
@@ -147,7 +177,12 @@
   - [ ] `workouts.service.ts` (start, sets, finish, history, past edit)
   - [ ] `workouts.controller.ts`
   - [ ] `workouts.routes.ts`
-  - [ ] 10 endpoints
+  - [ ] 10 endpoints per spec 4.7:
+    - POST /start / GET /:sessionId / PATCH /:sessionId
+    - PATCH /:sessionId/items/:itemId / POST /:sessionId/items
+    - POST /:sessionId/sets / PATCH /:sessionId/sets/:setId / DELETE /:sessionId/sets/:setId
+    - POST /:sessionId/finish
+    - GET /history
 - [ ] F.T: Unit + integration tests
   - [ ] `workouts.service.test.ts`
   - [ ] Integration: full workout flow (spec 11)
@@ -181,8 +216,14 @@
   - [ ] `social.service.ts`
   - [ ] `social.controller.ts`
   - [ ] `social.routes.ts`
-  - [ ] Endpoints: friends invite/accept/latest-workout + crews create/list/add-member
-  - [ ] Endpoint: `PUT /api/privacy-settings`
+  - [ ] Endpoints per spec 4.11 + 4.12:
+    - `POST /api/friends/invite`
+    - `POST /api/friends/:friendId/accept`
+    - `GET /api/friends` (list friends)
+    - `GET /api/friends/:friendId/latest-workout`
+    - `POST /api/crews` / `GET /api/crews` / `POST /api/crews/:crewId/members`
+    - `PUT /api/privacy-settings`
+  - [ ] Privacy guard middleware (spec 6.9): filter by `privacy_settings` before returning data
   - [ ] Free-Lite guard: max 1 crew per owner
   - [ ] Free-Lite guard: max 2 members per crew
   - [ ] Over-limit error contract: `422 FREE_TIER_LIMIT_EXCEEDED`
@@ -193,7 +234,8 @@
   - [ ] Endpoint: `POST /api/checkins`（idempotent per day）
   - [ ] Endpoint: `GET /api/checkins`
   - [ ] Endpoint: `GET /api/dashboard`
-  - [ ] Streak computation + aggregation query
+  - [ ] Streak computation (spec 6.12): streak_count +1 / reset / maintain logic
+  - [ ] Dashboard aggregation query (spec 3.6: Dashboard Summary)
 - [ ] G.5.3: Activity Feed & Likes (`apps/api/src/modules/feed/`)
   - [ ] `feed.service.ts`
   - [ ] `feed.controller.ts`
@@ -201,7 +243,8 @@
   - [ ] Endpoint: `GET /api/feed`（cursor pagination）
   - [ ] Endpoint: `POST /api/feed/:eventId/likes`
   - [ ] Endpoint: `DELETE /api/feed/:eventId/likes`
-  - [ ] Feed event producer: workout started/completed + check-in created
+  - [ ] Feed event pipeline (spec 6.13): produce events on workout start/complete + check-in
+  - [ ] Like deduplication (spec 6.14): unique `(event_id, user_id)`, hard delete on unlike
 - [ ] G.5.4: Profile (`apps/api/src/modules/profile/`)
   - [ ] `profile.service.ts`
   - [ ] `profile.controller.ts`
@@ -221,12 +264,17 @@
   - [ ] Endpoint: `POST /api/share-cards/render`
   - [ ] Plan guard: free = FREE templates only
 - [ ] G.5.T: Unit + integration tests
-  - [ ] Check-in idempotency + streak transitions
-  - [ ] Feed visibility respects privacy settings
+  - [ ] Check-in idempotency: same day upsert, streak +1 / reset / maintain
+  - [ ] Feed visibility respects privacy settings (privacy guard integration)
+  - [ ] Feed cursor pagination returns correct order
   - [ ] Like deduplication `(event_id, user_id)` unique
   - [ ] Dashboard summary aggregation correctness
   - [ ] Reminder update validation + timezone handling
-  - [ ] Share card template entitlement (FREE/PRO)
+  - [ ] Share card template entitlement (FREE/PRO) + `403 PLAN_REQUIRED`
+  - [ ] Friends invite → accept → list → latest-workout flow
+  - [ ] Crew free-limit: second crew → `422 FREE_TIER_LIMIT_EXCEEDED`
+  - [ ] Crew member limit: third member → `422 FREE_TIER_LIMIT_EXCEEDED`
+  - [ ] Profile endpoint respects privacy settings (date/records separately)
 
 ---
 
@@ -359,13 +407,30 @@
 
 ## Deferred (not in Phase 1)
 
+### MVP 2
+
+- [ ] Achievement system DB: `achievement_definitions`, `achievement_events`, `user_achievements` (spec 3.1.2)
+- [ ] Achievement API: `GET /api/achievements`, `GET /api/achievements/timeline` (spec 4.13)
+- [ ] Achievement trigger engine (spec 6.10)
+- [ ] Weekly challenges
+- [ ] Friends leaderboard
+
+### MVP 3
+
+- [ ] Profile customization (paid)
+
+### Auth
+
 - [ ] Google OAuth (`POST /api/auth/google`)
-- [ ] Media/S3 upload (custom exercise images)
-- [ ] MVP 2: weekly challenges
-- [ ] MVP 2: achievement progression experience
-- [ ] MVP 2: friends leaderboard
-- [ ] MVP 3: profile customization (paid)
-- [ ] Pro analytics: e1RM chart, weekly muscle volume, weekly adherence
+
+### Pro (Paid)
+
+- [ ] Pro analytics: e1RM chart, weekly muscle volume, weekly adherence (spec 4.8 Pro)
 - [ ] Pro logging: RPE/RIR set logging + analytics
-- [ ] Pro goals module: weekly target + adherence mode
+- [ ] Pro goals module: `GET/PUT /api/goals/training` (spec 4.10)
+- [ ] Pro DB: `user_training_goals`, `user_gym_exercise_adjustments` (spec 3.1.1)
+- [ ] Pro enums: `muscleGroup`, `adherenceMode` (spec 3.5 #8-9)
+
+### Infrastructure
+
 - [ ] Rate limiting
