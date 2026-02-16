@@ -3,6 +3,7 @@ export * from './exercises.js';
 export * from './gym.js';
 export * from './metric.js';
 export * from './refresh-token.js';
+export * from './social.js';
 export * from './template.js';
 export * from './user.js';
 export * from './workout.js';
