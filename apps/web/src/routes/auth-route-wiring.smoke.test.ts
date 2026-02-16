@@ -25,7 +25,7 @@ async function loadRouter(initialPath: string): Promise<SmokeRouter> {
   return router
 }
 
-function getMatchedRouteIds(router: SmokeRouter): string[] {
+function getMatchedRouteIds(router: SmokeRouter): Array<string> {
   return router.state.matches.map((match) => match.routeId)
 }
 

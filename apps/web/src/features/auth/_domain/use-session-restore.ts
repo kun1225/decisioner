@@ -3,8 +3,8 @@ import { useCallback } from 'react'
 import { me, refresh } from './auth-api'
 import { isUnauthorizedError } from './auth-errors'
 import { useAuthSession } from './auth-session-store'
-import { clearAccessToken, getAccessToken, setAccessToken } from './token-storage'
 import type { AuthUser } from './auth-types'
+import { clearAccessToken, getAccessToken, setAccessToken } from './token-storage'
 
 type RestoreDependencies = {
   readAccessToken: () => string | null

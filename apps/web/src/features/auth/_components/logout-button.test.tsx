@@ -13,7 +13,7 @@ vi.mock('../_domain/auth-session-store', () => ({
 }))
 
 vi.mock('../_domain/logout-action', () => ({
-  performLogout: (...args: unknown[]) => performLogoutMock(...args),
+  performLogout: (...args: Array<unknown>) => performLogoutMock(...args),
 }))
 
 describe('logout-button', () => {

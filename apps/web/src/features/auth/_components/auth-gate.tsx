@@ -1,23 +1,25 @@
-import { useAuthSession } from '../_domain/auth-session-store'
+import { useAuthSession } from '../_domain/auth-session-store';
 
 export function buildReLoginHref(currentPath: string): string {
-  const redirect = currentPath || '/'
-  return `/auth/login?redirect=${encodeURIComponent(redirect)}`
+  const redirect = currentPath || '/';
+  return `/auth/login?redirect=${encodeURIComponent(redirect)}`;
 }
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const {
     state: { status },
-  } = useAuthSession()
+  } = useAuthSession();
 
   if (status === 'idle' || status === 'restoring') {
-    return <p className="p-6 text-sm text-muted-foreground">Restoring session...</p>
+    return (
+      <p className="p-6 text-sm text-muted-foreground">Restoring session...</p>
+    );
   }
 
   if (status === 'guest') {
     const reloginHref = buildReLoginHref(
       `${window.location.pathname}${window.location.search}`,
-    )
+    );
 
     return (
       <section className="p-6 mx-auto max-w-lg grid gap-3">
@@ -32,8 +34,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
           Sign In Again
         </a>
       </section>
-    )
+    );
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }

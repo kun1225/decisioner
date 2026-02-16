@@ -8,8 +8,8 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import Header from '../components/Header'
-import { AuthSessionProvider } from '../features/auth/_domain/auth-session-store'
 import { SessionRestoreBootstrap } from '../features/auth/_components/session-restore-bootstrap'
+import { AuthSessionProvider } from '../features/auth/_domain/auth-session-store'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 

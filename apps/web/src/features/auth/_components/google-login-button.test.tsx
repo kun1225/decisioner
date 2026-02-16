@@ -9,12 +9,12 @@ const googleLoginMock = vi.fn()
 const setAccessTokenMock = vi.fn()
 
 vi.mock('../_domain/google-login', () => ({
-  googleLogin: (...args: unknown[]) => googleLoginMock(...args),
+  googleLogin: (...args: Array<unknown>) => googleLoginMock(...args),
   isGoogleLoginEnabled: () => false,
 }))
 
 vi.mock('../_domain/token-storage', () => ({
-  setAccessToken: (...args: unknown[]) => setAccessTokenMock(...args),
+  setAccessToken: (...args: Array<unknown>) => setAccessTokenMock(...args),
 }))
 
 describe('google-login-button', () => {

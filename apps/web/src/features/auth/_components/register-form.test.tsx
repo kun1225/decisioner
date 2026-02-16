@@ -9,11 +9,11 @@ const registerMock = vi.fn()
 const setAccessTokenMock = vi.fn()
 
 vi.mock('../_domain/auth-api', () => ({
-  register: (...args: unknown[]) => registerMock(...args),
+  register: (...args: Array<unknown>) => registerMock(...args),
 }))
 
 vi.mock('../_domain/token-storage', () => ({
-  setAccessToken: (...args: unknown[]) => setAccessTokenMock(...args),
+  setAccessToken: (...args: Array<unknown>) => setAccessTokenMock(...args),
 }))
 
 describe('register-form', () => {

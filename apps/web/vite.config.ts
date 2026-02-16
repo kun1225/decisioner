@@ -5,7 +5,8 @@ import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
-import { type PluginOption, defineConfig } from 'vite'
+import type {PluginOption} from 'vite';
+import { defineConfig } from 'vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 const isTest = process.env.VITEST === 'true'
@@ -33,7 +34,7 @@ const config = defineConfig({
         plugins: ['babel-plugin-react-compiler'],
       },
     }),
-  ].filter(Boolean) as PluginOption[],
+  ].filter(Boolean) as Array<PluginOption>,
   test: {
     globals: true,
     environment: 'jsdom',

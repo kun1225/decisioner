@@ -9,11 +9,11 @@ const loginMock = vi.fn()
 const setAccessTokenMock = vi.fn()
 
 vi.mock('../_domain/auth-api', () => ({
-  login: (...args: unknown[]) => loginMock(...args),
+  login: (...args: Array<unknown>) => loginMock(...args),
 }))
 
 vi.mock('../_domain/token-storage', () => ({
-  setAccessToken: (...args: unknown[]) => setAccessTokenMock(...args),
+  setAccessToken: (...args: Array<unknown>) => setAccessTokenMock(...args),
 }))
 
 describe('login-form', () => {

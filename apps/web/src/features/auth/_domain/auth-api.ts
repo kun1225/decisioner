@@ -1,7 +1,10 @@
-import { loginSchema, registerSchema, type LoginInput, type RegisterInput } from '@repo/shared/auth'
+import type {LoginInput, RegisterInput} from '@repo/shared/auth';
+import {  loginSchema, registerSchema } from '@repo/shared/auth'
 
-import { AuthApiError, mapAuthApiError } from './auth-errors'
-import { normalizeAuthUser, type AuthUser } from './auth-types'
+import type { AuthApiError} from './auth-errors';
+import { mapAuthApiError } from './auth-errors'
+import type {AuthUser} from './auth-types';
+import { normalizeAuthUser } from './auth-types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000'
 const AUTH_BASE_URL = `${API_BASE_URL}/api/auth`
