@@ -15,4 +15,8 @@ describe('auth.login redirect', () => {
     expect(normalizeRedirectTarget('https://evil.example.com')).toBe('/');
     expect(normalizeRedirectTarget('//evil.example.com')).toBe('/');
   });
+
+  it('rejects javascript pseudo-protocol redirects', () => {
+    expect(normalizeRedirectTarget('javascript:alert(1)')).toBe('/');
+  });
 });

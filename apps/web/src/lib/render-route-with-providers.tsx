@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { RouteComponent } from '@tanstack/react-router';
 import {
   createMemoryHistory,
   createRootRoute,
@@ -11,7 +12,7 @@ import { render } from '@testing-library/react';
 
 export function renderRouteWithProviders(options: {
   path: string;
-  component: React.ComponentType;
+  component: RouteComponent;
 }) {
   const queryClient = new QueryClient({
     defaultOptions: {

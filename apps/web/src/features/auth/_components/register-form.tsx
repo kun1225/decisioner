@@ -137,10 +137,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
       <FieldError>{errorMessage}</FieldError>
 
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Creating...' : 'Create Account'}
       </Button>
     </form>

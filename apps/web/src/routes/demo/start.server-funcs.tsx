@@ -17,8 +17,12 @@ const loggedServerFunction = createServerFn({ method: "GET" }).middleware([
 */
 
 const TODOS_FILE = 'todos.json';
+type Todo = {
+  id: number;
+  name: string;
+};
 
-async function readTodos() {
+async function readTodos(): Promise<Array<Todo>> {
   return JSON.parse(
     await fs.promises.readFile(TODOS_FILE, 'utf-8').catch(() =>
       JSON.stringify(
@@ -30,7 +34,7 @@ async function readTodos() {
         2,
       ),
     ),
-  );
+  ) as Array<Todo>;
 }
 
 const getTodos = createServerFn({
@@ -53,15 +57,15 @@ export const Route = createFileRoute('/demo/start/server-funcs')({
 
 function Home() {
   const router = useRouter();
-  let todos = Route.useLoaderData();
+  const todos = Route.useLoaderData();
 
   const [todo, setTodo] = useState('');
 
   const submitTodo = useCallback(async () => {
-    todos = await addTodo({ data: todo });
+    await addTodo({ data: todo });
     setTodo('');
-    router.invalidate();
-  }, [addTodo, todo]);
+    await router.invalidate();
+  }, [router, todo]);
 
   return (
     <div

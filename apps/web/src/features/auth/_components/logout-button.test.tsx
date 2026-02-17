@@ -5,6 +5,23 @@ import { renderWithProviders } from '@/lib/render-with-providers';
 
 import { LogoutButton } from './logout-button';
 
+function createDeferred() {
+  let resolve: (() => void) | null = null;
+  const promise = new Promise<void>((resolver) => {
+    resolve = resolver;
+  });
+
+  return {
+    promise,
+    resolve() {
+      if (!resolve) {
+        throw new Error('Deferred resolver is not initialized');
+      }
+      resolve();
+    },
+  };
+}
+
 const useAuthSessionMock = vi.fn();
 const performLogoutMock = vi.fn();
 
@@ -59,13 +76,8 @@ describe('logout-button', () => {
   });
 
   it('shows pending state while logout request is in progress', async () => {
-    let resolveLogout: (() => void) | null = null;
-    performLogoutMock.mockImplementation(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveLogout = resolve;
-        }),
-    );
+    const deferred = createDeferred();
+    performLogoutMock.mockImplementation(() => deferred.promise);
     useAuthSessionMock.mockReturnValue({
       state: {
         status: 'authenticated',
@@ -82,7 +94,7 @@ describe('logout-button', () => {
       screen.getByRole('button', { name: 'Signing Out...' }),
     ).toBeDefined();
 
-    resolveLogout?.();
+    deferred.resolve();
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Sign Out' })).toBeDefined();
     });

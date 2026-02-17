@@ -5,6 +5,23 @@ import { renderWithProviders } from '@/lib/render-with-providers';
 
 import { LoginForm } from './login-form';
 
+function createDeferred<T>() {
+  let resolve: ((value: T) => void) | null = null;
+  const promise = new Promise<T>((resolver) => {
+    resolve = resolver;
+  });
+
+  return {
+    promise,
+    resolve(value: T) {
+      if (!resolve) {
+        throw new Error('Deferred resolver is not initialized');
+      }
+      resolve(value);
+    },
+  };
+}
+
 const loginMock = vi.fn();
 const setAccessTokenMock = vi.fn();
 
@@ -75,13 +92,8 @@ describe('login-form', () => {
   });
 
   it('shows submitting text while login is pending', async () => {
-    let resolveLogin: ((value: { accessToken: string }) => void) | null = null;
-    loginMock.mockImplementation(
-      () =>
-        new Promise<{ accessToken: string }>((resolve) => {
-          resolveLogin = resolve;
-        }),
-    );
+    const deferred = createDeferred<{ accessToken: string }>();
+    loginMock.mockImplementation(() => deferred.promise);
 
     renderWithProviders(<LoginForm />);
 
@@ -95,9 +107,7 @@ describe('login-form', () => {
 
     expect(screen.getByRole('button', { name: 'Signing In...' })).toBeDefined();
 
-    if (resolveLogin) {
-      resolveLogin({ accessToken: 'token-1' });
-    }
+    deferred.resolve({ accessToken: 'token-1' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'Sign In' })).toBeDefined();

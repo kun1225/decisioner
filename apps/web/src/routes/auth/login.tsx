@@ -1,4 +1,4 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link, useRouter } from '@tanstack/react-router';
 
 import {
   Card,
@@ -30,7 +30,7 @@ export const Route = createFileRoute('/auth/login')({
 });
 
 function LoginPage() {
-  const navigate = Route.useNavigate();
+  const router = useRouter();
   const { redirect } = Route.useSearch();
 
   return (
@@ -42,8 +42,8 @@ function LoginPage() {
         </CardHeader>
         <CardContent className="grid gap-4">
           <LoginForm
-            onSuccess={async () => {
-              await navigate({ href: redirect });
+            onSuccess={() => {
+              router.history.push(redirect);
             }}
           />
           <GoogleLoginButton />

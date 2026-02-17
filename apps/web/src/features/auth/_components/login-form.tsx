@@ -99,10 +99,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
       <FieldError>{errorMessage}</FieldError>
 
-      <Button
-        type="submit"
-        disabled={isSubmitting}
-      >
+      <Button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Signing In...' : 'Sign In'}
       </Button>
     </form>

@@ -17,4 +17,8 @@ describe('auth.register redirect', () => {
     );
     expect(normalizeRegisterRedirectTarget('//evil.example.com')).toBe('/');
   });
+
+  it('rejects javascript pseudo-protocol redirects', () => {
+    expect(normalizeRegisterRedirectTarget('javascript:alert(1)')).toBe('/');
+  });
 });

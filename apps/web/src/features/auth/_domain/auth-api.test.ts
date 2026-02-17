@@ -116,11 +116,12 @@ describe('auth-api', () => {
       .mockResolvedValue(new Response('not-json', { status: 500 }));
     globalThis.fetch = fetchSpy as typeof fetch;
 
-    await expect(login({ email: 'joy@example.com', password: 'Strong@123' }))
-      .rejects.toMatchObject({
-        status: 500,
-        message: 'Request failed',
-      });
+    await expect(
+      login({ email: 'joy@example.com', password: 'Strong@123' }),
+    ).rejects.toMatchObject({
+      status: 500,
+      message: 'Request failed',
+    });
   });
 
   it('omits content-type header for GET me endpoint', async () => {
