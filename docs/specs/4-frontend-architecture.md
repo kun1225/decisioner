@@ -2,21 +2,21 @@
 
 ## 4.1 Routes
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Dashboard |
-| `/templates` | Template list/create/edit |
-| `/train/start` | Start workout from gym/template |
-| `/train/$sessionId` | Workout editor (in-progress + history edit) |
-| `/workouts/history` | Workout history list |
-| `/progress` | Exercise progress charts |
-| `/friends` | Friends management |
-| `/crews` | Crew management |
-| `/feed` | Friend activity feed |
-| `/checkins` | Daily check-in list/streak |
-| `/users/$userId` | Public profile |
-| `/settings/privacy` | Privacy settings |
-| `/settings/reminders` | Reminder settings |
+| Route                 | Purpose                                     |
+| --------------------- | ------------------------------------------- |
+| `/`                   | Dashboard                                   |
+| `/templates`          | Template list/create/edit                   |
+| `/train/start`        | Start workout from gym/template             |
+| `/train/$sessionId`   | Workout editor (in-progress + history edit) |
+| `/workouts/history`   | Workout history list                        |
+| `/progress`           | Exercise progress charts                    |
+| `/friends`            | Friends management                          |
+| `/crews`              | Crew management                             |
+| `/feed`               | Friend activity feed                        |
+| `/checkins`           | Daily check-in list/streak                  |
+| `/users/$userId`      | Public profile                              |
+| `/settings/privacy`   | Privacy settings                            |
+| `/settings/reminders` | Reminder settings                           |
 
 ## 4.2 Feature Boundaries
 

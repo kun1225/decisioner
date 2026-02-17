@@ -1,9 +1,9 @@
-import type { AccessTokenPayload } from '@repo/auth/types'
+import type { AccessTokenPayload } from '@repo/auth/types';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: AccessTokenPayload
+      user?: AccessTokenPayload;
     }
   }
 }

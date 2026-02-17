@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const registerSchema = z
   .object({
@@ -23,17 +23,17 @@ export const registerSchema = z
       error: 'Passwords do not match',
       path: ['confirmedPassword'],
     }),
-  )
+  );
 
 export const loginSchema = z.object({
   email: z.email({ error: 'Invalid email address' }),
   password: z.string().min(1, { error: 'Password is required' }),
-})
+});
 
 export const googleLoginSchema = z.object({
   idToken: z.string().min(1, { error: 'idToken is required' }),
-})
+});
 
-export type RegisterInput = z.infer<typeof registerSchema>
-export type LoginInput = z.infer<typeof loginSchema>
-export type GoogleLoginInput = z.infer<typeof googleLoginSchema>
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type GoogleLoginInput = z.infer<typeof googleLoginSchema>;
