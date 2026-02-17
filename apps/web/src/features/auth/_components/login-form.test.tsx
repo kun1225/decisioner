@@ -73,4 +73,34 @@ describe('login-form', () => {
 
     expect(await screen.findByText('Invalid email or password')).toBeDefined();
   });
+
+  it('shows submitting text while login is pending', async () => {
+    let resolveLogin: ((value: { accessToken: string }) => void) | null = null;
+    loginMock.mockImplementation(
+      () =>
+        new Promise<{ accessToken: string }>((resolve) => {
+          resolveLogin = resolve;
+        }),
+    );
+
+    renderWithProviders(<LoginForm />);
+
+    fireEvent.change(screen.getByLabelText('Email'), {
+      target: { value: 'joy@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText('Password'), {
+      target: { value: 'Strong@123' },
+    });
+    fireEvent.submit(screen.getByRole('button', { name: 'Sign In' }));
+
+    expect(screen.getByRole('button', { name: 'Signing In...' })).toBeDefined();
+
+    if (resolveLogin) {
+      resolveLogin({ accessToken: 'token-1' });
+    }
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Sign In' })).toBeDefined();
+    });
+  });
 });

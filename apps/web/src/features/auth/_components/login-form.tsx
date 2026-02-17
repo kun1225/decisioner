@@ -2,6 +2,16 @@ import { useState } from 'react';
 
 import { loginSchema } from '@repo/shared/auth';
 
+import { Button } from '@/components/ui/button';
+import {
+  Field,
+  FieldContent,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+
 import { login } from '../_domain/auth-api';
 import { mapAuthApiError } from '../_domain/auth-errors';
 import { setAccessToken } from '../_domain/token-storage';
@@ -47,55 +57,54 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4">
-      <div className="grid gap-2">
-        <label htmlFor="auth-login-email">Email</label>
-        <input
-          id="auth-login-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          value={value.email}
-          onChange={(event) =>
-            setValue((previous) => ({
-              ...previous,
-              email: event.target.value,
-            }))
-          }
-          className="border rounded-md px-3 py-2"
-        />
-      </div>
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="auth-login-email">Email</FieldLabel>
+          <FieldContent>
+            <Input
+              id="auth-login-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={value.email}
+              onChange={(event) =>
+                setValue((previous) => ({
+                  ...previous,
+                  email: event.target.value,
+                }))
+              }
+            />
+          </FieldContent>
+        </Field>
 
-      <div className="grid gap-2">
-        <label htmlFor="auth-login-password">Password</label>
-        <input
-          id="auth-login-password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          value={value.password}
-          onChange={(event) =>
-            setValue((previous) => ({
-              ...previous,
-              password: event.target.value,
-            }))
-          }
-          className="border rounded-md px-3 py-2"
-        />
-      </div>
+        <Field>
+          <FieldLabel htmlFor="auth-login-password">Password</FieldLabel>
+          <FieldContent>
+            <Input
+              id="auth-login-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              value={value.password}
+              onChange={(event) =>
+                setValue((previous) => ({
+                  ...previous,
+                  password: event.target.value,
+                }))
+              }
+            />
+          </FieldContent>
+        </Field>
+      </FieldGroup>
 
-      {errorMessage ? (
-        <p className="text-sm text-red-600" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
+      <FieldError>{errorMessage}</FieldError>
 
-      <button
+      <Button
         type="submit"
-        className="rounded-md px-4 py-2 bg-primary text-primary-foreground"
         disabled={isSubmitting}
       >
         {isSubmitting ? 'Signing In...' : 'Sign In'}
-      </button>
+      </Button>
     </form>
   );
 }
