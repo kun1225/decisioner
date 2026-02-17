@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeRedirectTarget } from './auth.login';
+import { normalizeRedirectTarget } from './login';
 
 describe('auth.login redirect', () => {
   it('defaults to root for missing values', () => {

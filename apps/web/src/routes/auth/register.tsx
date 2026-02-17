@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-
 import { RegisterForm } from '@/features/auth/_components/register-form';
 
 export function normalizeRegisterRedirectTarget(input?: string): string {
@@ -32,7 +31,7 @@ function RegisterPage() {
       </p>
       <RegisterForm
         onSuccess={async () => {
-          await navigate({ to: redirect });
+          await navigate({ href: redirect });
         }}
       />
     </main>

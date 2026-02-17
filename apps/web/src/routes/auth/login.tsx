@@ -1,0 +1,66 @@
+import { Link, createFileRoute } from '@tanstack/react-router';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { GoogleLoginButton } from '@/features/auth/_components/google-login-button';
+import { LoginForm } from '@/features/auth/_components/login-form';
+
+export function normalizeRedirectTarget(input?: string): string {
+  if (!input || !input.startsWith('/') || input.startsWith('//')) {
+    return '/';
+  }
+
+  return input;
+}
+
+export const Route = createFileRoute('/auth/login')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect:
+      typeof search.redirect === 'string'
+        ? normalizeRedirectTarget(search.redirect)
+        : '/',
+  }),
+  component: LoginPage,
+});
+
+function LoginPage() {
+  const navigate = Route.useNavigate();
+  const { redirect } = Route.useSearch();
+
+  return (
+    <main className="mx-auto w-full max-w-md p-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Sign In</CardTitle>
+          <CardDescription>Use your account to continue.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <LoginForm
+            onSuccess={async () => {
+              await navigate({ href: redirect });
+            }}
+          />
+          <GoogleLoginButton />
+        </CardContent>
+        <CardFooter className="text-sm text-muted-foreground">
+          <span>
+            New here?{' '}
+            <Link
+              to="/auth/register"
+              search={{ redirect }}
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              Create account
+            </Link>
+          </span>
+        </CardFooter>
+      </Card>
+    </main>
+  );
+}

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { buildReLoginHref } from '@/features/auth/_components/auth-gate';
 
-import { normalizeRedirectTarget } from './auth.login';
-import { normalizeRegisterRedirectTarget } from './auth.register';
+import { normalizeRedirectTarget } from './login';
+import { normalizeRegisterRedirectTarget } from './register';
 
 function decodeRedirect(href: string): string {
   const url = new URL(href, 'https://example.test');

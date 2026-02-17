@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { normalizeRegisterRedirectTarget } from './auth.register';
+import { normalizeRegisterRedirectTarget } from './register';
 
 describe('auth.register redirect', () => {
   it('defaults to root path', () => {

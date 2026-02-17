@@ -63,7 +63,10 @@ describe('auth route wiring smoke', () => {
   it('navigates from /auth/login to /auth/register', async () => {
     const router = await loadRouter('/auth/login');
 
-    await router.navigate({ to: '/auth/register' });
+    await router.navigate({
+      to: '/auth/register',
+      search: { redirect: '/' },
+    });
 
     expect(router.state.location.pathname).toBe('/auth/register');
     expect(getMatchedRouteIds(router)).toContain('/auth/register');
@@ -72,7 +75,10 @@ describe('auth route wiring smoke', () => {
   it('navigates from /auth/register to /auth/login', async () => {
     const router = await loadRouter('/auth/register');
 
-    await router.navigate({ to: '/auth/login' });
+    await router.navigate({
+      to: '/auth/login',
+      search: { redirect: '/' },
+    });
 
     expect(router.state.location.pathname).toBe('/auth/login');
     expect(getMatchedRouteIds(router)).toContain('/auth/login');
@@ -90,7 +96,10 @@ describe('auth route wiring smoke', () => {
   it('navigates from /demo/start/api-request back to /auth/login', async () => {
     const router = await loadRouter('/demo/start/api-request');
 
-    await router.navigate({ to: '/auth/login' });
+    await router.navigate({
+      to: '/auth/login',
+      search: { redirect: '/' },
+    });
 
     expect(router.state.location.pathname).toBe('/auth/login');
     expect(getMatchedRouteIds(router)).toContain('/auth/login');
