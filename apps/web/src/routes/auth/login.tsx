@@ -10,20 +10,13 @@ import {
 } from '@/components/ui/card';
 import { GoogleLoginButton } from '@/features/auth/_components/google-login-button';
 import { LoginForm } from '@/features/auth/_components/login-form';
-
-export function normalizeRedirectTarget(input?: string): string {
-  if (!input || !input.startsWith('/') || input.startsWith('//')) {
-    return '/';
-  }
-
-  return input;
-}
+import { normalizeRedirectPath } from '@/lib/auth-utils';
 
 export const Route = createFileRoute('/auth/login')({
   validateSearch: (search: Record<string, unknown>) => ({
     redirect:
       typeof search.redirect === 'string'
-        ? normalizeRedirectTarget(search.redirect)
+        ? normalizeRedirectPath(search.redirect)
         : '/',
   }),
   component: LoginPage,

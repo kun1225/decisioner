@@ -9,20 +9,13 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { RegisterForm } from '@/features/auth/_components/register-form';
-
-export function normalizeRegisterRedirectTarget(input?: string): string {
-  if (!input || !input.startsWith('/') || input.startsWith('//')) {
-    return '/';
-  }
-
-  return input;
-}
+import { normalizeRedirectPath } from '@/lib/auth-utils';
 
 export const Route = createFileRoute('/auth/register')({
   validateSearch: (search: Record<string, unknown>) => ({
     redirect:
       typeof search.redirect === 'string'
-        ? normalizeRegisterRedirectTarget(search.redirect)
+        ? normalizeRedirectPath(search.redirect)
         : '/',
   }),
   component: RegisterPage,

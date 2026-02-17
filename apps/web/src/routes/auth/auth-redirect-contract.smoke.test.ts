@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { buildReLoginHref } from '@/features/auth/_components/auth-gate';
-
-import { normalizeRedirectTarget } from './login';
-import { normalizeRegisterRedirectTarget } from './register';
+import { normalizeRedirectPath } from '@/lib/auth-utils';
 
 function decodeRedirect(href: string): string {
   const url = new URL(href, 'https://example.test');
@@ -19,7 +17,7 @@ describe('auth redirect contract smoke', () => {
   it('keeps encoded redirect safe after decode-normalize on login route', () => {
     const href = buildReLoginHref('/progress?tab=weekly');
     const decodedRedirect = decodeRedirect(href);
-    const normalized = normalizeRedirectTarget(decodedRedirect);
+    const normalized = normalizeRedirectPath(decodedRedirect);
 
     expect(normalized).toBe('/progress?tab=weekly');
   });
@@ -27,27 +25,18 @@ describe('auth redirect contract smoke', () => {
   it('keeps encoded redirect safe after decode-normalize on register route', () => {
     const href = buildReLoginHref('/train/start');
     const decodedRedirect = decodeRedirect(href);
-    const normalized = normalizeRegisterRedirectTarget(decodedRedirect);
+    const normalized = normalizeRedirectPath(decodedRedirect);
 
     expect(normalized).toBe('/train/start');
   });
 
   it('drops protocol-relative redirects consistently', () => {
-    const normalizedLogin = normalizeRedirectTarget('//evil.example');
-    const normalizedRegister =
-      normalizeRegisterRedirectTarget('//evil.example');
-
-    expect(normalizedLogin).toBe('/');
-    expect(normalizedRegister).toBe('/');
+    const normalized = normalizeRedirectPath('//evil.example');
+    expect(normalized).toBe('/');
   });
 
   it('drops absolute protocol redirects consistently', () => {
-    const normalizedLogin = normalizeRedirectTarget('https://evil.example');
-    const normalizedRegister = normalizeRegisterRedirectTarget(
-      'https://evil.example',
-    );
-
-    expect(normalizedLogin).toBe('/');
-    expect(normalizedRegister).toBe('/');
+    const normalized = normalizeRedirectPath('https://evil.example');
+    expect(normalized).toBe('/');
   });
 });
