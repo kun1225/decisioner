@@ -1,4 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { RegisterForm } from '@/features/auth/_components/register-form';
 
 export function normalizeRegisterRedirectTarget(input?: string): string {
@@ -25,15 +34,33 @@ function RegisterPage() {
 
   return (
     <main className="mx-auto w-full max-w-md p-6">
-      <h1 className="text-2xl font-semibold mb-4">Create Account</h1>
-      <p className="text-sm text-muted-foreground mb-5">
-        Register to secure your training data.
-      </p>
-      <RegisterForm
-        onSuccess={async () => {
-          await navigate({ href: redirect });
-        }}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>Create Account</CardTitle>
+          <CardDescription>
+            Register to secure your training data.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <RegisterForm
+            onSuccess={async () => {
+              await navigate({ href: redirect });
+            }}
+          />
+        </CardContent>
+        <CardFooter className="text-sm text-muted-foreground">
+          <span>
+            Already have an account?{' '}
+            <Link
+              to="/auth/login"
+              search={{ redirect }}
+              className="text-primary underline-offset-4 hover:underline"
+            >
+              Sign in
+            </Link>
+          </span>
+        </CardFooter>
+      </Card>
     </main>
   );
 }

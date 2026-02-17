@@ -1,5 +1,8 @@
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { FieldError } from '@/components/ui/field';
+
 import { mapAuthApiError } from '../_domain/auth-errors';
 import { googleLogin, isGoogleLoginEnabled } from '../_domain/google-login';
 import { setAccessToken } from '../_domain/token-storage';
@@ -25,9 +28,9 @@ export function GoogleLoginButton({
 
   return (
     <div className="grid gap-2">
-      <button
+      <Button
         type="button"
-        className="rounded-md border px-4 py-2"
+        variant="outline"
         disabled={isSubmitting}
         onClick={async () => {
           if (!getIdToken) {
@@ -50,12 +53,8 @@ export function GoogleLoginButton({
         }}
       >
         {isSubmitting ? 'Connecting...' : 'Continue with Google'}
-      </button>
-      {errorMessage ? (
-        <p role="alert" className="text-sm text-red-600">
-          {errorMessage}
-        </p>
-      ) : null}
+      </Button>
+      <FieldError>{errorMessage}</FieldError>
     </div>
   );
 }

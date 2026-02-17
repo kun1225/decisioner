@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 import { logout } from '../_domain/auth-api';
 import { useAuthSession } from '../_domain/auth-session-store';
 import { performLogout } from '../_domain/logout-action';
@@ -17,9 +19,10 @@ export function LogoutButton() {
   }
 
   return (
-    <button
+    <Button
       type="button"
-      className="rounded-md border border-white/30 px-3 py-2 text-sm hover:bg-white/10"
+      variant="outline"
+      size="sm"
       disabled={isSubmitting}
       onClick={async () => {
         setIsSubmitting(true);
@@ -32,6 +35,6 @@ export function LogoutButton() {
       }}
     >
       {isSubmitting ? 'Signing Out...' : 'Sign Out'}
-    </button>
+    </Button>
   );
 }

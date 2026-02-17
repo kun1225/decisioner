@@ -1,3 +1,6 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { buttonVariants } from '@/components/ui/button';
+
 import { useAuthSession } from '../_domain/auth-session-store';
 
 export function buildReLoginHref(currentPath: string): string {
@@ -12,7 +15,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (status === 'idle' || status === 'restoring') {
     return (
-      <p className="p-6 text-sm text-muted-foreground">Restoring session...</p>
+      <Card className="mx-auto mt-6 max-w-lg">
+        <CardContent>
+          <p className="text-sm text-muted-foreground">Restoring session...</p>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -22,18 +29,22 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     );
 
     return (
-      <section className="p-6 mx-auto max-w-lg grid gap-3">
-        <h2 className="text-xl font-semibold">Session expired</h2>
-        <p className="text-sm text-muted-foreground">
-          Please sign in again to continue.
-        </p>
-        <a
-          href={reloginHref}
-          className="inline-flex rounded-md px-4 py-2 bg-primary text-primary-foreground"
-        >
-          Sign In Again
-        </a>
-      </section>
+      <Card className="mx-auto mt-6 max-w-lg">
+        <CardHeader>
+          <CardTitle>Session expired</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <p className="text-sm text-muted-foreground">
+            Please sign in again to continue.
+          </p>
+          <a
+            href={reloginHref}
+            className={buttonVariants({ className: 'w-fit' })}
+          >
+            Sign In Again
+          </a>
+        </CardContent>
+      </Card>
     );
   }
 
