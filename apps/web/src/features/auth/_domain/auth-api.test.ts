@@ -109,4 +109,35 @@ describe('auth-api', () => {
     expect(options?.credentials).toBe('include');
     expect(options?.method).toBe('POST');
   });
+
+  it('falls back to generic message when error body is not parseable', async () => {
+    const fetchSpy = vi
+      .fn()
+      .mockResolvedValue(new Response('not-json', { status: 500 }));
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    await expect(login({ email: 'joy@example.com', password: 'Strong@123' }))
+      .rejects.toMatchObject({
+        status: 500,
+        message: 'Request failed',
+      });
+  });
+
+  it('omits content-type header for GET me endpoint', async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      createFetchResponse({
+        id: 'u-1',
+        email: 'joy@example.com',
+        name: 'Joy',
+      }),
+    );
+    globalThis.fetch = fetchSpy as typeof fetch;
+
+    await me('access-2');
+
+    const [, options] = fetchSpy.mock.calls[0];
+    const headers = options?.headers as Record<string, string>;
+    expect(headers['Content-Type']).toBeUndefined();
+    expect(headers.Accept).toBe('application/json');
+  });
 });

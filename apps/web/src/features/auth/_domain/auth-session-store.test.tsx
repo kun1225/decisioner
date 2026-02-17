@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { renderWithProviders } from '@/lib/render-with-providers';
@@ -47,5 +47,11 @@ describe('auth-session-store', () => {
     expect(screen.getByTestId('status').textContent).toBe('authenticated');
     fireEvent.click(screen.getByText('guest'));
     expect(screen.getByTestId('status').textContent).toBe('guest');
+  });
+
+  it('throws if hook is used outside provider', () => {
+    expect(() => render(<SessionFixture />)).toThrowError(
+      'useAuthSession must be used within AuthSessionProvider',
+    );
   });
 });

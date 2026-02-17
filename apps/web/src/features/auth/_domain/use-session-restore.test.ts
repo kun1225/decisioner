@@ -91,4 +91,42 @@ describe('restoreAuthSession', () => {
     expect(clearAccessToken).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ status: 'guest' });
   });
+
+  it('rethrows non-unauthorized me errors', async () => {
+    const upstreamError = new AuthApiError({
+      status: 500,
+      code: 'SERVER_ERROR',
+      message: 'internal',
+    });
+
+    await expect(
+      restoreAuthSession({
+        readAccessToken: vi.fn().mockReturnValue('token-1'),
+        saveAccessToken: vi.fn(),
+        clearAccessToken: vi.fn(),
+        fetchMe: vi.fn().mockRejectedValue(upstreamError),
+        refreshToken: vi.fn(),
+      }),
+    ).rejects.toBe(upstreamError);
+  });
+
+  it('restores from refresh when no existing token is present', async () => {
+    const result = await restoreAuthSession({
+      readAccessToken: vi.fn().mockReturnValue(null),
+      saveAccessToken: vi.fn(),
+      clearAccessToken: vi.fn(),
+      fetchMe: vi.fn().mockResolvedValue({
+        id: 'u-1',
+        email: 'joy@example.com',
+        name: 'Joy',
+      }),
+      refreshToken: vi.fn().mockResolvedValue({ accessToken: 'token-2' }),
+    });
+
+    expect(result).toMatchObject({
+      status: 'authenticated',
+      accessToken: 'token-2',
+      user: { id: 'u-1' },
+    });
+  });
 });
