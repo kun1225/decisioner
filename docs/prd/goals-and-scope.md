@@ -4,8 +4,8 @@
 
 ### Phase 1.0
 
-| Status      | Goal ID | Goal Name                           | Detail                 |
-| ----------- | ------- | ----------------------------------- | ---------------------- |
+| Status      | Goal ID | Goal Name                           | Detail                |
+| ----------- | ------- | ----------------------------------- | --------------------- |
 | Not Started | `g-01`  | Gym-aware record                    | [g-01](goals/g-01.md) |
 | Not Started | `g-02`  | Template versioning                 | [g-02](goals/g-02.md) |
 | Not Started | `g-03`  | Session adjustment                  | [g-03](goals/g-03.md) |
@@ -18,28 +18,26 @@
 | Not Started | `g-10`  | Share card                          | [g-10](goals/g-10.md) |
 | Not Started | `g-11`  | Progress charts                     | [g-11](goals/g-11.md) |
 | Not Started | `g-18`  | Authentication and session security | [g-18](goals/g-18.md) |
-| Not Started | `g-19`  | Global site header                  | [g-19](goals/g-19.md) |
-| Not Started | `g-20`  | Page-oriented frontend structure    | [g-20](goals/g-20.md) |
 
-### Phase 1.1
+### Phase 1.2
 
-| Status      | Goal ID | Goal Name           | Detail                 |
-| ----------- | ------- | ------------------- | ---------------------- |
+| Status      | Goal ID | Goal Name           | Detail                |
+| ----------- | ------- | ------------------- | --------------------- |
 | Not Started | `g-12`  | Pro analytics       | [g-12](goals/g-12.md) |
 | Not Started | `g-13`  | Gym load conversion | [g-13](goals/g-13.md) |
 
 ### Phase 2.0
 
-| Status      | Goal ID | Goal Name               | Detail                 |
-| ----------- | ------- | ----------------------- | ---------------------- |
+| Status      | Goal ID | Goal Name               | Detail                |
+| ----------- | ------- | ----------------------- | --------------------- |
 | Not Started | `g-14`  | Weekly challenge        | [g-14](goals/g-14.md) |
 | Not Started | `g-15`  | Achievement progression | [g-15](goals/g-15.md) |
 | Not Started | `g-16`  | Friends leaderboard     | [g-16](goals/g-16.md) |
 
 ### Phase 2.1
 
-| Status      | Goal ID | Goal Name             | Detail                 |
-| ----------- | ------- | --------------------- | ---------------------- |
+| Status      | Goal ID | Goal Name             | Detail                |
+| ----------- | ------- | --------------------- | --------------------- |
 | Not Started | `g-17`  | Profile customization | [g-17](goals/g-17.md) |
 
 ## Non-Goals
