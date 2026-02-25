@@ -11,7 +11,5 @@
 
 ## Goal-linked Navigation
 
-API / Data 依 `g-xx` 需求可在以下入口查找：
-
-1. `5-api-design.md`（依 domain 分段，目標對應請參考 `docs/prd/goals/*.md`）
-2. `6-data-model.md`（tables / constraints / indexes / contracts）
+各 spec 段落標題已標註對應 goal ID（例如 `## 5.2 Auth (g-18)`）。
+完整 goal 清單與連結請見 [goals-and-scope.md](../prd/goals-and-scope.md)。

@@ -1,6 +1,5 @@
 # Product Requirements Document: 揪Gym (JoyGym)
 
-> **Version:** 2.5.0
 > **Status:** Draft
 > **Last Updated:** 2026-02-16
 > **Author:** Kun

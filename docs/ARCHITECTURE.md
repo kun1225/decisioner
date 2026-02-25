@@ -1,6 +1,5 @@
 # 揪Gym (JoyGym) - Architecture Index
 
-> **Version:** 2.4.0
 > **Status:** Proposed
 > **Last Updated:** 2026-02-16
 

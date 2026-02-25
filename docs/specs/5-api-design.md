@@ -132,23 +132,3 @@
 | 422  | Business rule failed                             |
 | 429  | Rate limit                                       |
 
-## 5.12 Goal Reference Map
-
-- <a id="g-01-api"></a>`g-01`: `5.4`, `5.5`
-- <a id="g-02-api"></a>`g-02`: `5.3`, `5.4`, `5.6`
-- <a id="g-03-api"></a>`g-03`: `5.6`, `5.7`
-- <a id="g-04-api"></a>`g-04`: `5.7`, `5.8`
-- <a id="g-05-api"></a>`g-05`: `5.7`
-- <a id="g-06-api"></a>`g-06`: `5.9`
-- <a id="g-07-api"></a>`g-07`: `5.9`
-- <a id="g-08-api"></a>`g-08`: `5.6`, `5.9`
-- <a id="g-09-api"></a>`g-09`: `5.9`
-- <a id="g-10-api"></a>`g-10`: `5.9`
-- <a id="g-11-api"></a>`g-11`: `5.8`
-- <a id="g-12-api"></a>`g-12`: `5.8`
-- <a id="g-13-api"></a>`g-13`: `5.8`
-- <a id="g-14-api"></a>`g-14`: `5.9` (future challenge APIs)
-- <a id="g-15-api"></a>`g-15`: `5.10`
-- <a id="g-16-api"></a>`g-16`: `5.9` (leaderboard)
-- <a id="g-17-api"></a>`g-17`: `5.9` (future profile customization APIs)
-- <a id="g-18-api"></a>`g-18`: `5.2`

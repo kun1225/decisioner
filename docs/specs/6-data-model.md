@@ -122,21 +122,21 @@ templates -> template_shares
 
 ## 6.7 Goal Reference Map
 
-- <a id="g-01-data"></a>`g-01`: `gyms`, `workout_sessions(gym_id)`
-- <a id="g-02-data"></a>`g-02`: `templates`, `template_items`, `template_versions`, `template_version_items`, `exercise_media`
-- <a id="g-03-data"></a>`g-03`: `workout_sessions`, `workout_session_items`, `workout_sets`
-- <a id="g-04-data"></a>`g-04`: `exercise_session_metrics`
-- <a id="g-05-data"></a>`g-05`: `workout_session_revisions`, `exercise_session_metrics`
-- <a id="g-06-data"></a>`g-06`: `workout_checkins`, `workout_sessions`
-- <a id="g-07-data"></a>`g-07`: `activity_feed_events`, `activity_likes`
-- <a id="g-08-data"></a>`g-08`: `privacy_settings`, `friends`, `crews`, `crew_members`, `template_shares`
-- <a id="g-09-data"></a>`g-09`: `reminder_settings`
-- <a id="g-10-data"></a>`g-10`: `share_card_templates`, `share_card_renders`
-- <a id="g-11-data"></a>`g-11`: `exercise_session_metrics`
-- <a id="g-12-data"></a>`g-12`: `exercise_session_metrics(estimated_1rm)`, `workout_sets(rpe/rir)`, `user_training_goals`
-- <a id="g-13-data"></a>`g-13`: `user_gym_exercise_adjustments`
-- <a id="g-14-data"></a>`g-14`: `achievement_events` (future `weekly_challenges` table)
-- <a id="g-15-data"></a>`g-15`: `achievement_definitions`, `achievement_events`, `user_achievements`
-- <a id="g-16-data"></a>`g-16`: `friends` + leaderboard projection store (future)
-- <a id="g-17-data"></a>`g-17`: `users` + profile customization store (future)
-- <a id="g-18-data"></a>`g-18`: `users`, `refresh_tokens`
+- `g-01`: `gyms`, `workout_sessions(gym_id)`
+- `g-02`: `templates`, `template_items`, `template_versions`, `template_version_items`, `exercise_media`
+- `g-03`: `workout_sessions`, `workout_session_items`, `workout_sets`
+- `g-04`: `exercise_session_metrics`
+- `g-05`: `workout_session_revisions`, `exercise_session_metrics`
+- `g-06`: `workout_checkins`, `workout_sessions`
+- `g-07`: `activity_feed_events`, `activity_likes`
+- `g-08`: `privacy_settings`, `friends`, `crews`, `crew_members`, `template_shares`
+- `g-09`: `reminder_settings`
+- `g-10`: `share_card_templates`, `share_card_renders`
+- `g-11`: `exercise_session_metrics`
+- `g-12`: `exercise_session_metrics(estimated_1rm)`, `workout_sets(rpe/rir)`, `user_training_goals`
+- `g-13`: `user_gym_exercise_adjustments`
+- `g-14`: `achievement_events` (future `weekly_challenges` table)
+- `g-15`: `achievement_definitions`, `achievement_events`, `user_achievements`
+- `g-16`: `friends` + leaderboard projection store (future)
+- `g-17`: `users` + profile customization store (future)
+- `g-18`: `users`, `refresh_tokens`
