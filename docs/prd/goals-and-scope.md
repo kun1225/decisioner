@@ -22,6 +22,8 @@
 | `g-15`  | Achievement progression             | 2.0   | [g-15](goals/g-15.md) |
 | `g-16`  | Friends leaderboard                 | 2.0   | [g-16](goals/g-16.md) |
 | `g-17`  | Profile customization               | 2.1   | [g-17](goals/g-17.md) |
+| `g-19`  | Global site header                  | 1.0   | [g-19](goals/g-19.md) |
+| `g-20`  | Page-oriented frontend structure    | 1.0   | [g-20](goals/g-20.md) |
 
 ## Non-Goals
 
