@@ -11,6 +11,7 @@
 1. shadcn (Base UI)
 2. Tailwind CSS v4
 3. CVA + clsx + tailwind-merge
+4. UI component implementation strategy: Prioritize shadcn, only allow extensions/custom builds when there are no corresponding components or requirements don't fit
 
 ## 1.3 Data and Routing
 

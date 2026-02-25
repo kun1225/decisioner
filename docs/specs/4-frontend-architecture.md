@@ -27,6 +27,7 @@
 3. 需要跨頁重用的 feature/domain 模組統一放在 `src/features`。
 4. 其他共用函數統一放在 `src/lib`。
 5. `src/providers/index.tsx` 必須集中所有 providers，並只對外匯出一個 `Provider` 元件。
+6. 所有前端 UI 元件一律優先採用 shadcn；僅在 shadcn 無對應元件或需求明確不適配時，才允許擴充/自建，且需在 PR 說明替代原因與可維護性評估。
 
 參考：
 
@@ -51,3 +52,7 @@
 1. TanStack Query for server state
 2. Route loader for route-level prefetch
 3. Mutations invalidate corresponding query keys
+
+## 4.4 UI Rules Reference
+
+1. UI 視覺與互動規範請見 `docs/specs/7-ui-design-guideline.md`。
