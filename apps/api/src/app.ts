@@ -4,6 +4,7 @@ import express from 'express';
 import { errorHandler } from '@/middleware/error-handler.js';
 
 import { authRoutes } from './modules/auth/auth.routes.js';
+import { exerciseRoutes } from './modules/exercises/exercise.routes.js';
 
 export function createApp(): express.Express {
   const app = express();
@@ -19,6 +20,7 @@ export function createApp(): express.Express {
 
   // *** Routes ***
   app.use('/api/auth', authRoutes);
+  app.use('/api/exercises', exerciseRoutes);
 
   // *** Error handler (must be last) ***
   app.use(errorHandler);

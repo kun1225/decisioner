@@ -8,6 +8,7 @@ if (!DATABASE_URL) {
 
 export const db = drizzle(DATABASE_URL);
 export * from './schema/enums.js';
+export * from './schema/exercises.js';
 export * from './schema/refresh-token.js';
 export * from './schema/user.js';
 export { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
