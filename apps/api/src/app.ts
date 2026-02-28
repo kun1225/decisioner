@@ -5,6 +5,7 @@ import { errorHandler } from '@/middleware/error-handler.js';
 
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { exerciseRoutes } from './modules/exercises/exercise.routes.js';
+import { templateRoutes } from './modules/templates/template.routes.js';
 
 export function createApp(): express.Express {
   const app = express();
@@ -21,6 +22,7 @@ export function createApp(): express.Express {
   // *** Routes ***
   app.use('/api/auth', authRoutes);
   app.use('/api/exercises', exerciseRoutes);
+  app.use('/api/templates', templateRoutes);
 
   // *** Error handler (must be last) ***
   app.use(errorHandler);
