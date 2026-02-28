@@ -29,7 +29,7 @@ describe('app-header', () => {
       />,
     );
 
-    const dashboardButton = screen.getByRole('button', { name: 'Go to App' });
+    const dashboardButton = screen.getByRole('button', { name: '前往後台' });
     expect(dashboardButton).toBeTruthy();
   });
 
@@ -50,7 +50,7 @@ describe('app-header', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'JoyGym' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
+    fireEvent.click(screen.getByRole('button', { name: '登入' }));
 
     expect(logoClicked).toBe(true);
     expect(actionClicked).toBe(true);

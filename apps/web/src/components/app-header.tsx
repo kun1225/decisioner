@@ -12,7 +12,7 @@ export function AppHeader({
   onLogoClick,
   onPrimaryAction,
 }: AppHeaderProps) {
-  const actionLabel = isAuthenticated ? 'Go to App' : 'Login';
+  const actionLabel = isAuthenticated ? '前往後台' : '登入';
 
   return (
     <header className="bg-background/90 supports-backdrop-filter:bg-background/70 sticky top-0 z-40 border-b backdrop-blur">
