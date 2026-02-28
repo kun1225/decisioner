@@ -107,4 +107,28 @@ describe('auth-client request contract', () => {
       new AuthApiError(401, 'Invalid email or password'),
     )
   })
+
+  it('preserves validation error details on api error', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({
+        error: 'Validation failed',
+        details: [{ path: 'email', message: 'Invalid email address' }],
+      }),
+    })
+
+    await expect(
+      register({
+        email: 'bad',
+        name: 'Joy',
+        password: 'Passw0rd!',
+        confirmedPassword: 'Passw0rd!',
+      }),
+    ).rejects.toMatchObject({
+      status: 400,
+      message: 'Validation failed',
+      details: [{ path: 'email', message: 'Invalid email address' }],
+    })
+  })
 })
