@@ -10,10 +10,13 @@ import { defineConfig } from 'vite';
 import viteTsConfigPaths from 'vite-tsconfig-paths';
 
 function getWorktreeIndex() {
-  const branch = execSync('git branch --show-current').toString().trim();
-
-  const match = branch.match(/\d+/);
-  return match ? Number(match[0]) : 0;
+  try {
+    const branch = execSync('git branch --show-current').toString().trim();
+    const match = branch.match(/\d+/);
+    return match ? Number(match[0]) : 0;
+  } catch {
+    return 0;
+  }
 }
 
 const baseDevtoolsPort = 43000;
