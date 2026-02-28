@@ -22,6 +22,7 @@ export const templates = pgTable('templates', {
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
 export const templateItems = pgTable('template_items', {
