@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { register } from '@/features/auth/_domain/auth-client';
 import type { AuthUser } from '@/features/auth/_domain/auth-types';
 
@@ -102,90 +102,81 @@ export function RegisterForm({
   return (
     <form className="space-y-4" onSubmit={handleSubmit} noValidate>
       {formError ? (
-        <p
-          role="alert"
+        <FieldError
           className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm"
         >
           {formError}
-        </p>
+        </FieldError>
       ) : null}
 
-      <div className="space-y-2">
-        <Label htmlFor="register-email">Email</Label>
-        <Input
-          id="register-email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          value={values.email}
-          onChange={(event) => setFieldValue('email', event.target.value)}
-          aria-invalid={Boolean(fieldErrors.email)}
-          required
-        />
-        {fieldErrors.email ? (
-          <p role="alert" className="text-destructive text-sm">
-            {fieldErrors.email}
-          </p>
-        ) : null}
-      </div>
+      <FieldGroup className="gap-4">
+        <Field data-invalid={Boolean(fieldErrors.email)}>
+          <FieldLabel htmlFor="register-email">Email</FieldLabel>
+          <Input
+            id="register-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={values.email}
+            onChange={(event) => setFieldValue('email', event.target.value)}
+            aria-invalid={Boolean(fieldErrors.email)}
+            required
+          />
+          {fieldErrors.email ? <FieldError>{fieldErrors.email}</FieldError> : null}
+        </Field>
 
-      <div className="space-y-2">
-        <Label htmlFor="register-name">Name</Label>
-        <Input
-          id="register-name"
-          name="name"
-          autoComplete="name"
-          value={values.name}
-          onChange={(event) => setFieldValue('name', event.target.value)}
-          aria-invalid={Boolean(fieldErrors.name)}
-          required
-        />
-        {fieldErrors.name ? (
-          <p role="alert" className="text-destructive text-sm">
-            {fieldErrors.name}
-          </p>
-        ) : null}
-      </div>
+        <Field data-invalid={Boolean(fieldErrors.name)}>
+          <FieldLabel htmlFor="register-name">Name</FieldLabel>
+          <Input
+            id="register-name"
+            name="name"
+            autoComplete="name"
+            value={values.name}
+            onChange={(event) => setFieldValue('name', event.target.value)}
+            aria-invalid={Boolean(fieldErrors.name)}
+            required
+          />
+          {fieldErrors.name ? <FieldError>{fieldErrors.name}</FieldError> : null}
+        </Field>
 
-      <div className="space-y-2">
-        <Label htmlFor="register-password">Password</Label>
-        <Input
-          id="register-password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          value={values.password}
-          onChange={(event) => setFieldValue('password', event.target.value)}
-          aria-invalid={Boolean(fieldErrors.password)}
-          required
-        />
-        {fieldErrors.password ? (
-          <p role="alert" className="text-destructive text-sm">
-            {fieldErrors.password}
-          </p>
-        ) : null}
-      </div>
+        <Field data-invalid={Boolean(fieldErrors.password)}>
+          <FieldLabel htmlFor="register-password">Password</FieldLabel>
+          <Input
+            id="register-password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            value={values.password}
+            onChange={(event) => setFieldValue('password', event.target.value)}
+            aria-invalid={Boolean(fieldErrors.password)}
+            required
+          />
+          {fieldErrors.password ? (
+            <FieldError>{fieldErrors.password}</FieldError>
+          ) : null}
+        </Field>
 
-      <div className="space-y-2">
-        <Label htmlFor="register-confirmed-password">Confirm password</Label>
-        <Input
-          id="register-confirmed-password"
-          name="confirmedPassword"
-          type="password"
-          autoComplete="new-password"
-          value={values.confirmedPassword}
-          onChange={(event) =>
-            setFieldValue('confirmedPassword', event.target.value)
-          }
-          aria-invalid={Boolean(fieldErrors.confirmedPassword)}
-          required
-        />
-        {fieldErrors.confirmedPassword ? (
-          <p role="alert" className="text-destructive text-sm">
-            {fieldErrors.confirmedPassword}
-          </p>
-        ) : null}
-      </div>
+        <Field data-invalid={Boolean(fieldErrors.confirmedPassword)}>
+          <FieldLabel htmlFor="register-confirmed-password">
+            Confirm password
+          </FieldLabel>
+          <Input
+            id="register-confirmed-password"
+            name="confirmedPassword"
+            type="password"
+            autoComplete="new-password"
+            value={values.confirmedPassword}
+            onChange={(event) =>
+              setFieldValue('confirmedPassword', event.target.value)
+            }
+            aria-invalid={Boolean(fieldErrors.confirmedPassword)}
+            required
+          />
+          {fieldErrors.confirmedPassword ? (
+            <FieldError>{fieldErrors.confirmedPassword}</FieldError>
+          ) : null}
+        </Field>
+      </FieldGroup>
 
       <Button
         type="submit"
