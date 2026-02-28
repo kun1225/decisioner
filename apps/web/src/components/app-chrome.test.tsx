@@ -1,4 +1,3 @@
-import { fireEvent } from '@testing-library/dom';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -20,7 +19,7 @@ vi.mock('@/features/auth/_domain/auth-session-provider', () => ({
 }));
 
 describe('app-chrome', () => {
-  it('navigates to login with redirect when anonymous user clicks header action', () => {
+  it('renders login href with redirect when anonymous user is on a frontend page', () => {
     mockUseRouterState.mockImplementation((options) =>
       options.select({
         location: {
@@ -38,14 +37,10 @@ describe('app-chrome', () => {
       </AppChrome>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
-
-    expect(mockNavigate).toHaveBeenCalledWith({
-      to: '/auth/login',
-      search: {
-        redirect: '/workouts?tab=history#today',
-      },
-    });
+    const loginLink = screen.getByText('Login').closest('a');
+    expect(loginLink?.getAttribute('href')).toBe(
+      '/auth/login?redirect=%2Fworkouts%3Ftab%3Dhistory%23today',
+    );
   });
 
   it('renders sticky frontend header outside dashboard routes', () => {
@@ -60,7 +55,7 @@ describe('app-chrome', () => {
       </AppChrome>,
     );
 
-    expect(screen.getByRole('button', { name: 'Login' })).toBeTruthy();
+    expect(screen.getByText('Login')).toBeTruthy();
     expect(screen.getByText('Page Content')).toBeTruthy();
     expect(screen.queryByText('後台導覽')).toBeNull();
   });
@@ -79,7 +74,7 @@ describe('app-chrome', () => {
 
     expect(screen.getByText('後台導覽')).toBeTruthy();
     expect(screen.getByText('Dashboard Content')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Login' })).toBeNull();
+    expect(screen.queryByText('Login')).toBeNull();
     expect(screen.queryByRole('main')).toBeNull();
   });
 });

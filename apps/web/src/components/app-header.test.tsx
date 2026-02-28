@@ -1,58 +1,31 @@
-import { fireEvent } from '@testing-library/dom';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { AppHeader } from './app-header';
 
 describe('app-header', () => {
-  it('shows logo and login button for anonymous users', () => {
+  it('shows logo and login link for anonymous users', () => {
     render(
-      <AppHeader
-        isAuthenticated={false}
-        onLogoClick={() => {}}
-        onPrimaryAction={() => {}}
-      />,
+      <AppHeader isAuthenticated={false} logoHref="/" primaryHref="/auth/login" />,
     );
 
-    expect(screen.getByText('JoyGym')).toBeTruthy();
+    const logoLink = screen.getByText('JoyGym').closest('a');
+    const loginLink = screen.getByText('Login').closest('a');
 
-    const loginButton = screen.getByRole('button', { name: 'Login' });
-    expect(loginButton).toBeTruthy();
+    expect(logoLink?.getAttribute('href')).toBe('/');
+    expect(loginLink?.getAttribute('href')).toBe('/auth/login');
   });
 
-  it('shows go-to-dashboard button for authenticated users', () => {
+  it('shows dashboard link for authenticated users', () => {
     render(
       <AppHeader
         isAuthenticated
-        onLogoClick={() => {}}
-        onPrimaryAction={() => {}}
+        logoHref="/"
+        primaryHref="/dashboard"
       />,
     );
 
-    const dashboardButton = screen.getByRole('button', { name: 'Dashboard' });
-    expect(dashboardButton).toBeTruthy();
-  });
-
-  it('fires callbacks when logo and action button are clicked', () => {
-    let logoClicked = false;
-    let actionClicked = false;
-
-    render(
-      <AppHeader
-        isAuthenticated={false}
-        onLogoClick={() => {
-          logoClicked = true;
-        }}
-        onPrimaryAction={() => {
-          actionClicked = true;
-        }}
-      />,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: 'JoyGym' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
-
-    expect(logoClicked).toBe(true);
-    expect(actionClicked).toBe(true);
+    const dashboardLink = screen.getByText('Dashboard').closest('a');
+    expect(dashboardLink?.getAttribute('href')).toBe('/dashboard');
   });
 });

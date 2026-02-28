@@ -18,6 +18,10 @@ export function AppChrome({ children }: AppChromeProps) {
   const isAuthenticated = authSession.status === 'authenticated';
   const isDashboardRoute = location.pathname.startsWith('/dashboard');
   const redirectTarget = `${location.pathname}${location.searchStr}${location.hash}`;
+  const headerLogoHref = '/';
+  const headerPrimaryHref = isAuthenticated
+    ? '/dashboard'
+    : `/auth/login?redirect=${encodeURIComponent(redirectTarget)}`;
 
   const runNavigation = (
     payload:
@@ -49,15 +53,6 @@ export function AppChrome({ children }: AppChromeProps) {
     });
   };
 
-  const handleHeaderAction = () => {
-    if (isAuthenticated) {
-      navigateToDashboard();
-      return;
-    }
-
-    navigateToLogin(redirectTarget);
-  };
-
   const handleSidebarAuthAction = () => {
     if (isAuthenticated) {
       navigateToHome();
@@ -85,8 +80,8 @@ export function AppChrome({ children }: AppChromeProps) {
     <>
       <AppHeader
         isAuthenticated={isAuthenticated}
-        onLogoClick={navigateToHome}
-        onPrimaryAction={handleHeaderAction}
+        logoHref={headerLogoHref}
+        primaryHref={headerPrimaryHref}
       />
       <div>{children}</div>
     </>
