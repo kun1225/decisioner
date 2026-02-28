@@ -1,8 +1,11 @@
 import type { CorsOptions } from 'cors';
 
-const DEFAULT_ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:3001'];
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+];
 
-export function parseAllowedOrigins(rawValue?: string): string[] {
+function parseAllowedOrigins(rawValue?: string): string[] {
   if (!rawValue?.trim()) {
     return [...DEFAULT_ALLOWED_ORIGINS];
   }
