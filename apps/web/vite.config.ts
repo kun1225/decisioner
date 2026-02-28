@@ -18,8 +18,14 @@ function getWorktreeIndex() {
 
 const baseDevtoolsPort = 43000;
 const index = getWorktreeIndex();
+const apiPort = Number(process.env.API_PORT ?? 4000);
 
 const config = defineConfig({
+  server: {
+    proxy: {
+      '/api': `http://localhost:${apiPort}`,
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
