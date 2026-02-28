@@ -41,17 +41,18 @@
 
 ## 5.6 Templates (`g-02`, `g-03`, `g-08`)
 
-| Method | Endpoint                                   | Description               | Auth |
-| ------ | ------------------------------------------ | ------------------------- | ---- |
-| POST   | `/api/templates`                           | Create template           | Yes  |
-| GET    | `/api/templates`                           | List own/shared templates | Yes  |
-| GET    | `/api/templates/:templateId`               | Template detail           | Yes  |
-| PATCH  | `/api/templates/:templateId`               | Update template meta      | Yes  |
-| POST   | `/api/templates/:templateId/items`         | Add template item         | Yes  |
-| PATCH  | `/api/templates/:templateId/items/:itemId` | Update template item      | Yes  |
-| DELETE | `/api/templates/:templateId/items/:itemId` | Remove template item      | Yes  |
-| GET    | `/api/templates/:templateId/versions`      | Version history           | Yes  |
-| POST   | `/api/templates/:templateId/share`         | Share template to crew    | Yes  |
+| Method | Endpoint                                   | Description            | Auth |
+| ------ | ------------------------------------------ | ---------------------- | ---- |
+| POST   | `/api/templates`                           | Create template        | Yes  |
+| GET    | `/api/templates`                           | List own templates     | Yes  |
+| GET    | `/api/templates/:templateId`               | Template detail        | Yes  |
+| PATCH  | `/api/templates/:templateId`               | Update template meta   | Yes  |
+| DELETE | `/api/templates/:templateId`               | Soft delete template   | Yes  |
+| POST   | `/api/templates/:templateId/items`         | Add template item      | Yes  |
+| PATCH  | `/api/templates/:templateId/items/:itemId` | Update template item   | Yes  |
+| DELETE | `/api/templates/:templateId/items/:itemId` | Remove template item   | Yes  |
+| GET    | `/api/templates/:templateId/versions`      | Version history        | Yes  |
+| POST   | `/api/templates/:templateId/share`         | Share template to crew | Yes  |
 
 ## 5.7 Workouts (`g-03`, `g-04`, `g-05`)
 
@@ -131,4 +132,3 @@
 | 409  | Version conflict / invalid transition            |
 | 422  | Business rule failed                             |
 | 429  | Rate limit                                       |
-
