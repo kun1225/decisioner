@@ -1,8 +1,10 @@
 import type { AuthUser, LoginRequest, RegisterRequest } from './auth-types';
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL as string | undefined
-)?.replace(/\/+$/, '') ?? '/api';
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(
+    /\/+$/,
+    '',
+  ) ?? '/api';
 
 type RegisterResponse = {
   accessToken: string;
@@ -79,10 +81,7 @@ function apiUrl(path: string) {
 }
 
 export function register(input: RegisterRequest) {
-  return postJson<RegisterResponse, RegisterRequest>(
-    '/auth/register',
-    input,
-  );
+  return postJson<RegisterResponse, RegisterRequest>('/auth/register', input);
 }
 
 export function login(input: LoginRequest) {
