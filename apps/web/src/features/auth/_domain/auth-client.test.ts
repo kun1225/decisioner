@@ -24,7 +24,7 @@ describe('auth-client request contract', () => {
   it('calls register endpoint with include credentials and json body', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ accessToken: 'token', user: { id: 'u1' } }),
+      json: () => ({ accessToken: 'token', user: { id: 'u1' } }),
     });
 
     await register({
@@ -50,7 +50,7 @@ describe('auth-client request contract', () => {
   it('calls login endpoint with include credentials and json body', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ accessToken: 'token' }),
+      json: () => ({ accessToken: 'token' }),
     });
 
     await login({ email: 'joy@example.com', password: 'Passw0rd!' });
@@ -67,9 +67,9 @@ describe('auth-client request contract', () => {
     fetchMock
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ accessToken: 'rotated' }),
+        json: () => ({ accessToken: 'rotated' }),
       })
-      .mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+      .mockResolvedValueOnce({ ok: true, json: () => ({}) });
 
     await refresh();
     await logout();
@@ -87,7 +87,7 @@ describe('auth-client request contract', () => {
   it('calls me endpoint with bearer token', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ id: 'u1' }),
+      json: () => ({ id: 'u1' }),
     });
 
     await me('access-token');
@@ -103,7 +103,7 @@ describe('auth-client request contract', () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 401,
-      json: async () => ({ error: 'Invalid email or password' }),
+      json: () => ({ error: 'Invalid email or password' }),
     });
 
     await expect(
@@ -115,7 +115,7 @@ describe('auth-client request contract', () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 400,
-      json: async () => ({
+      json: () => ({
         error: 'Validation failed',
         details: [{ path: 'email', message: 'Invalid email address' }],
       }),

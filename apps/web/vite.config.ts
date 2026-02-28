@@ -21,7 +21,7 @@ function getWorktreeIndex() {
 
 const baseDevtoolsPort = 43000;
 const index = getWorktreeIndex();
-const apiPort = Number(process.env.API_PORT ?? 4000);
+const apiPort = Number(process.env.PORT ?? 4000);
 
 const config = defineConfig({
   server: {

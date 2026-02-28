@@ -1,25 +1,31 @@
-import { createContext, useContext, useMemo, useReducer } from 'react'
+import { createContext, useContext, useMemo, useReducer } from 'react';
 
 import {
   initialAuthSessionState,
   reduceAuthSessionState,
-} from './auth-session-state'
-import type { AuthSessionState, AuthUser } from './auth-types'
+} from './auth-session-state';
+import type { AuthSessionState, AuthUser } from './auth-types';
 
 export type AuthSessionActions = {
-  setAuthenticated: (payload: { accessToken: string; user: AuthUser }) => void
-  setAnonymous: () => void
-  setUnknown: () => void
-}
+  setAuthenticated: (payload: { accessToken: string; user: AuthUser }) => void;
+  setAnonymous: () => void;
+  setUnknown: () => void;
+};
 
-const AuthSessionStateContext = createContext<AuthSessionState | null>(null)
-const AuthSessionActionsContext = createContext<AuthSessionActions | null>(null)
+const AuthSessionStateContext = createContext<AuthSessionState | null>(null);
+const AuthSessionActionsContext = createContext<AuthSessionActions | null>(
+  null,
+);
 
-export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
+export function AuthSessionProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [state, dispatch] = useReducer(
     reduceAuthSessionState,
     initialAuthSessionState,
-  )
+  );
 
   const actions = useMemo<AuthSessionActions>(
     () => ({
@@ -29,7 +35,7 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
       setUnknown: () => dispatch({ type: 'unknown' }),
     }),
     [],
-  )
+  );
 
   return (
     <AuthSessionActionsContext.Provider value={actions}>
@@ -37,25 +43,29 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
         {children}
       </AuthSessionStateContext.Provider>
     </AuthSessionActionsContext.Provider>
-  )
+  );
 }
 
 export function useAuthSessionState() {
-  const state = useContext(AuthSessionStateContext)
+  const state = useContext(AuthSessionStateContext);
 
   if (!state) {
-    throw new Error('useAuthSessionState must be used inside AuthSessionProvider')
+    throw new Error(
+      'useAuthSessionState must be used inside AuthSessionProvider',
+    );
   }
 
-  return state
+  return state;
 }
 
 export function useAuthSessionActions() {
-  const actions = useContext(AuthSessionActionsContext)
+  const actions = useContext(AuthSessionActionsContext);
 
   if (!actions) {
-    throw new Error('useAuthSessionActions must be used inside AuthSessionProvider')
+    throw new Error(
+      'useAuthSessionActions must be used inside AuthSessionProvider',
+    );
   }
 
-  return actions
+  return actions;
 }

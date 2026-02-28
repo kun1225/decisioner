@@ -1,1 +1,1 @@
-export { getContext, Provider } from '@/providers'
+export { getContext, Provider } from '@/providers';
