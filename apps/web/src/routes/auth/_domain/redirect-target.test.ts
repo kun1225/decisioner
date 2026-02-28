@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildAuthRedirectSearch,
   DEFAULT_POST_AUTH_REDIRECT,
   resolvePostAuthRedirect,
   sanitizeRedirectTarget,
@@ -29,5 +30,10 @@ describe('redirect-target', () => {
 
   it('returns sanitized redirect when target is valid', () => {
     expect(resolvePostAuthRedirect('/settings')).toBe('/settings');
+  });
+
+  it('builds auth search params with only safe redirect value', () => {
+    expect(buildAuthRedirectSearch('/history')).toEqual({ redirect: '/history' });
+    expect(buildAuthRedirectSearch('https://evil.example')).toEqual({});
   });
 });
