@@ -20,14 +20,14 @@ export function AppHeader({
           variant="ghost"
           className="text-foreground cursor-pointer px-0 text-lg font-semibold tracking-tight hover:bg-transparent"
           nativeButton={false}
-          render={() => <a href={logoHref}>JoyGym</a>}
+          render={<a href={logoHref}>JoyGym</a>}
         />
 
         <Button
           size="sm"
           className="cursor-pointer px-4"
           nativeButton={false}
-          render={() => <a href={primaryHref}>{actionLabel}</a>}
+          render={<a href={primaryHref}>{actionLabel}</a>}
         />
       </div>
     </header>
