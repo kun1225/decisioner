@@ -16,7 +16,7 @@ describe('app-header', () => {
 
     expect(screen.getByText('JoyGym')).toBeTruthy();
 
-    const loginButton = screen.getByRole('button', { name: '登入' });
+    const loginButton = screen.getByRole('button', { name: 'Login' });
     expect(loginButton).toBeTruthy();
   });
 
@@ -29,7 +29,7 @@ describe('app-header', () => {
       />,
     );
 
-    const dashboardButton = screen.getByRole('button', { name: '前往後台' });
+    const dashboardButton = screen.getByRole('button', { name: 'Dashboard' });
     expect(dashboardButton).toBeTruthy();
   });
 
@@ -50,7 +50,7 @@ describe('app-header', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'JoyGym' }));
-    fireEvent.click(screen.getByRole('button', { name: '登入' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
 
     expect(logoClicked).toBe(true);
     expect(actionClicked).toBe(true);

@@ -38,7 +38,7 @@ describe('app-chrome', () => {
       </AppChrome>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '登入' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
 
     expect(mockNavigate).toHaveBeenCalledWith({
       to: '/auth/login',
@@ -60,7 +60,7 @@ describe('app-chrome', () => {
       </AppChrome>,
     );
 
-    expect(screen.getByRole('button', { name: '登入' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Login' })).toBeTruthy();
     expect(screen.getByText('Page Content')).toBeTruthy();
     expect(screen.queryByText('後台導覽')).toBeNull();
   });
@@ -79,7 +79,7 @@ describe('app-chrome', () => {
 
     expect(screen.getByText('後台導覽')).toBeTruthy();
     expect(screen.getByText('Dashboard Content')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: '登入' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Login' })).toBeNull();
     expect(screen.queryByRole('main')).toBeNull();
   });
 });
