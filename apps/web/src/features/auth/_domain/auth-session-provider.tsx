@@ -7,18 +7,14 @@ import {
 } from './auth-session-state'
 import type { AuthSessionState } from './auth-types'
 
-type AuthSessionActions = {
+export type AuthSessionActions = {
   setAuthenticated: (payload: { accessToken: string; user: AuthUser }) => void
   setAnonymous: () => void
   setUnknown: () => void
 }
 
-export type AuthSessionContextValue = {
-  state: AuthSessionState
-  actions: AuthSessionActions
-}
-
-const AuthSessionContext = createContext<AuthSessionContextValue | null>(null)
+const AuthSessionStateContext = createContext<AuthSessionState | null>(null)
+const AuthSessionActionsContext = createContext<AuthSessionActions | null>(null)
 
 export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(
@@ -26,32 +22,41 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
     initialAuthSessionState,
   )
 
-  const value = useMemo<AuthSessionContextValue>(
+  const actions = useMemo<AuthSessionActions>(
     () => ({
-      state,
-      actions: {
-        setAuthenticated: ({ accessToken, user }) =>
-          dispatch({ type: 'authenticated', accessToken, user }),
-        setAnonymous: () => dispatch({ type: 'anonymous' }),
-        setUnknown: () => dispatch({ type: 'unknown' }),
-      },
+      setAuthenticated: ({ accessToken, user }) =>
+        dispatch({ type: 'authenticated', accessToken, user }),
+      setAnonymous: () => dispatch({ type: 'anonymous' }),
+      setUnknown: () => dispatch({ type: 'unknown' }),
     }),
-    [state],
+    [],
   )
 
   return (
-    <AuthSessionContext.Provider value={value}>
-      {children}
-    </AuthSessionContext.Provider>
+    <AuthSessionActionsContext.Provider value={actions}>
+      <AuthSessionStateContext.Provider value={state}>
+        {children}
+      </AuthSessionStateContext.Provider>
+    </AuthSessionActionsContext.Provider>
   )
 }
 
-export function useAuthSession() {
-  const context = useContext(AuthSessionContext)
+export function useAuthSessionState() {
+  const state = useContext(AuthSessionStateContext)
 
-  if (!context) {
-    throw new Error('useAuthSession must be used inside AuthSessionProvider')
+  if (!state) {
+    throw new Error('useAuthSessionState must be used inside AuthSessionProvider')
   }
 
-  return context
+  return state
+}
+
+export function useAuthSessionActions() {
+  const actions = useContext(AuthSessionActionsContext)
+
+  if (!actions) {
+    throw new Error('useAuthSessionActions must be used inside AuthSessionProvider')
+  }
+
+  return actions
 }

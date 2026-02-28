@@ -3,7 +3,10 @@ import type { ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
-import { useAuthSession } from '@/features/auth/_domain/auth-session-provider'
+import {
+  useAuthSessionActions,
+  useAuthSessionState,
+} from '@/features/auth/_domain/auth-session-provider'
 
 import { Provider, getContext } from './index'
 
@@ -18,18 +21,19 @@ describe('providers index wiring', () => {
     const { result } = renderHook(
       () => ({
         queryClient: useQueryClient(),
-        auth: useAuthSession(),
+        state: useAuthSessionState(),
+        actions: useAuthSessionActions(),
       }),
       { wrapper },
     )
 
     expect(result.current.queryClient).toBe(queryClient)
-    expect(result.current.auth.state).toEqual({ status: 'unknown' })
+    expect(result.current.state).toEqual({ status: 'unknown' })
 
     act(() => {
-      result.current.auth.actions.setAnonymous()
+      result.current.actions.setAnonymous()
     })
 
-    expect(result.current.auth.state).toEqual({ status: 'anonymous' })
+    expect(result.current.state).toEqual({ status: 'anonymous' })
   })
 })

@@ -2,7 +2,11 @@ import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it } from 'vitest'
 
-import { AuthSessionProvider, useAuthSession } from './auth-session-provider'
+import {
+  AuthSessionProvider,
+  useAuthSessionActions,
+  useAuthSessionState,
+} from './auth-session-provider'
 
 function Wrapper({ children }: { children: ReactNode }) {
   return <AuthSessionProvider>{children}</AuthSessionProvider>
@@ -10,13 +14,21 @@ function Wrapper({ children }: { children: ReactNode }) {
 
 describe('auth-session-provider', () => {
   it('exposes unknown as initial state', () => {
-    const { result } = renderHook(() => useAuthSession(), { wrapper: Wrapper })
+    const { result } = renderHook(() => useAuthSessionState(), {
+      wrapper: Wrapper,
+    })
 
-    expect(result.current.state).toEqual({ status: 'unknown' })
+    expect(result.current).toEqual({ status: 'unknown' })
   })
 
-  it('updates state via actions', () => {
-    const { result } = renderHook(() => useAuthSession(), { wrapper: Wrapper })
+  it('updates state via split hooks', () => {
+    const { result } = renderHook(
+      () => ({
+        state: useAuthSessionState(),
+        actions: useAuthSessionActions(),
+      }),
+      { wrapper: Wrapper },
+    )
 
     act(() => {
       result.current.actions.setAuthenticated({
@@ -53,8 +65,11 @@ describe('auth-session-provider', () => {
   })
 
   it('throws when hook is used outside provider', () => {
-    expect(() => renderHook(() => useAuthSession())).toThrow(
-      'useAuthSession must be used inside AuthSessionProvider',
+    expect(() => renderHook(() => useAuthSessionState())).toThrow(
+      'useAuthSessionState must be used inside AuthSessionProvider',
+    )
+    expect(() => renderHook(() => useAuthSessionActions())).toThrow(
+      'useAuthSessionActions must be used inside AuthSessionProvider',
     )
   })
 })
