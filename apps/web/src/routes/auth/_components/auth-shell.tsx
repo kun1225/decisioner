@@ -22,7 +22,7 @@ export function AuthShell({
   footer,
 }: AuthShellProps) {
   return (
-    <main className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-gradient-to-br from-orange-50 via-white to-emerald-50 px-4 py-10 sm:px-6">
+    <main className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-linear-to-br from-orange-50 via-white to-emerald-50 px-4 py-10 sm:px-6">
       <div
         aria-hidden
         className="bg-primary/10 absolute -top-20 left-1/2 size-72 -translate-x-1/2 rounded-full blur-3xl"

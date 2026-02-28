@@ -1,14 +1,14 @@
 import { useState } from 'react';
 
-import type { AuthUser } from '@/features/auth/_domain/auth-types';
-import { register } from '@/features/auth/_domain/auth-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { register } from '@/features/auth/_domain/auth-client';
+import type { AuthUser } from '@/features/auth/_domain/auth-types';
 
+import { validateRegisterInput } from '../_domain/auth-form-validation';
 import { mapAuthApiErrorToFormErrors } from '../_domain/form-error-mapper';
 import { resolvePostAuthRedirect } from '../_domain/redirect-target';
-import { validateRegisterInput } from '../_domain/auth-form-validation';
 
 type RegisterFields = {
   email: string;
@@ -25,7 +25,12 @@ type RegisterFormProps = {
   onSuccessRedirect: (target: string) => void;
 };
 
-const REGISTER_FIELDS = ['email', 'name', 'password', 'confirmedPassword'] as const;
+const REGISTER_FIELDS = [
+  'email',
+  'name',
+  'password',
+  'confirmedPassword',
+] as const;
 
 const DEFAULT_FORM_VALUES: RegisterFields = {
   email: '',

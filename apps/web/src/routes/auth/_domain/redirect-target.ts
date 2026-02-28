@@ -1,8 +1,6 @@
 export const DEFAULT_POST_AUTH_REDIRECT = '/dashboard';
 
-export function sanitizeRedirectTarget(
-  input?: string | null,
-): string | null {
+export function sanitizeRedirectTarget(input?: string | null): string | null {
   if (typeof input !== 'string') {
     return null;
   }

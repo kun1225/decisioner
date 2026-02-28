@@ -1,14 +1,14 @@
 import { useState } from 'react';
 
-import type { AuthUser } from '@/features/auth/_domain/auth-types';
-import { login, me } from '@/features/auth/_domain/auth-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { login, me } from '@/features/auth/_domain/auth-client';
+import type { AuthUser } from '@/features/auth/_domain/auth-types';
 
+import { validateLoginInput } from '../_domain/auth-form-validation';
 import { mapAuthApiErrorToFormErrors } from '../_domain/form-error-mapper';
 import { resolvePostAuthRedirect } from '../_domain/redirect-target';
-import { validateLoginInput } from '../_domain/auth-form-validation';
 
 type LoginFields = {
   email: string;

@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { AppHeader } from './app-header';
@@ -29,7 +29,7 @@ describe('app-header', () => {
       />,
     );
 
-    const dashboardButton = screen.getByRole('button', { name: '前往後台' });
+    const dashboardButton = screen.getByRole('button', { name: 'Go to App' });
     expect(dashboardButton).toBeTruthy();
   });
 
@@ -50,7 +50,7 @@ describe('app-header', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'JoyGym' }));
-    fireEvent.click(screen.getByRole('button', { name: '登入' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }));
 
     expect(logoClicked).toBe(true);
     expect(actionClicked).toBe(true);

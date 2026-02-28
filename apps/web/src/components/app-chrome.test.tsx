@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/dom';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AppChrome } from './app-chrome';
@@ -9,8 +9,9 @@ const mockUseAuthSessionState = vi.fn();
 const mockNavigate = vi.fn();
 
 vi.mock('@tanstack/react-router', () => ({
-  useRouterState: (options: { select: (state: { location: { pathname: string } }) => string }) =>
-    mockUseRouterState(options),
+  useRouterState: (options: {
+    select: (state: { location: { pathname: string } }) => string;
+  }) => mockUseRouterState(options),
   useNavigate: () => mockNavigate,
 }));
 
