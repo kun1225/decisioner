@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
-import Header from '../components/Header';
+import { AppChrome } from '../components/app-chrome';
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
 import appCss from '../styles.css?url';
 
@@ -47,8 +47,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
-        {children}
+        <AppChrome>{children}</AppChrome>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
