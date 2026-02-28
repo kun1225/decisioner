@@ -1,5 +1,11 @@
 import type { AuthUser, LoginRequest, RegisterRequest } from './auth-types';
 
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(
+    /\/+$/,
+    '',
+  ) ?? '/api';
+
 type RegisterResponse = {
   accessToken: string;
   user: AuthUser;
@@ -40,7 +46,14 @@ export class AuthApiError extends Error {
 }
 
 async function parseApiError(response: Response) {
-  const payload = (await response.json().catch(() => ({}))) as ApiErrorPayload;
+  let payload: ApiErrorPayload = {};
+
+  try {
+    payload = (await response.json()) as ApiErrorPayload;
+  } catch {
+    payload = {};
+  }
+
   const message = payload.error ?? 'Request failed';
   throw new AuthApiError(response.status, message, payload.details);
 }
@@ -49,7 +62,7 @@ async function postJson<TResponse, TRequest>(
   path: string,
   body: TRequest,
 ): Promise<TResponse> {
-  const response = await fetch(path, {
+  const response = await fetch(apiUrl(path), {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -63,19 +76,20 @@ async function postJson<TResponse, TRequest>(
   return response.json() as Promise<TResponse>;
 }
 
+function apiUrl(path: string) {
+  return `${API_BASE_URL}${path}`;
+}
+
 export function register(input: RegisterRequest) {
-  return postJson<RegisterResponse, RegisterRequest>(
-    '/api/auth/register',
-    input,
-  );
+  return postJson<RegisterResponse, RegisterRequest>('/auth/register', input);
 }
 
 export function login(input: LoginRequest) {
-  return postJson<LoginResponse, LoginRequest>('/api/auth/login', input);
+  return postJson<LoginResponse, LoginRequest>('/auth/login', input);
 }
 
 export async function refresh() {
-  return fetch('/api/auth/refresh', {
+  return fetch(apiUrl('/auth/refresh'), {
     method: 'POST',
     credentials: 'include',
   }).then(async (response) => {
@@ -87,7 +101,7 @@ export async function refresh() {
 }
 
 export async function logout() {
-  const response = await fetch('/api/auth/logout', {
+  const response = await fetch(apiUrl('/auth/logout'), {
     method: 'POST',
     credentials: 'include',
   });
@@ -98,7 +112,7 @@ export async function logout() {
 }
 
 export async function me(accessToken: string) {
-  return fetch('/api/auth/me', {
+  return fetch(apiUrl('/auth/me'), {
     method: 'GET',
     credentials: 'include',
     headers: {

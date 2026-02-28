@@ -9,6 +9,16 @@ import {
   register,
 } from './auth-client';
 
+const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(
+    /\/+$/,
+    '',
+  ) ?? '/api';
+
+function expectedApiUrl(path: string) {
+  return `${API_BASE_URL}${path}`;
+}
+
 describe('auth-client request contract', () => {
   const fetchMock = vi.fn();
 
@@ -34,7 +44,7 @@ describe('auth-client request contract', () => {
       confirmedPassword: 'Passw0rd!',
     });
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/auth/register', {
+    expect(fetchMock).toHaveBeenCalledWith(expectedApiUrl('/auth/register'), {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -55,7 +65,7 @@ describe('auth-client request contract', () => {
 
     await login({ email: 'joy@example.com', password: 'Passw0rd!' });
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/auth/login', {
+    expect(fetchMock).toHaveBeenCalledWith(expectedApiUrl('/auth/login'), {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -74,14 +84,22 @@ describe('auth-client request contract', () => {
     await refresh();
     await logout();
 
-    expect(fetchMock).toHaveBeenNthCalledWith(1, '/api/auth/refresh', {
-      method: 'POST',
-      credentials: 'include',
-    });
-    expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include',
-    });
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      expectedApiUrl('/auth/refresh'),
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      expectedApiUrl('/auth/logout'),
+      {
+        method: 'POST',
+        credentials: 'include',
+      },
+    );
   });
 
   it('calls me endpoint with bearer token', async () => {
@@ -92,7 +110,7 @@ describe('auth-client request contract', () => {
 
     await me('access-token');
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/auth/me', {
+    expect(fetchMock).toHaveBeenCalledWith(expectedApiUrl('/auth/me'), {
       method: 'GET',
       credentials: 'include',
       headers: { Authorization: 'Bearer access-token' },
