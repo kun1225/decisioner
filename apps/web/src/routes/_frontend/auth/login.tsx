@@ -2,44 +2,44 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 
 import { useAuthSessionActions } from '@/features/auth/_domain/auth-session-provider';
 
-import { AuthShell } from './_components/auth-shell';
-import { RegisterForm } from './_components/register-form';
-import { buildAuthRedirectSearch } from './_domain/redirect-target';
+import { AuthShell } from './-components/auth-shell';
+import { LoginForm } from './-components/login-form';
+import { buildAuthRedirectSearch } from './-domain/redirect-target';
 
 type AuthSearch = {
   redirect?: string;
 };
 
-export const Route = createFileRoute('/auth/register')({
+export const Route = createFileRoute('/_frontend/auth/login')({
   validateSearch: (search: Record<string, unknown>): AuthSearch => ({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
   }),
-  component: RegisterRoutePage,
+  component: LoginRoutePage,
 });
 
-function RegisterRoutePage() {
+function LoginRoutePage() {
   const { redirect } = Route.useSearch();
   const navigate = useNavigate();
   const { setAuthenticated } = useAuthSessionActions();
 
   return (
     <AuthShell
-      title="Create account"
-      description="Start tracking workouts and keep your gym progress in one place."
+      title="Sign in"
+      description="Use your JoyGym account to continue your training plan."
       footer={
         <p className="text-muted-foreground text-center text-sm">
-          Already have an account?{' '}
+          New to JoyGym?{' '}
           <Link
-            to="/auth/login"
+            to="/auth/register"
             search={buildAuthRedirectSearch(redirect)}
             className="text-primary font-medium underline underline-offset-4"
           >
-            Sign in
+            Create an account
           </Link>
         </p>
       }
     >
-      <RegisterForm
+      <LoginForm
         redirect={redirect}
         onAuthenticated={setAuthenticated}
         onSuccessRedirect={(target) => {

@@ -1,14 +1,19 @@
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { login, me } from '@/features/auth/_domain/auth-client';
 import type { AuthUser } from '@/features/auth/_domain/auth-types';
 
-import { validateLoginInput } from '../_domain/auth-form-validation';
-import { mapAuthApiErrorToFormErrors } from '../_domain/form-error-mapper';
-import { resolvePostAuthRedirect } from '../_domain/redirect-target';
+import { validateLoginInput } from '../-domain/auth-form-validation';
+import { mapAuthApiErrorToFormErrors } from '../-domain/form-error-mapper';
+import { resolvePostAuthRedirect } from '../-domain/redirect-target';
 
 type LoginFields = {
   email: string;
@@ -95,9 +100,7 @@ export function LoginForm({
   return (
     <form className="space-y-4" onSubmit={handleSubmit} noValidate>
       {formError ? (
-        <FieldError
-          className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm"
-        >
+        <FieldError className="border-destructive/40 bg-destructive/10 text-destructive rounded-md border px-3 py-2 text-sm">
           {formError}
         </FieldError>
       ) : null}
@@ -115,7 +118,9 @@ export function LoginForm({
             aria-invalid={Boolean(fieldErrors.email)}
             required
           />
-          {fieldErrors.email ? <FieldError>{fieldErrors.email}</FieldError> : null}
+          {fieldErrors.email ? (
+            <FieldError>{fieldErrors.email}</FieldError>
+          ) : null}
         </Field>
 
         <Field data-invalid={Boolean(fieldErrors.password)}>
