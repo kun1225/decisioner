@@ -13,6 +13,7 @@ describe('auth-client request contract', () => {
   const fetchMock = vi.fn()
 
   beforeEach(() => {
+    fetchMock.mockReset()
     vi.stubGlobal('fetch', fetchMock)
   })
 
