@@ -1,0 +1,64 @@
+import type { ReactNode } from 'react';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
+type AuthShellProps = {
+  title: string;
+  description: string;
+  children: ReactNode;
+  footer: ReactNode;
+};
+
+export function AuthShell({
+  title,
+  description,
+  children,
+  footer,
+}: AuthShellProps) {
+  return (
+    <main className="relative min-h-[calc(100vh-72px)] overflow-hidden bg-gradient-to-br from-orange-50 via-white to-emerald-50 px-4 py-10 sm:px-6">
+      <div
+        aria-hidden
+        className="bg-primary/10 absolute -top-20 left-1/2 size-72 -translate-x-1/2 rounded-full blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="absolute bottom-0 right-0 size-64 rounded-full bg-emerald-200/40 blur-3xl"
+      />
+
+      <section className="relative mx-auto grid max-w-5xl items-start gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div className="space-y-4 lg:pr-8">
+          <p className="text-primary text-sm font-semibold uppercase tracking-[0.2em]">
+            JoyGym
+          </p>
+          <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">
+            Build strength with secure sessions.
+          </h1>
+          <p className="text-muted-foreground max-w-md text-base leading-relaxed">
+            Sign in to continue tracking workouts, save templates, and keep your
+            training history synced.
+          </p>
+        </div>
+
+        <Card className="border-primary/15 bg-background/90 ring-primary/10 shadow-lg backdrop-blur-sm">
+          <CardHeader className="space-y-2">
+            <CardTitle className="text-2xl tracking-tight">{title}</CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
+              {description}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {children}
+            {footer}
+          </CardContent>
+        </Card>
+      </section>
+    </main>
+  );
+}
