@@ -1,5 +1,4 @@
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 type DashboardSidebarProps = {
   isAuthenticated: boolean;
@@ -19,38 +18,38 @@ export function DashboardSidebar({
   return (
     <aside className="bg-card sticky top-0 h-screen border-r">
       <div className="flex h-full flex-col gap-8 p-6">
-        <button
+        <Button
           type="button"
           onClick={onBrandClick}
-          className="text-foreground w-fit cursor-pointer text-left text-xl font-semibold tracking-tight"
+          variant="ghost"
+          className="text-foreground w-fit cursor-pointer px-0 text-left text-xl font-semibold tracking-tight hover:bg-transparent"
         >
           JoyGym
-        </button>
+        </Button>
 
         <nav aria-label="後台導覽" className="space-y-2">
           <p className="text-muted-foreground text-xs font-medium tracking-[0.2em] uppercase">
             後台導覽
           </p>
-          <button
+          <Button
             type="button"
             onClick={onDashboardClick}
-            className="text-foreground hover:text-primary block rounded-md px-3 py-2 text-sm font-medium transition-colors"
+            variant="ghost"
+            className="text-foreground hover:text-primary block w-full justify-start px-3 py-2 text-sm font-medium transition-colors"
           >
             儀表板
-          </button>
+          </Button>
         </nav>
 
         <div className="mt-auto">
-          <button
+          <Button
             type="button"
             onClick={onAuthActionClick}
-            className={cn(
-              buttonVariants({ variant: 'outline' }),
-              'w-full cursor-pointer',
-            )}
+            variant="outline"
+            className="w-full cursor-pointer"
           >
             {authActionLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </aside>
