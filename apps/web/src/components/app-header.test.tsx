@@ -9,7 +9,7 @@ describe('app-header', () => {
       <AppHeader isAuthenticated={false} logoHref="/" primaryHref="/auth/login" />,
     );
 
-    const logoLink = screen.getByText('JoyGym').closest('a');
+    const logoLink = screen.getByText('Joy Gym').closest('a');
     const loginLink = screen.getByText('Login').closest('a');
 
     expect(logoLink?.getAttribute('href')).toBe('/');

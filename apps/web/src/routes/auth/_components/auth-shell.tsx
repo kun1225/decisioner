@@ -22,19 +22,19 @@ export function AuthShell({
   footer,
 }: AuthShellProps) {
   return (
-    <main className="bg-brand-auth-gradient relative flex min-h-[calc(100vh-64px)] items-center overflow-hidden px-4 py-6 sm:px-6">
+    <main className="bg-brand-auth-gradient relative flex min-h-svh items-center overflow-hidden px-4 py-6 sm:px-6">
       <div
         aria-hidden
         className="bg-primary/10 absolute -top-20 left-1/2 size-72 -translate-x-1/2 rounded-full blur-3xl"
       />
       <div
         aria-hidden
-        className="bg-brand-green-glow/40 absolute bottom-0 right-0 size-64 rounded-full blur-3xl"
+        className="bg-brand-green-glow/40 absolute right-0 bottom-0 size-64 rounded-full blur-3xl"
       />
 
       <section className="relative mx-auto grid w-full max-w-5xl items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-4 lg:pr-8">
-          <p className="text-primary text-sm font-semibold uppercase tracking-[0.2em]">
+          <p className="text-primary text-sm font-semibold tracking-[0.2em] uppercase">
             JoyGym
           </p>
           <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">
