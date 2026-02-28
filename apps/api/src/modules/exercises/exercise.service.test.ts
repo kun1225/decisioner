@@ -23,6 +23,7 @@ vi.mock('@repo/database/index', () => ({
   },
   eq: vi.fn((_col, val) => val),
   and: vi.fn((...conditions: unknown[]) => conditions),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   isNull: vi.fn((_col) => 'IS_NULL'),
   exercises: {
     id: 'exercises.id',
