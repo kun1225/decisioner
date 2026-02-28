@@ -30,19 +30,13 @@ async function findTemplateOrFail(templateId: string) {
   return template;
 }
 
-function verifyOwner(
-  template: { ownerId: string },
-  userId: string,
-) {
+function verifyOwner(template: { ownerId: string }, userId: string) {
   if (template.ownerId !== userId) {
     throw new ApiError(403, 'Forbidden');
   }
 }
 
-async function verifyExerciseAccessible(
-  exerciseId: string,
-  userId: string,
-) {
+async function verifyExerciseAccessible(exerciseId: string, userId: string) {
   const [exercise] = await db
     .select()
     .from(exercises)
@@ -156,7 +150,12 @@ export async function updateTemplateItem(
   const [updated] = await db
     .update(templateItems)
     .set(input)
-    .where(and(eq(templateItems.id, itemId), eq(templateItems.templateId, templateId)))
+    .where(
+      and(
+        eq(templateItems.id, itemId),
+        eq(templateItems.templateId, templateId),
+      ),
+    )
     .returning();
 
   if (!updated) {
@@ -174,11 +173,17 @@ export async function deleteTemplateItem(
   const template = await findTemplateOrFail(templateId);
   verifyOwner(template, userId);
 
-  const result = await db
+  const deletedItems = await db
     .delete(templateItems)
-    .where(and(eq(templateItems.id, itemId), eq(templateItems.templateId, templateId)));
+    .where(
+      and(
+        eq(templateItems.id, itemId),
+        eq(templateItems.templateId, templateId),
+      ),
+    )
+    .returning({ id: templateItems.id });
 
-  if ((result as { rowCount: number }).rowCount === 0) {
+  if (deletedItems.length === 0) {
     throw new ApiError(404, 'Template item not found');
   }
 }
