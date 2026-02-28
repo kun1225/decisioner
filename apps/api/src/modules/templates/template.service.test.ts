@@ -78,9 +78,6 @@ beforeEach(() => {
   updateResult = [];
 });
 
-// ============================================================
-// createTemplate
-// ============================================================
 describe('createTemplate', () => {
   it('should create a template with name and description', async () => {
     const created = {
@@ -117,9 +114,6 @@ describe('createTemplate', () => {
   });
 });
 
-// ============================================================
-// listOwnTemplates
-// ============================================================
 describe('listOwnTemplates', () => {
   it('should return own templates', async () => {
     const mockTemplates = [
@@ -142,9 +136,6 @@ describe('listOwnTemplates', () => {
   });
 });
 
-// ============================================================
-// getTemplateById
-// ============================================================
 describe('getTemplateById', () => {
   it('should return template with items sorted by sortOrder', async () => {
     const template = {
@@ -208,9 +199,6 @@ describe('getTemplateById', () => {
   });
 });
 
-// ============================================================
-// updateTemplate
-// ============================================================
 describe('updateTemplate', () => {
   it('should update template name', async () => {
     const template = {
@@ -237,11 +225,22 @@ describe('updateTemplate', () => {
       updateTemplate('non-existent', 'user-1', { name: 'New Name' }),
     ).rejects.toThrow(new ApiError(404, 'Template not found'));
   });
+
+  it('should throw 403 when user is not the owner', async () => {
+    const template = {
+      id: 'tpl-1',
+      ownerId: 'user-2',
+      name: 'Push Day',
+      deletedAt: null,
+    };
+    selectResult = [template];
+
+    await expect(
+      updateTemplate('tpl-1', 'user-1', { name: 'Push Day v2' }),
+    ).rejects.toThrow(new ApiError(403, 'Forbidden'));
+  });
 });
 
-// ============================================================
-// deleteTemplate
-// ============================================================
 describe('deleteTemplate', () => {
   it('should soft delete a template', async () => {
     const template = {
@@ -253,9 +252,7 @@ describe('deleteTemplate', () => {
     selectResult = [template];
     updateResult = [{ ...template, deletedAt: new Date() }];
 
-    await expect(
-      deleteTemplate('tpl-1', 'user-1'),
-    ).resolves.toBeUndefined();
+    await expect(deleteTemplate('tpl-1', 'user-1')).resolves.toBeUndefined();
   });
 
   it('should throw 404 when template not found', async () => {
@@ -281,9 +278,6 @@ describe('deleteTemplate', () => {
   });
 });
 
-// ============================================================
-// addTemplateItem
-// ============================================================
 describe('addTemplateItem', () => {
   it('should add an item to template', async () => {
     const template = {
@@ -416,7 +410,6 @@ describe('addTemplateItem', () => {
           }),
         } as never;
       }
-      // Exercise not found
       return {
         from: () => ({
           where: () => [],
@@ -433,11 +426,67 @@ describe('addTemplateItem', () => {
 
     vi.mocked(dbMock.db.select).mockRestore();
   });
+
+  it('should throw 400 when custom exercise belongs to another user', async () => {
+    const template = {
+      id: 'tpl-1',
+      ownerId: 'user-1',
+      name: 'Push Day',
+      deletedAt: null,
+    };
+    const exercise = {
+      id: 'ex-2',
+      source: 'CUSTOM',
+      ownerId: 'user-2',
+      deletedAt: null,
+    };
+
+    const dbMock = await import('@repo/database/index');
+    let selectCallCount = 0;
+    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) {
+        return {
+          from: () => ({
+            where: () => [template],
+          }),
+        } as never;
+      }
+      return {
+        from: () => ({
+          where: () => [exercise],
+        }),
+      } as never;
+    });
+
+    await expect(
+      addTemplateItem('tpl-1', 'user-1', {
+        exerciseId: 'ex-2',
+        sortOrder: 0,
+      }),
+    ).rejects.toThrow(new ApiError(400, 'Exercise not accessible'));
+
+    vi.mocked(dbMock.db.select).mockRestore();
+  });
+
+  it('should throw 403 when user is not the owner', async () => {
+    const template = {
+      id: 'tpl-1',
+      ownerId: 'user-2',
+      name: 'Push Day',
+      deletedAt: null,
+    };
+    selectResult = [template];
+
+    await expect(
+      addTemplateItem('tpl-1', 'user-1', {
+        exerciseId: 'ex-1',
+        sortOrder: 0,
+      }),
+    ).rejects.toThrow(new ApiError(403, 'Forbidden'));
+  });
 });
 
-// ============================================================
-// updateTemplateItem
-// ============================================================
 describe('updateTemplateItem', () => {
   it('should update an item sortOrder', async () => {
     const template = {
@@ -484,11 +533,22 @@ describe('updateTemplateItem', () => {
       updateTemplateItem('tpl-1', 'non-existent', 'user-1', { sortOrder: 2 }),
     ).rejects.toThrow(new ApiError(404, 'Template item not found'));
   });
+
+  it('should throw 403 when user is not the owner', async () => {
+    const template = {
+      id: 'tpl-1',
+      ownerId: 'user-2',
+      name: 'Push Day',
+      deletedAt: null,
+    };
+    selectResult = [template];
+
+    await expect(
+      updateTemplateItem('tpl-1', 'item-1', 'user-1', { sortOrder: 2 }),
+    ).rejects.toThrow(new ApiError(403, 'Forbidden'));
+  });
 });
 
-// ============================================================
-// deleteTemplateItem
-// ============================================================
 describe('deleteTemplateItem', () => {
   it('should delete an item', async () => {
     const template = {
@@ -503,7 +563,9 @@ describe('deleteTemplateItem', () => {
     const deleteSpy = vi.spyOn(dbMock.db, 'delete').mockImplementation(
       () =>
         ({
-          where: () => ({ rowCount: 1 }),
+          where: () => ({
+            returning: () => [{ id: 'item-1' }],
+          }),
         }) as never,
     );
 
@@ -535,7 +597,9 @@ describe('deleteTemplateItem', () => {
     vi.spyOn(dbMock.db, 'delete').mockImplementation(
       () =>
         ({
-          where: () => ({ rowCount: 0 }),
+          where: () => ({
+            returning: () => [],
+          }),
         }) as never,
     );
 
@@ -544,5 +608,19 @@ describe('deleteTemplateItem', () => {
     ).rejects.toThrow(new ApiError(404, 'Template item not found'));
 
     vi.mocked(dbMock.db.delete).mockRestore();
+  });
+
+  it('should throw 403 when user is not the owner', async () => {
+    const template = {
+      id: 'tpl-1',
+      ownerId: 'user-2',
+      name: 'Push Day',
+      deletedAt: null,
+    };
+    selectResult = [template];
+
+    await expect(
+      deleteTemplateItem('tpl-1', 'item-1', 'user-1'),
+    ).rejects.toThrow(new ApiError(403, 'Forbidden'));
   });
 });
