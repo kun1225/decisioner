@@ -40,7 +40,14 @@ export class AuthApiError extends Error {
 }
 
 async function parseApiError(response: Response) {
-  const payload = (await response.json().catch(() => ({}))) as ApiErrorPayload;
+  let payload: ApiErrorPayload = {};
+
+  try {
+    payload = (await response.json()) as ApiErrorPayload;
+  } catch {
+    payload = {};
+  }
+
   const message = payload.error ?? 'Request failed';
   throw new AuthApiError(response.status, message, payload.details);
 }

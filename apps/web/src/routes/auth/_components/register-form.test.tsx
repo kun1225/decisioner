@@ -9,9 +9,7 @@ import {
 import { RegisterForm } from './register-form';
 
 vi.mock('@/features/auth/_domain/auth-client', async () => {
-  const actual = await vi.importActual<
-    typeof import('@/features/auth/_domain/auth-client')
-  >('@/features/auth/_domain/auth-client');
+  const actual = await vi.importActual('@/features/auth/_domain/auth-client');
 
   return {
     ...actual,
@@ -128,7 +126,7 @@ describe('register-form', () => {
     expect(onSuccessRedirect).toHaveBeenCalledWith('/settings');
   });
 
-  it('shows loading state during submission', async () => {
+  it('shows loading state during submission', () => {
     let resolveRegister:
       | ((value: { accessToken: string; user: { id: string; email: string; name: string } }) => void)
       | undefined;

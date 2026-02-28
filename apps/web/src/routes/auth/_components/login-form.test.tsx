@@ -10,9 +10,7 @@ import {
 import { LoginForm } from './login-form';
 
 vi.mock('@/features/auth/_domain/auth-client', async () => {
-  const actual = await vi.importActual<typeof import('@/features/auth/_domain/auth-client')>(
-    '@/features/auth/_domain/auth-client',
-  );
+  const actual = await vi.importActual('@/features/auth/_domain/auth-client');
 
   return {
     ...actual,
@@ -113,7 +111,7 @@ describe('login-form', () => {
     expect(onSuccessRedirect).toHaveBeenCalledWith('/workouts/history');
   });
 
-  it('disables submit button while request is in-flight', async () => {
+  it('disables submit button while request is in-flight', () => {
     let resolveLogin: ((value: { accessToken: string }) => void) | undefined;
     vi.mocked(login).mockReturnValueOnce(
       new Promise((resolve) => {

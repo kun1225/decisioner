@@ -11,7 +11,7 @@ const FALLBACK_FORM_ERROR = 'Something went wrong. Please try again.';
 
 export function mapAuthApiErrorToFormErrors<TField extends string>(
   error: unknown,
-  knownFields: readonly TField[],
+  knownFields: ReadonlyArray<TField>,
 ): AuthFormErrorState<TField> {
   const fieldErrors: FormErrorMap<TField> = {};
 
