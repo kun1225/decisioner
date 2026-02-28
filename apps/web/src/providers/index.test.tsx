@@ -1,6 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -8,7 +8,7 @@ import {
   useAuthSessionState,
 } from '@/features/auth/_domain/auth-session-provider'
 
-import { Provider, getContext } from './index'
+import { getContext, Provider } from './index'
 
 describe('providers index wiring', () => {
   it('provides both query client and auth session context', () => {

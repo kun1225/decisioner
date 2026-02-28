@@ -1,11 +1,10 @@
 import { createContext, useContext, useMemo, useReducer } from 'react'
 
-import type { AuthUser } from './auth-client'
 import {
   initialAuthSessionState,
   reduceAuthSessionState,
 } from './auth-session-state'
-import type { AuthSessionState } from './auth-types'
+import type { AuthSessionState, AuthUser } from './auth-types'
 
 export type AuthSessionActions = {
   setAuthenticated: (payload: { accessToken: string; user: AuthUser }) => void

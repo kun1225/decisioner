@@ -1,50 +1,33 @@
-export interface RegisterRequest {
-  email: string
-  name: string
-  password: string
-  confirmedPassword: string
-}
+import type { AuthUser, LoginRequest, RegisterRequest } from './auth-types'
 
-export interface LoginRequest {
-  email: string
-  password: string
-}
-
-export interface AuthUser {
-  id: string
-  email: string
-  name: string
-  avatarUrl?: string | null
-}
-
-interface RegisterResponse {
+type RegisterResponse = {
   accessToken: string
   user: AuthUser
 }
 
-interface LoginResponse {
+type LoginResponse = {
   accessToken: string
 }
 
-interface RefreshResponse {
+type RefreshResponse = {
   accessToken: string
 }
 
-interface ApiErrorDetail {
+type ApiErrorDetail = {
   path: string
   message: string
 }
 
-interface ApiErrorPayload {
+type ApiErrorPayload = {
   error?: string
-  details?: ApiErrorDetail[]
+  details?: Array<ApiErrorDetail>
 }
 
 export class AuthApiError extends Error {
   readonly status: number
-  readonly details?: ApiErrorDetail[]
+  readonly details?: Array<ApiErrorDetail>
 
-  constructor(status: number, message: string, details?: ApiErrorDetail[]) {
+  constructor(status: number, message: string, details?: Array<ApiErrorDetail>) {
     super(message)
     this.name = 'AuthApiError'
     this.status = status

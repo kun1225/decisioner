@@ -11,7 +11,7 @@ import Header from '../components/Header'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 
-interface MyRouterContext {
+type MyRouterContext = {
   queryClient: QueryClient
 }
 

@@ -1,5 +1,4 @@
-import type { AuthUser } from './auth-client'
-import type { AuthSessionState } from './auth-types'
+import type { AuthSessionState, AuthUser } from './auth-types'
 
 export const initialAuthSessionState: AuthSessionState = { status: 'unknown' }
 
