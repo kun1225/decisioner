@@ -5,15 +5,34 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:3001',
 ];
 
-function parseAllowedOrigins(rawValue?: string): string[] {
+function normalizeOrigin(origin: string): string {
+  return origin.trim().replace(/\/+$/, '');
+}
+
+function isLoopbackOrigin(origin: string): boolean {
+  return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(origin);
+}
+
+export function parseAllowedOrigins(rawValue?: string): string[] {
   if (!rawValue?.trim()) {
-    return [...DEFAULT_ALLOWED_ORIGINS];
+    return DEFAULT_ALLOWED_ORIGINS.map(normalizeOrigin);
   }
 
   return rawValue
     .split(',')
-    .map((origin) => origin.trim())
+    .map(normalizeOrigin)
     .filter((origin) => origin.length > 0);
+}
+
+function isAllowedOrigin(origin: string, allowedOrigins: Set<string>) {
+  const normalizedOrigin = normalizeOrigin(origin);
+  if (allowedOrigins.has(normalizedOrigin)) {
+    return true;
+  }
+
+  return (
+    process.env.NODE_ENV !== 'production' && isLoopbackOrigin(normalizedOrigin)
+  );
 }
 
 export function createCorsOptions(
@@ -23,7 +42,7 @@ export function createCorsOptions(
 
   return {
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.has(origin)) {
+      if (!origin || isAllowedOrigin(origin, allowedOrigins)) {
         callback(null, true);
         return;
       }
