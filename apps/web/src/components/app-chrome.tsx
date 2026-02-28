@@ -17,11 +17,23 @@ export function AppChrome({ children }: AppChromeProps) {
 
   const isAuthenticated = authSession.status === 'authenticated';
   const isDashboardRoute = location.pathname.startsWith('/dashboard');
+  const isAuthRoute = location.pathname.startsWith('/auth/');
   const redirectTarget = `${location.pathname}${location.searchStr}${location.hash}`;
+  const redirectFromAuthSearch = new URLSearchParams(location.searchStr).get(
+    'redirect',
+  );
+  const safeAuthRedirect =
+    redirectFromAuthSearch && redirectFromAuthSearch.startsWith('/')
+      ? redirectFromAuthSearch
+      : undefined;
   const headerLogoHref = '/';
   const headerPrimaryHref = isAuthenticated
     ? '/dashboard'
-    : `/auth/login?redirect=${encodeURIComponent(redirectTarget)}`;
+    : isAuthRoute
+      ? safeAuthRedirect
+        ? `/auth/login?redirect=${encodeURIComponent(safeAuthRedirect)}`
+        : '/auth/login'
+      : `/auth/login?redirect=${encodeURIComponent(redirectTarget)}`;
 
   const runNavigation = (
     payload:

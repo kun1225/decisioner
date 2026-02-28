@@ -45,7 +45,9 @@ describe('app-chrome', () => {
 
   it('renders sticky frontend header outside dashboard routes', () => {
     mockUseRouterState.mockImplementation((options) =>
-      options.select({ location: { pathname: '/auth/login' } }),
+      options.select({
+        location: { pathname: '/auth/login', searchStr: '', hash: '' },
+      }),
     );
     mockUseAuthSessionState.mockReturnValue({ status: 'anonymous' });
 
@@ -56,13 +58,41 @@ describe('app-chrome', () => {
     );
 
     expect(screen.getByText('Login')).toBeTruthy();
+    const loginLink = screen.getByText('Login').closest('a');
+    expect(loginLink?.getAttribute('href')).toBe('/auth/login');
     expect(screen.getByText('Page Content')).toBeTruthy();
     expect(screen.queryByText('後台導覽')).toBeNull();
   });
 
+  it('does not nest redirect when already on auth route', () => {
+    mockUseRouterState.mockImplementation((options) =>
+      options.select({
+        location: {
+          pathname: '/auth/login',
+          searchStr: '?redirect=%2Fdashboard',
+          hash: '',
+        },
+      }),
+    );
+    mockUseAuthSessionState.mockReturnValue({ status: 'anonymous' });
+
+    render(
+      <AppChrome>
+        <div>Page Content</div>
+      </AppChrome>,
+    );
+
+    const loginLink = screen.getByText('Login').closest('a');
+    expect(loginLink?.getAttribute('href')).toBe(
+      '/auth/login?redirect=%2Fdashboard',
+    );
+  });
+
   it('renders sidebar layout on dashboard routes', () => {
     mockUseRouterState.mockImplementation((options) =>
-      options.select({ location: { pathname: '/dashboard' } }),
+      options.select({
+        location: { pathname: '/dashboard', searchStr: '', hash: '' },
+      }),
     );
     mockUseAuthSessionState.mockReturnValue({ status: 'authenticated' });
 
