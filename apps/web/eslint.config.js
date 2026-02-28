@@ -1,5 +1,5 @@
-//  @ts-check
+// @ts-check
 
-import { config } from '@repo/eslint-config/tanstack-internal'
+import { config } from '@repo/eslint-config/tanstack-internal';
 
-export default config
+export default [...config, { ignores: ['eslint.config.js'] }];

@@ -18,7 +18,12 @@ const loggedServerFunction = createServerFn({ method: "GET" }).middleware([
 
 const TODOS_FILE = 'todos.json'
 
-async function readTodos() {
+type Todo = {
+  id: number
+  name: string
+}
+
+async function readTodos(): Promise<Array<Todo>> {
   return JSON.parse(
     await fs.promises.readFile(TODOS_FILE, 'utf-8').catch(() =>
       JSON.stringify(
@@ -30,12 +35,12 @@ async function readTodos() {
         2,
       ),
     ),
-  )
+  ) as Array<Todo>
 }
 
 const getTodos = createServerFn({
   method: 'GET',
-}).handler(async () => await readTodos())
+}).handler(() => readTodos())
 
 const addTodo = createServerFn({ method: 'POST' })
   .inputValidator((d: string) => d)
@@ -48,20 +53,20 @@ const addTodo = createServerFn({ method: 'POST' })
 
 export const Route = createFileRoute('/demo/start/server-funcs')({
   component: Home,
-  loader: async () => await getTodos(),
+  loader: () => getTodos(),
 })
 
 function Home() {
   const router = useRouter()
-  let todos = Route.useLoaderData()
+  const todos = Route.useLoaderData()
 
   const [todo, setTodo] = useState('')
 
   const submitTodo = useCallback(async () => {
-    todos = await addTodo({ data: todo })
+    await addTodo({ data: todo })
     setTodo('')
-    router.invalidate()
-  }, [addTodo, todo])
+    await router.invalidate()
+  }, [router, todo])
 
   return (
     <div
@@ -74,7 +79,7 @@ function Home() {
       <div className="w-full max-w-2xl p-8 rounded-xl backdrop-blur-md bg-black/50 shadow-xl border-8 border-black/10">
         <h1 className="text-2xl mb-4">Start Server Functions - Todo Example</h1>
         <ul className="mb-4 space-y-2">
-          {todos?.map((t) => (
+          {todos.map((t) => (
             <li
               key={t.id}
               className="bg-white/10 border border-white/20 rounded-lg p-3 backdrop-blur-sm shadow-md"
