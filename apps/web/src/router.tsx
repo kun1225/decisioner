@@ -1,6 +1,8 @@
 import { createRouter } from '@tanstack/react-router';
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query';
 
+import { AuthSessionProvider } from '@/features/auth/_domain/auth-session-provider';
+
 import * as AppProviders from './providers';
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
@@ -14,7 +16,7 @@ export const getRouter = () => {
     context: {
       ...rqContext,
     },
-
+    Wrap: ({ children }) => <AuthSessionProvider>{children}</AuthSessionProvider>,
     defaultPreload: 'intent',
   });
 

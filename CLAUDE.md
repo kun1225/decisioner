@@ -89,7 +89,10 @@ Data fetching: TanStack Query for server state, route loaders for prefetch, muta
 
 - **File naming**: kebab-case for all files (e.g., `auth-service.ts`, `practice-header.tsx`)
 - **UI components**: Always prefer shadcn. Only custom-build when shadcn has no match; document rationale in PR.
+- **Shadcn-first rule (mandatory)**: For interactive UI controls, use shadcn components first.  
+  For buttons specifically, use `@/components/ui/button` (`<Button />`) instead of raw `<button>` unless there is a documented technical exception.
 - **Styling**: Tailwind CSS v4 + CVA + clsx + tailwind-merge
+- **Color token reuse (mandatory)**: Define reusable colors as tokens (e.g., CSS variables in `styles.css` / `@theme`) and consume those tokens/utilities across components. Avoid ad-hoc hardcoded color values in component files.
 - **Validation**: Zod for all input validation (shared schemas in `packages/shared`)
 - **Immutability**: Always create new objects, never mutate
 
