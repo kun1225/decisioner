@@ -123,7 +123,7 @@ Client beforeLoad:
 - 再呼叫 onStateChange('unknown') → wait 重新回到 pending
 - 再呼叫 onStateChange('anonymous') → 新的 wait resolves
 
-### Phase 2: Session Restore Hook (TDD)
+### Phase 2: Session Restore Hook (TDD) ✅
 
 **New: `apps/web/src/features/auth/_domain/use-session-restore.ts`** (~35 lines)
 
