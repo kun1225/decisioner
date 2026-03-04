@@ -12,10 +12,10 @@ import { getContext, Provider } from './index';
 
 describe('providers index wiring', () => {
   it('provides both query client and auth session context', () => {
-    const { queryClient } = getContext();
+    const context = getContext();
 
     const wrapper = ({ children }: { children: ReactNode }) => (
-      <Provider queryClient={queryClient}>{children}</Provider>
+      <Provider context={context}>{children}</Provider>
     );
 
     const { result } = renderHook(
@@ -27,7 +27,7 @@ describe('providers index wiring', () => {
       { wrapper },
     );
 
-    expect(result.current.queryClient).toBe(queryClient);
+    expect(result.current.queryClient).toBe(context.queryClient);
     expect(result.current.state).toEqual({ status: 'unknown' });
 
     act(() => {

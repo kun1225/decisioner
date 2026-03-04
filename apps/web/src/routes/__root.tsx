@@ -7,11 +7,15 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
+import type { AuthSessionState } from '@/features/auth/_domain/auth-types';
+
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
 import appCss from '../styles.css?url';
 
 type MyRouterContext = {
   queryClient: QueryClient;
+  getAuthSessionState: () => AuthSessionState;
+  waitForAuthReady: () => Promise<void>;
 };
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

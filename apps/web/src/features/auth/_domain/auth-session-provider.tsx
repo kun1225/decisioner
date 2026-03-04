@@ -1,15 +1,27 @@
-import { createContext, useContext, useMemo, useReducer } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from 'react';
 
 import {
   initialAuthSessionState,
   reduceAuthSessionState,
 } from './auth-session-state';
 import type { AuthSessionState, AuthUser } from './auth-types';
+import { useSessionRestore } from './use-session-restore';
 
 export type AuthSessionActions = {
   setAuthenticated: (payload: { accessToken: string; user: AuthUser }) => void;
   setAnonymous: () => void;
   setUnknown: () => void;
+};
+
+type AuthSessionProviderProps = {
+  children: React.ReactNode;
+  onStateChange?: (state: AuthSessionState) => void;
 };
 
 const AuthSessionStateContext = createContext<AuthSessionState | null>(null);
@@ -19,9 +31,8 @@ const AuthSessionActionsContext = createContext<AuthSessionActions | null>(
 
 export function AuthSessionProvider({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+  onStateChange,
+}: AuthSessionProviderProps) {
   const [state, dispatch] = useReducer(
     reduceAuthSessionState,
     initialAuthSessionState,
@@ -36,6 +47,12 @@ export function AuthSessionProvider({
     }),
     [],
   );
+
+  useSessionRestore(actions);
+
+  useEffect(() => {
+    onStateChange?.(state);
+  }, [state, onStateChange]);
 
   return (
     <AuthSessionActionsContext.Provider value={actions}>

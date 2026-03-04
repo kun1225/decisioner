@@ -182,7 +182,7 @@ function clearSessionPresenceCookie(res: Parameters<RequestHandler>[1]) {
 }
 ```
 
-### Phase 5: Provider + Router Wiring
+### Phase 5: Provider + Router Wiring ✅
 
 **Modify: `apps/web/src/features/auth/_domain/auth-session-provider.tsx`** (+15 lines)
 
