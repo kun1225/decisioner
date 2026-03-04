@@ -139,7 +139,7 @@ Client beforeLoad:
 - me failure after refresh success → setAnonymous
 - StrictMode double-mount → only runs once
 
-### Phase 3: Logout Hook (TDD)
+### Phase 3: Logout Hook (TDD) ✅
 
 **New: `apps/web/src/features/auth/_domain/use-logout.ts`** (~25 lines)
 
