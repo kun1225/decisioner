@@ -15,6 +15,7 @@ import {
 } from './auth.service.js';
 
 const REFRESH_COOKIE = 'refresh_token';
+const SESSION_PRESENCE_COOKIE = 'session_presence';
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 function setRefreshCookie(res: Parameters<RequestHandler>[1], token: string) {
@@ -36,6 +37,23 @@ function clearRefreshCookie(res: Parameters<RequestHandler>[1]) {
   });
 }
 
+function setSessionPresenceCookie(res: Parameters<RequestHandler>[1]) {
+  res.cookie(SESSION_PRESENCE_COOKIE, '1', {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+    maxAge: THIRTY_DAYS_MS,
+  });
+}
+
+function clearSessionPresenceCookie(res: Parameters<RequestHandler>[1]) {
+  res.clearCookie(SESSION_PRESENCE_COOKIE, {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/',
+  });
+}
+
 // POST /api/auth/register
 export const register: RequestHandler = async (req, res) => {
   const { email, name, password } = registerSchema.parse(req.body);
@@ -44,6 +62,7 @@ export const register: RequestHandler = async (req, res) => {
   const tokens = await createTokenPair(user.id, user.email);
 
   setRefreshCookie(res, tokens.refreshToken);
+  setSessionPresenceCookie(res);
   res.status(201).json({ user, accessToken: tokens.accessToken });
 };
 
@@ -64,6 +83,7 @@ export const login: RequestHandler = async (req, res) => {
   const tokens = await createTokenPair(user.id, user.email);
 
   setRefreshCookie(res, tokens.refreshToken);
+  setSessionPresenceCookie(res);
   res.json({ accessToken: tokens.accessToken });
 };
 
@@ -78,6 +98,7 @@ export const refresh: RequestHandler = async (req, res) => {
   const tokens = await rotateRefreshToken(oldToken);
 
   setRefreshCookie(res, tokens.refreshToken);
+  setSessionPresenceCookie(res);
   res.json({ accessToken: tokens.accessToken });
 };
 
@@ -95,6 +116,7 @@ export const logout: RequestHandler = async (req, res) => {
   }
 
   clearRefreshCookie(res);
+  clearSessionPresenceCookie(res);
   res.status(204).end();
 };
 

@@ -153,7 +153,7 @@ Client beforeLoad:
 - API failure → still setAnonymous + navigate
 - isLoggingOut flag transitions
 
-### Phase 4: Backend - `session_presence` cookie
+### Phase 4: Backend - `session_presence` cookie ✅
 
 **Modify: `apps/api/src/modules/auth/auth.controller.ts`** (+15 lines)
 
