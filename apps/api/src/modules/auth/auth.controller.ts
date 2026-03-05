@@ -12,6 +12,7 @@ import {
   findUserByEmail,
   findUserById,
   revokeTokenFamily,
+  rotateRefreshToken,
 } from './auth.service.js';
 
 const REFRESH_COOKIE = 'refresh_token';
@@ -39,6 +40,7 @@ function clearRefreshCookie(res: Parameters<RequestHandler>[1]) {
 
 function setSessionPresenceCookie(res: Parameters<RequestHandler>[1]) {
   res.cookie(SESSION_PRESENCE_COOKIE, '1', {
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
@@ -48,6 +50,7 @@ function setSessionPresenceCookie(res: Parameters<RequestHandler>[1]) {
 
 function clearSessionPresenceCookie(res: Parameters<RequestHandler>[1]) {
   res.clearCookie(SESSION_PRESENCE_COOKIE, {
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
@@ -91,15 +94,25 @@ export const login: RequestHandler = async (req, res) => {
 export const refresh: RequestHandler = async (req, res) => {
   const oldToken = req.cookies?.[REFRESH_COOKIE];
   if (!oldToken) {
+    clearRefreshCookie(res);
+    clearSessionPresenceCookie(res);
     throw new ApiError(401, 'Missing refresh token');
   }
 
-  const { rotateRefreshToken } = await import('./auth.service.js');
-  const tokens = await rotateRefreshToken(oldToken);
+  try {
+    const tokens = await rotateRefreshToken(oldToken);
 
-  setRefreshCookie(res, tokens.refreshToken);
-  setSessionPresenceCookie(res);
-  res.json({ accessToken: tokens.accessToken });
+    setRefreshCookie(res, tokens.refreshToken);
+    setSessionPresenceCookie(res);
+    res.json({ accessToken: tokens.accessToken });
+  } catch (error) {
+    if (error instanceof ApiError && error.statusCode === 401) {
+      clearRefreshCookie(res);
+      clearSessionPresenceCookie(res);
+    }
+
+    throw error;
+  }
 };
 
 // POST /api/auth/logout
@@ -122,7 +135,11 @@ export const logout: RequestHandler = async (req, res) => {
 
 // GET /api/auth/me
 export const me: RequestHandler = async (req, res) => {
-  const user = await findUserById(req.user!.userId);
+  if (!req.user) {
+    throw new ApiError(401, 'Unauthorized');
+  }
+  const user = await findUserById(req.user.userId);
+
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
