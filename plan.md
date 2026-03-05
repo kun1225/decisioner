@@ -342,7 +342,7 @@ beforeLoad: async ({ context, location }) => {
 - Extract `user.name` from authenticated state
 - Pass `userName` and `onLogout` to `DashboardSidebar`
 
-### Phase 8: Test Coverage
+### Phase 8: Test Coverage ✅
 
 **New: `apps/web/src/routes/dashboard.test.ts`** (~50 lines)
 

@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   AuthSessionProvider,
@@ -71,5 +71,29 @@ describe('auth-session-provider', () => {
     expect(() => renderHook(() => useAuthSessionActions())).toThrow(
       'useAuthSessionActions must be used inside AuthSessionProvider',
     );
+  });
+
+  it('calls onStateChange when state changes', () => {
+    const onStateChange = vi.fn();
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <AuthSessionProvider onStateChange={onStateChange}>
+        {children}
+      </AuthSessionProvider>
+    );
+
+    const { result } = renderHook(
+      () => useAuthSessionActions(),
+      { wrapper },
+    );
+
+    // Initial call with unknown state
+    expect(onStateChange).toHaveBeenCalledWith({ status: 'unknown' });
+
+    act(() => {
+      result.current.setAnonymous();
+    });
+
+    expect(onStateChange).toHaveBeenCalledWith({ status: 'anonymous' });
   });
 });

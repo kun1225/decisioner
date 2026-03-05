@@ -14,10 +14,16 @@ vi.mock('@tanstack/react-router', () => ({
       },
     ) => string;
   }) => mockUseRouterState(options),
+  useNavigate: () => vi.fn(),
 }));
 
 vi.mock('@/features/auth/_domain/auth-session-provider', () => ({
   useAuthSessionState: () => mockUseAuthSessionState(),
+  useAuthSessionActions: () => ({
+    setAnonymous: vi.fn(),
+    setAuthenticated: vi.fn(),
+    setUnknown: vi.fn(),
+  }),
 }));
 
 describe('frontend-layout', () => {
@@ -70,7 +76,7 @@ describe('frontend-layout', () => {
     );
   });
 
-  it('renders dashboard link for authenticated users', () => {
+  it('shows user dropdown for authenticated users', () => {
     mockUseRouterState.mockImplementation((options) =>
       options.select({
         location: {
@@ -80,7 +86,11 @@ describe('frontend-layout', () => {
         },
       }),
     );
-    mockUseAuthSessionState.mockReturnValue({ status: 'authenticated' });
+    mockUseAuthSessionState.mockReturnValue({
+      status: 'authenticated',
+      accessToken: 'tok',
+      user: { id: 'u1', email: 'a@b.com', name: 'Alice' },
+    });
 
     render(
       <FrontendLayout>
@@ -88,7 +98,6 @@ describe('frontend-layout', () => {
       </FrontendLayout>,
     );
 
-    const dashboardLink = screen.getByText('Dashboard').closest('a');
-    expect(dashboardLink?.getAttribute('href')).toBe('/dashboard');
+    expect(screen.getByText('Alice')).toBeTruthy();
   });
 });
