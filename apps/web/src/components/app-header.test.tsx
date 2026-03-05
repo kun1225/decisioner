@@ -6,7 +6,11 @@ import { AppHeader } from './app-header';
 describe('app-header', () => {
   it('shows logo and login link for anonymous users', () => {
     render(
-      <AppHeader isAuthenticated={false} logoHref="/" primaryHref="/auth/login" />,
+      <AppHeader
+        authStatus="anonymous"
+        logoHref="/"
+        primaryHref="/auth/login"
+      />,
     );
 
     const logoLink = screen.getByText('Joy Gym').closest('a');
@@ -16,16 +20,25 @@ describe('app-header', () => {
     expect(loginLink?.getAttribute('href')).toBe('/auth/login');
   });
 
-  it('shows dashboard link for authenticated users', () => {
+  it('shows disabled placeholder for unknown auth status', () => {
+    render(
+      <AppHeader authStatus="unknown" logoHref="/" primaryHref="/auth/login" />,
+    );
+
+    const placeholder = screen.getByText('...');
+    expect(placeholder.closest('button')?.disabled).toBe(true);
+  });
+
+  it('shows user name for authenticated users', () => {
     render(
       <AppHeader
-        isAuthenticated
+        authStatus="authenticated"
+        userName="Alice"
         logoHref="/"
         primaryHref="/dashboard"
       />,
     );
 
-    const dashboardLink = screen.getByText('Dashboard').closest('a');
-    expect(dashboardLink?.getAttribute('href')).toBe('/dashboard');
+    expect(screen.getByText('Alice')).toBeTruthy();
   });
 });

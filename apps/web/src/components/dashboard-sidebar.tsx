@@ -1,20 +1,18 @@
 import { Button } from '@/components/ui/button';
 
 type DashboardSidebarProps = {
-  isAuthenticated: boolean;
+  userName?: string;
   onBrandClick: () => void;
   onDashboardClick: () => void;
-  onAuthActionClick: () => void;
+  onLogout?: () => void;
 };
 
 export function DashboardSidebar({
-  isAuthenticated,
+  userName,
   onBrandClick,
   onDashboardClick,
-  onAuthActionClick,
+  onLogout,
 }: DashboardSidebarProps) {
-  const authActionLabel = isAuthenticated ? '前往前台' : '登入';
-
   return (
     <aside className="bg-card sticky top-0 h-screen border-r">
       <div className="flex h-full flex-col gap-8 p-6">
@@ -41,14 +39,17 @@ export function DashboardSidebar({
           </Button>
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto space-y-2">
+          {userName && (
+            <p className="text-muted-foreground truncate text-sm">{userName}</p>
+          )}
           <Button
             type="button"
-            onClick={onAuthActionClick}
+            onClick={onLogout}
             variant="outline"
             className="w-full cursor-pointer"
           >
-            {authActionLabel}
+            登出
           </Button>
         </div>
       </div>

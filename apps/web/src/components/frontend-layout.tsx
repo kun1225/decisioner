@@ -2,6 +2,7 @@ import { useRouterState } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 
 import { useAuthSessionState } from '@/features/auth/_domain/auth-session-provider';
+import { useLogout } from '@/features/auth/_domain/use-logout';
 
 import { AppHeader } from './app-header';
 
@@ -12,8 +13,10 @@ type FrontendLayoutProps = {
 export function FrontendLayout({ children }: FrontendLayoutProps) {
   const location = useRouterState({ select: (state) => state.location });
   const authSession = useAuthSessionState();
+  const { handleLogout } = useLogout();
 
   const isAuthenticated = authSession.status === 'authenticated';
+  const userName = isAuthenticated ? authSession.user.name : undefined;
   const isAuthRoute = location.pathname.startsWith('/auth/');
   const redirectTarget = `${location.pathname}${location.searchStr}${location.hash}`;
   const redirectFromAuthSearch = new URLSearchParams(location.searchStr).get(
@@ -34,9 +37,11 @@ export function FrontendLayout({ children }: FrontendLayoutProps) {
   return (
     <>
       <AppHeader
-        isAuthenticated={isAuthenticated}
+        authStatus={authSession.status}
+        userName={userName}
         logoHref="/"
         primaryHref={primaryHref}
+        onLogout={handleLogout}
       />
       <div>{children}</div>
     </>

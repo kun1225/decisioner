@@ -315,7 +315,7 @@ beforeLoad: async ({ context, location }) => {
 
 **注意 redirect target**：使用 `location.href`（完整 path+search+hash），與 `frontend-layout.tsx:18` 的做法一致，不會丟失 query/hash。
 
-### Phase 7: Header & Sidebar UI
+### Phase 7: Header & Sidebar UI ✅
 
 **Modify: `apps/web/src/components/app-header.tsx`** (+35 lines)
 
