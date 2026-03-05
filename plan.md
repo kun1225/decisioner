@@ -261,7 +261,7 @@ export function Provider({
   ```
 - 移除對 `AuthSessionProvider` 的直接 import
 
-### Phase 6: Route Guard（SSR + Client）
+### Phase 6: Route Guard（SSR + Client）✅
 
 **New: `apps/web/src/features/auth/_domain/check-session-presence.ts`** (~10 lines)
 
