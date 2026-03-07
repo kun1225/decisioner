@@ -28,6 +28,7 @@ describe('router provider integration', () => {
     expect(result.current).toEqual({
       setAnonymous: expect.any(Function),
       setAuthenticated: expect.any(Function),
+      setError: expect.any(Function),
       setUnknown: expect.any(Function),
     });
   });
