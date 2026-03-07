@@ -20,7 +20,7 @@ export function DashboardSidebar({
           type="button"
           onClick={onBrandClick}
           variant="ghost"
-          className="text-foreground w-fit cursor-pointer px-0 text-left text-xl font-semibold tracking-tight hover:bg-transparent"
+          className="text-foreground font-display w-fit cursor-pointer px-0 text-left text-xl font-semibold tracking-tight hover:bg-transparent"
         >
           JoyGym
         </Button>
