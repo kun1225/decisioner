@@ -1,6 +1,9 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { logout } from './auth-client';
+import { useLogout } from './use-logout';
+
 vi.mock('./auth-client', () => ({
   logout: vi.fn(),
 }));
@@ -19,9 +22,6 @@ vi.mock('./auth-session-provider', () => ({
 }));
 
 const mockSetAnonymous = vi.fn();
-
-import { logout } from './auth-client';
-import { useLogout } from './use-logout';
 
 const mockLogout = vi.mocked(logout);
 
