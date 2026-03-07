@@ -1,7 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+vi.mock('@/features/auth/_domain/auth-client', () => ({
+  AuthApiError: class extends Error {},
+  refresh: vi.fn().mockRejectedValue(new Error('no session')),
+  me: vi.fn().mockRejectedValue(new Error('no session')),
+}));
 
 import {
   useAuthSessionActions,

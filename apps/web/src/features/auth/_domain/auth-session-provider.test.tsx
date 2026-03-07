@@ -8,6 +8,18 @@ import {
   useAuthSessionState,
 } from './auth-session-provider';
 
+vi.mock('./auth-client', () => ({
+  AuthApiError: class AuthApiError extends Error {
+    status: number;
+    constructor(status: number, message: string) {
+      super(message);
+      this.status = status;
+    }
+  },
+  refresh: vi.fn().mockRejectedValue(new Error('not mocked')),
+  me: vi.fn().mockRejectedValue(new Error('not mocked')),
+}));
+
 function Wrapper({ children }: { children: ReactNode }) {
   return <AuthSessionProvider>{children}</AuthSessionProvider>;
 }

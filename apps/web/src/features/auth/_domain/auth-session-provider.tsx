@@ -4,14 +4,83 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
 } from 'react';
 
-import {
-  initialAuthSessionState,
-  reduceAuthSessionState,
-} from './auth-session-state';
+import { AuthApiError, me, refresh } from './auth-client';
 import type { AuthSessionState, AuthUser } from './auth-types';
-import { useSessionRestore } from './use-session-restore';
+
+// --- Reducer ---
+
+type AuthSessionAction =
+  | { type: 'unknown' }
+  | { type: 'anonymous' }
+  | {
+      type: 'authenticated';
+      accessToken: string;
+      user: AuthUser;
+    };
+
+const initialAuthSessionState: AuthSessionState = { status: 'unknown' };
+
+function reduceAuthSessionState(
+  _state: AuthSessionState,
+  action: AuthSessionAction,
+): AuthSessionState {
+  if (action.type === 'unknown') {
+    return { status: 'unknown' };
+  }
+
+  if (action.type === 'anonymous') {
+    return { status: 'anonymous' };
+  }
+
+  return {
+    status: 'authenticated',
+    accessToken: action.accessToken,
+    user: action.user,
+  };
+}
+
+// --- Session Restore ---
+
+type RestoreActions = Pick<
+  AuthSessionActions,
+  'setAuthenticated' | 'setAnonymous' | 'setUnknown'
+>;
+
+function useSessionRestore(actions: RestoreActions) {
+  const ranRef = useRef(false);
+
+  useEffect(() => {
+    if (ranRef.current) return;
+    ranRef.current = true;
+
+    async function restoreSession() {
+      try {
+        const { accessToken } = await refresh();
+        const user = await me(accessToken);
+
+        actions.setAuthenticated({ accessToken, user });
+      } catch (error) {
+        if (
+          error instanceof AuthApiError &&
+          (error.status === 401 || error.status === 403)
+        ) {
+          actions.setAnonymous();
+          return;
+        }
+
+        actions.setUnknown();
+        return;
+      }
+    }
+
+    void restoreSession();
+  }, [actions]);
+}
+
+// --- Provider ---
 
 export type AuthSessionActions = {
   setAuthenticated: (payload: { accessToken: string; user: AuthUser }) => void;

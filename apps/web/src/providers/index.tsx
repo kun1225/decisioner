@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { AuthSessionProvider } from '@/features/auth/_domain/auth-session-provider';
 import { createAuthReadyGate } from '@/features/auth/_domain/auth-ready-gate';
+import { AuthSessionProvider } from '@/features/auth/_domain/auth-session-provider';
 import type { AuthSessionState } from '@/features/auth/_domain/auth-types';
 
 export function getContext() {
