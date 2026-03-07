@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import '@fontsource-variable/bricolage-grotesque';
 @import '@fontsource-variable/geist';
 
 @custom-variant dark (&:is(.dark *));
@@ -96,6 +97,7 @@ code {
 
 @theme inline {
   --font-sans: 'Geist Variable', sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', sans-serif;
   --color-brand-orange-soft: var(--brand-orange-soft);
   --color-brand-green-soft: var(--brand-green-soft);
   --color-brand-green-glow: var(--brand-green-glow);
@@ -145,7 +147,7 @@ code {
 }
 
 @utility bg-brand-auth-gradient {
-  @apply bg-linear-to-br from-brand-orange-soft via-white to-brand-green-soft;
+  @apply from-brand-orange-soft to-brand-green-soft bg-linear-to-br via-white;
 }
 
 @layer base {
@@ -153,7 +155,7 @@ code {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply font-sans bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
   }
   html {
     @apply font-sans;
