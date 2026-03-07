@@ -1,5 +1,3 @@
-import type { AuthSessionState } from '@/features/auth/_domain/auth-types';
-
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -7,28 +5,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuthSessionState } from '@/features/auth/_domain/auth-session-provider';
+import type { AuthSessionState } from '@/features/auth/_domain/auth-types';
+import { useLogout } from '@/features/auth/_domain/use-logout';
 
 type AppHeaderProps = {
-  authStatus: AuthSessionState['status'];
+  authStatus?: AuthSessionState['status'];
   userName?: string;
   logoHref: string;
   primaryHref: string;
   onLogout?: () => void;
 };
 
-export function AppHeader({
-  authStatus,
-  userName,
-  logoHref,
-  primaryHref,
-  onLogout,
-}: AppHeaderProps) {
+export function AppHeader({ logoHref, primaryHref }: AppHeaderProps) {
+  const authSession = useAuthSessionState();
+  const authStatus = authSession.status;
+
+  const isAuthenticated = authSession.status === 'authenticated';
+  const userName = isAuthenticated ? authSession.user.name : undefined;
+
+  const { handleLogout } = useLogout();
+
   return (
     <header className="px-edge fixed inset-x-0 top-0 z-40 py-4">
       <div className="bg-background/90 supports-backdrop-filter:bg-background/70 flex h-16 w-full items-center justify-between rounded-full px-4 shadow backdrop-blur-lg md:px-8">
         <Button
           variant="ghost"
-          className="text-foreground cursor-pointer px-0 text-xl font-semibold tracking-tight hover:bg-transparent"
+          className="text-foreground font-display cursor-pointer px-0 text-xl font-semibold tracking-tight hover:bg-transparent"
           nativeButton={false}
           render={
             <a href={logoHref} className="flex gap-2">
@@ -44,7 +47,7 @@ export function AppHeader({
           authStatus={authStatus}
           userName={userName}
           primaryHref={primaryHref}
-          onLogout={onLogout}
+          onLogout={handleLogout}
         />
       </div>
     </header>
@@ -56,13 +59,12 @@ function HeaderAction({
   userName,
   primaryHref,
   onLogout,
-}: Pick<AppHeaderProps, 'authStatus' | 'userName' | 'primaryHref' | 'onLogout'>) {
+}: Pick<
+  AppHeaderProps,
+  'authStatus' | 'userName' | 'primaryHref' | 'onLogout'
+>) {
   if (authStatus === 'unknown') {
-    return (
-      <Button size="sm" className="px-4" disabled>
-        ...
-      </Button>
-    );
+    return null;
   }
 
   if (authStatus !== 'authenticated') {
@@ -86,10 +88,8 @@ function HeaderAction({
         }
       />
       <DropdownMenuContent align="end">
-        <DropdownMenuItem render={<a href="/dashboard" />}>
-          Dashboard
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={onLogout}>登出</DropdownMenuItem>
+        <DropdownMenuItem render={<a href="/dashboard">Dashboard</a>} />
+        <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

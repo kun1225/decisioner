@@ -52,11 +52,11 @@ describe('frontend-layout', () => {
     expect(screen.getByText('Page Content')).toBeTruthy();
   });
 
-  it('does not nest redirect when already on auth route', () => {
+  it('shows plain /auth/login on auth pages (no redirect nesting)', () => {
     mockUseRouterState.mockImplementation((options) =>
       options.select({
         location: {
-          pathname: '/auth/login',
+          pathname: '/auth/register',
           searchStr: '?redirect=%2Fdashboard',
           hash: '',
         },
@@ -71,9 +71,7 @@ describe('frontend-layout', () => {
     );
 
     const loginLink = screen.getByText('Login').closest('a');
-    expect(loginLink?.getAttribute('href')).toBe(
-      '/auth/login?redirect=%2Fdashboard',
-    );
+    expect(loginLink?.getAttribute('href')).toBe('/auth/login');
   });
 
   it('shows user dropdown for authenticated users', () => {

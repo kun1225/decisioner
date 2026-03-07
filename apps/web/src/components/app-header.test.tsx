@@ -1,17 +1,32 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { AppHeader } from './app-header';
 
+const mockUseAuthSessionState = vi.fn();
+
+vi.mock('@/features/auth/_domain/auth-session-provider', () => ({
+  useAuthSessionState: () => mockUseAuthSessionState(),
+  useAuthSessionActions: () => ({
+    setAnonymous: vi.fn(),
+    setAuthenticated: vi.fn(),
+    setUnknown: vi.fn(),
+  }),
+}));
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => vi.fn(),
+}));
+
+vi.mock('@/features/auth/_domain/auth-client', () => ({
+  logout: vi.fn().mockResolvedValue(undefined),
+}));
+
 describe('app-header', () => {
   it('shows logo and login link for anonymous users', () => {
-    render(
-      <AppHeader
-        authStatus="anonymous"
-        logoHref="/"
-        primaryHref="/auth/login"
-      />,
-    );
+    mockUseAuthSessionState.mockReturnValue({ status: 'anonymous' });
+
+    render(<AppHeader logoHref="/" primaryHref="/auth/login" />);
 
     const logoLink = screen.getByText('Joy Gym').closest('a');
     const loginLink = screen.getByText('Login').closest('a');
@@ -20,24 +35,22 @@ describe('app-header', () => {
     expect(loginLink?.getAttribute('href')).toBe('/auth/login');
   });
 
-  it('shows disabled placeholder for unknown auth status', () => {
-    render(
-      <AppHeader authStatus="unknown" logoHref="/" primaryHref="/auth/login" />,
-    );
+  it('renders nothing for action when auth status is unknown', () => {
+    mockUseAuthSessionState.mockReturnValue({ status: 'unknown' });
 
-    const placeholder = screen.getByText('...');
-    expect(placeholder.closest('button')?.disabled).toBe(true);
+    render(<AppHeader logoHref="/" primaryHref="/auth/login" />);
+
+    expect(screen.queryByText('Login')).toBeNull();
   });
 
   it('shows user name for authenticated users', () => {
-    render(
-      <AppHeader
-        authStatus="authenticated"
-        userName="Alice"
-        logoHref="/"
-        primaryHref="/dashboard"
-      />,
-    );
+    mockUseAuthSessionState.mockReturnValue({
+      status: 'authenticated',
+      accessToken: 'tok',
+      user: { id: 'u1', email: 'a@b.com', name: 'Alice' },
+    });
+
+    render(<AppHeader logoHref="/" primaryHref="/dashboard" />);
 
     expect(screen.getByText('Alice')).toBeTruthy();
   });
