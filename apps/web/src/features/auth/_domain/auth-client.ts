@@ -1,11 +1,5 @@
 import type { AuthUser, LoginRequest, RegisterRequest } from './auth-types';
 
-const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(
-    /\/+$/,
-    '',
-  ) ?? '/api';
-
 type RegisterResponse = {
   accessToken: string;
   user: AuthUser;
@@ -77,7 +71,19 @@ async function postJson<TResponse, TRequest>(
 }
 
 function apiUrl(path: string) {
-  return `${API_BASE_URL}${path}`;
+  return `${getApiBaseUrl()}${path}`;
+}
+
+function getApiBaseUrl() {
+  const apiBaseUrl = (
+    import.meta.env.VITE_API_BASE_URL as string | undefined
+  )?.replace(/\/+$/, '');
+
+  if (!apiBaseUrl) {
+    throw new Error('VITE_API_BASE_URL is required');
+  }
+
+  return apiBaseUrl;
 }
 
 export function register(input: RegisterRequest) {
@@ -89,15 +95,16 @@ export function login(input: LoginRequest) {
 }
 
 export async function refresh() {
-  return fetch(apiUrl('/auth/refresh'), {
+  const response = await fetch(apiUrl('/auth/refresh'), {
     method: 'POST',
     credentials: 'include',
-  }).then(async (response) => {
-    if (!response.ok) {
-      await parseApiError(response);
-    }
-    return response.json() as Promise<RefreshResponse>;
   });
+
+  if (!response.ok) {
+    await parseApiError(response);
+  }
+
+  return response.json() as Promise<RefreshResponse>;
 }
 
 export async function logout() {
@@ -112,16 +119,17 @@ export async function logout() {
 }
 
 export async function me(accessToken: string) {
-  return fetch(apiUrl('/auth/me'), {
+  const response = await fetch(apiUrl('/auth/me'), {
     method: 'GET',
     credentials: 'include',
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-  }).then(async (response) => {
-    if (!response.ok) {
-      await parseApiError(response);
-    }
-    return response.json() as Promise<AuthUser>;
   });
+
+  if (!response.ok) {
+    await parseApiError(response);
+  }
+
+  return response.json() as Promise<AuthUser>;
 }
