@@ -13,12 +13,14 @@ export const Route = createFileRoute('/dashboard')({
       } catch {
         // getCookie failure → fail-closed
       }
+
       if (!hasPresence) {
         throw redirect({
           to: '/auth/login',
           search: { redirect: location.href },
         });
       }
+
       return;
     }
 

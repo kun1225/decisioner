@@ -39,8 +39,18 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
-
   shellComponent: RootDocument,
+  notFoundComponent: () => (
+    <main className="mx-auto max-w-3xl px-6 py-16">
+      <h1 className="font-display text-2xl font-semibold">Page not found</h1>
+      <p className="text-muted-foreground mt-2">
+        The page you requested does not exist.
+      </p>
+      <a href="/" className="text-primary mt-4 inline-block underline">
+        Back to home
+      </a>
+    </main>
+  ),
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
