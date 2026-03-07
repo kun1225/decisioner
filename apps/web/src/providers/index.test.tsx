@@ -3,18 +3,18 @@ import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/features/auth/_domain/auth-client', () => ({
-  AuthApiError: class extends Error {},
-  refresh: vi.fn().mockRejectedValue(new Error('no session')),
-  me: vi.fn().mockRejectedValue(new Error('no session')),
-}));
-
 import {
   useAuthSessionActions,
   useAuthSessionState,
 } from '@/features/auth/_domain/auth-session-provider';
 
 import { getContext, Provider } from './index';
+
+vi.mock('@/features/auth/_domain/auth-client', () => ({
+  AuthApiError: class extends Error {},
+  refresh: vi.fn().mockRejectedValue(new Error('no session')),
+  me: vi.fn().mockRejectedValue(new Error('no session')),
+}));
 
 describe('providers index wiring', () => {
   it('provides both query client and auth session context', () => {
@@ -80,6 +80,24 @@ describe('auth bridge via getContext()', () => {
     await promise;
 
     expect(resolved).toBe(true);
+  });
+
+  it('waitForAuthReady resolves when auth enters error state', async () => {
+    const context = getContext();
+
+    let resolved = false;
+    const promise = context.waitForAuthReady().then(() => {
+      resolved = true;
+    });
+
+    context.onAuthStateChange({ status: 'error', reason: 'restore-failed' });
+    await promise;
+
+    expect(resolved).toBe(true);
+    expect(context.getAuthSessionState()).toEqual({
+      status: 'error',
+      reason: 'restore-failed',
+    });
   });
 
   it('waitForAuthReady resets when state returns to unknown', async () => {

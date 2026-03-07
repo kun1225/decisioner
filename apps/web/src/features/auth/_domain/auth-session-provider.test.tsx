@@ -74,6 +74,15 @@ describe('auth-session-provider', () => {
     });
 
     expect(result.current.state).toEqual({ status: 'unknown' });
+
+    act(() => {
+      result.current.actions.setError();
+    });
+
+    expect(result.current.state).toEqual({
+      status: 'error',
+      reason: 'restore-failed',
+    });
   });
 
   it('throws when hook is used outside provider', () => {

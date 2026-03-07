@@ -60,22 +60,35 @@ describe('session restore (via provider)', () => {
     });
   });
 
-  it('stays unknown when refresh fails unexpectedly', async () => {
+  it('sets error when refresh fails unexpectedly', async () => {
     mockRefresh.mockRejectedValueOnce(new Error('Network down'));
 
     const { result } = renderHook(() => useAuthSessionState(), {
       wrapper: Wrapper,
     });
 
-    // Non-auth errors → setUnknown (same as initial)
     await waitFor(() => {
-      expect(mockRefresh).toHaveBeenCalled();
+      expect(result.current).toEqual({
+        status: 'error',
+        reason: 'restore-failed',
+      });
     });
-
-    expect(result.current).toEqual({ status: 'unknown' });
   });
 
-  it('stays unknown when me fails after successful refresh', async () => {
+  it('sets anonymous when me returns 401 after successful refresh', async () => {
+    mockRefresh.mockResolvedValueOnce({ accessToken: 'tok' });
+    mockMe.mockRejectedValueOnce(new AuthApiError(401, 'Unauthorized'));
+
+    const { result } = renderHook(() => useAuthSessionState(), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => {
+      expect(result.current).toEqual({ status: 'anonymous' });
+    });
+  });
+
+  it('sets error when me fails unexpectedly after successful refresh', async () => {
     mockRefresh.mockResolvedValueOnce({ accessToken: 'tok' });
     mockMe.mockRejectedValueOnce(new Error('500'));
 
@@ -84,9 +97,10 @@ describe('session restore (via provider)', () => {
     });
 
     await waitFor(() => {
-      expect(mockMe).toHaveBeenCalled();
+      expect(result.current).toEqual({
+        status: 'error',
+        reason: 'restore-failed',
+      });
     });
-
-    expect(result.current).toEqual({ status: 'unknown' });
   });
 });

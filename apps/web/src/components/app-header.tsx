@@ -1,3 +1,5 @@
+import { useRouterState } from '@tanstack/react-router';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -6,26 +8,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthSessionState } from '@/features/auth/_domain/auth-session-provider';
-import type { AuthSessionState } from '@/features/auth/_domain/auth-types';
 import { useLogout } from '@/features/auth/_domain/use-logout';
 
-type AppHeaderProps = {
-  authStatus?: AuthSessionState['status'];
-  userName?: string;
-  logoHref: string;
-  primaryHref: string;
-  onLogout?: () => void;
-};
-
-export function AppHeader({ logoHref, primaryHref }: AppHeaderProps) {
-  const authSession = useAuthSessionState();
-  const authStatus = authSession.status;
-
-  const isAuthenticated = authSession.status === 'authenticated';
-  const userName = isAuthenticated ? authSession.user.name : undefined;
-
-  const { handleLogout } = useLogout();
-
+export function AppHeader() {
   return (
     <header className="px-edge fixed inset-x-0 top-0 z-40 py-4">
       <div className="bg-background/90 supports-backdrop-filter:bg-background/70 flex h-16 w-full items-center justify-between rounded-full px-4 shadow backdrop-blur-lg md:px-8">
@@ -34,7 +19,7 @@ export function AppHeader({ logoHref, primaryHref }: AppHeaderProps) {
           className="text-foreground font-display cursor-pointer px-0 text-xl font-semibold tracking-tight hover:bg-transparent"
           nativeButton={false}
           render={
-            <a href={logoHref} className="flex gap-2">
+            <a href="/" className="flex gap-2">
               <span className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-xl">
                 JG
               </span>
@@ -43,26 +28,29 @@ export function AppHeader({ logoHref, primaryHref }: AppHeaderProps) {
           }
         />
 
-        <HeaderAction
-          authStatus={authStatus}
-          userName={userName}
-          primaryHref={primaryHref}
-          onLogout={handleLogout}
-        />
+        <HeaderAction />
       </div>
     </header>
   );
 }
 
-function HeaderAction({
-  authStatus,
-  userName,
-  primaryHref,
-  onLogout,
-}: Pick<
-  AppHeaderProps,
-  'authStatus' | 'userName' | 'primaryHref' | 'onLogout'
->) {
+function HeaderAction() {
+  const location = useRouterState({ select: (state) => state.location });
+  const authSession = useAuthSessionState();
+  const { handleLogout } = useLogout();
+
+  const authStatus = authSession.status;
+  const userName =
+    authStatus === 'authenticated' ? authSession.user.name : undefined;
+  const isAuthRoute = location.pathname.startsWith('/auth/');
+
+  const primaryHref =
+    authStatus === 'authenticated'
+      ? '/dashboard'
+      : isAuthRoute
+        ? '/auth/login'
+        : `/auth/login?redirect=${encodeURIComponent(`${location.pathname}${location.searchStr}${location.hash}`)}`;
+
   if (authStatus === 'unknown') {
     return null;
   }
@@ -89,7 +77,7 @@ function HeaderAction({
       />
       <DropdownMenuContent align="end">
         <DropdownMenuItem render={<a href="/dashboard">Dashboard</a>} />
-        <DropdownMenuItem onClick={onLogout}>Logout</DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -15,6 +15,7 @@ import type { AuthSessionState, AuthUser } from './auth-types';
 type AuthSessionAction =
   | { type: 'unknown' }
   | { type: 'anonymous' }
+  | { type: 'error'; reason: 'restore-failed' }
   | {
       type: 'authenticated';
       accessToken: string;
@@ -35,6 +36,10 @@ function reduceAuthSessionState(
     return { status: 'anonymous' };
   }
 
+  if (action.type === 'error') {
+    return { status: 'error', reason: action.reason };
+  }
+
   return {
     status: 'authenticated',
     accessToken: action.accessToken,
@@ -46,7 +51,7 @@ function reduceAuthSessionState(
 
 type RestoreActions = Pick<
   AuthSessionActions,
-  'setAuthenticated' | 'setAnonymous' | 'setUnknown'
+  'setAuthenticated' | 'setAnonymous' | 'setError'
 >;
 
 function useSessionRestore(actions: RestoreActions) {
@@ -71,7 +76,7 @@ function useSessionRestore(actions: RestoreActions) {
           return;
         }
 
-        actions.setUnknown();
+        actions.setError();
         return;
       }
     }
@@ -86,6 +91,7 @@ export type AuthSessionActions = {
   setAuthenticated: (payload: { accessToken: string; user: AuthUser }) => void;
   setAnonymous: () => void;
   setUnknown: () => void;
+  setError: () => void;
 };
 
 type AuthSessionProviderProps = {
@@ -113,6 +119,7 @@ export function AuthSessionProvider({
         dispatch({ type: 'authenticated', accessToken, user }),
       setAnonymous: () => dispatch({ type: 'anonymous' }),
       setUnknown: () => dispatch({ type: 'unknown' }),
+      setError: () => dispatch({ type: 'error', reason: 'restore-failed' }),
     }),
     [],
   );

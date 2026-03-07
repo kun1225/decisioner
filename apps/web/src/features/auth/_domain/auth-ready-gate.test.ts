@@ -30,6 +30,14 @@ describe('createAuthReadyGate', () => {
     await expect(gate.wait()).resolves.toBeUndefined();
   });
 
+  it('resolves when state transitions to error', async () => {
+    const gate = createAuthReadyGate();
+
+    gate.onStateChange('error');
+
+    await expect(gate.wait()).resolves.toBeUndefined();
+  });
+
   it('resets to pending when state returns to unknown', async () => {
     const gate = createAuthReadyGate();
 
