@@ -2,6 +2,7 @@ import { useNavigate } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 
 import { useAuthSessionState } from '@/features/auth/_domain/auth-session-provider';
+import { useLogout } from '@/features/auth/_domain/use-logout';
 
 import { DashboardSidebar } from './dashboard-sidebar';
 
@@ -12,55 +13,24 @@ type DashboardLayoutProps = {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigate = useNavigate();
   const authSession = useAuthSessionState();
+  const { handleLogout } = useLogout();
 
-  const isAuthenticated = authSession.status === 'authenticated';
-
-  const runNavigation = (
-    payload:
-      | { to: '/' | '/dashboard' }
-      | {
-          to: '/auth/login';
-          search: {
-            redirect: string;
-          };
-        },
-  ) => {
-    Promise.resolve(navigate(payload as never)).catch(() => {});
-  };
-
-  const navigateToHome = () => {
-    runNavigation({ to: '/' });
-  };
+  const userName =
+    authSession.status === 'authenticated'
+      ? authSession.user.name
+      : undefined;
 
   const navigateToDashboard = () => {
-    runNavigation({ to: '/dashboard' });
-  };
-
-  const navigateToLogin = (redirect: string) => {
-    runNavigation({
-      to: '/auth/login',
-      search: {
-        redirect,
-      },
-    });
-  };
-
-  const handleSidebarAuthAction = () => {
-    if (isAuthenticated) {
-      navigateToHome();
-      return;
-    }
-
-    navigateToLogin('/dashboard');
+    Promise.resolve(navigate({ to: '/dashboard' } as never)).catch(() => {});
   };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[240px_1fr]">
       <DashboardSidebar
-        isAuthenticated={isAuthenticated}
+        userName={userName}
         onBrandClick={navigateToDashboard}
         onDashboardClick={navigateToDashboard}
-        onAuthActionClick={handleSidebarAuthAction}
+        onLogout={handleLogout}
       />
       <div>{children}</div>
     </div>

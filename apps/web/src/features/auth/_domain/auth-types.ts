@@ -31,7 +31,13 @@ export type AnonymousAuthSessionState = {
   status: 'anonymous';
 };
 
+export type ErrorAuthSessionState = {
+  status: 'error';
+  reason: 'restore-failed';
+};
+
 export type AuthSessionState =
   | UnknownAuthSessionState
   | AuthenticatedSessionState
-  | AnonymousAuthSessionState;
+  | AnonymousAuthSessionState
+  | ErrorAuthSessionState;

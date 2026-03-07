@@ -9,14 +9,10 @@ import {
   register,
 } from './auth-client';
 
-const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(
-    /\/+$/,
-    '',
-  ) ?? '/api';
+const TEST_API_BASE_URL = 'http://localhost:4000/api';
 
 function expectedApiUrl(path: string) {
-  return `${API_BASE_URL}${path}`;
+  return `${TEST_API_BASE_URL}${path}`;
 }
 
 describe('auth-client request contract', () => {
@@ -25,10 +21,12 @@ describe('auth-client request contract', () => {
   beforeEach(() => {
     fetchMock.mockReset();
     vi.stubGlobal('fetch', fetchMock);
+    vi.stubEnv('VITE_API_BASE_URL', TEST_API_BASE_URL);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it('calls register endpoint with include credentials and json body', async () => {
@@ -151,5 +149,14 @@ describe('auth-client request contract', () => {
       message: 'Validation failed',
       details: [{ path: 'email', message: 'Invalid email address' }],
     });
+  });
+
+  it('throws when VITE_API_BASE_URL is missing', async () => {
+    vi.stubEnv('VITE_API_BASE_URL', '');
+
+    await expect(refresh()).rejects.toThrowError(
+      'VITE_API_BASE_URL is required',
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -1,12 +1,24 @@
 import { act, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   AuthSessionProvider,
   useAuthSessionActions,
   useAuthSessionState,
 } from './auth-session-provider';
+
+vi.mock('./auth-client', () => ({
+  AuthApiError: class AuthApiError extends Error {
+    status: number;
+    constructor(status: number, message: string) {
+      super(message);
+      this.status = status;
+    }
+  },
+  refresh: vi.fn().mockRejectedValue(new Error('not mocked')),
+  me: vi.fn().mockRejectedValue(new Error('not mocked')),
+}));
 
 function Wrapper({ children }: { children: ReactNode }) {
   return <AuthSessionProvider>{children}</AuthSessionProvider>;
@@ -62,6 +74,15 @@ describe('auth-session-provider', () => {
     });
 
     expect(result.current.state).toEqual({ status: 'unknown' });
+
+    act(() => {
+      result.current.actions.setError();
+    });
+
+    expect(result.current.state).toEqual({
+      status: 'error',
+      reason: 'restore-failed',
+    });
   });
 
   it('throws when hook is used outside provider', () => {
@@ -71,5 +92,29 @@ describe('auth-session-provider', () => {
     expect(() => renderHook(() => useAuthSessionActions())).toThrow(
       'useAuthSessionActions must be used inside AuthSessionProvider',
     );
+  });
+
+  it('calls onStateChange when state changes', () => {
+    const onStateChange = vi.fn();
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <AuthSessionProvider onStateChange={onStateChange}>
+        {children}
+      </AuthSessionProvider>
+    );
+
+    const { result } = renderHook(
+      () => useAuthSessionActions(),
+      { wrapper },
+    );
+
+    // Initial call with unknown state
+    expect(onStateChange).toHaveBeenCalledWith({ status: 'unknown' });
+
+    act(() => {
+      result.current.setAnonymous();
+    });
+
+    expect(onStateChange).toHaveBeenCalledWith({ status: 'anonymous' });
   });
 });

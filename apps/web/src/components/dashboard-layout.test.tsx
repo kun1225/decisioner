@@ -1,23 +1,37 @@
 import { fireEvent } from '@testing-library/dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { DashboardLayout } from './dashboard-layout';
 
-const mockUseNavigate = vi.fn();
+const mockNavigate = vi.fn().mockResolvedValue(undefined);
 const mockUseAuthSessionState = vi.fn();
+const mockSetAnonymous = vi.fn();
 
 vi.mock('@tanstack/react-router', () => ({
-  useNavigate: () => mockUseNavigate,
+  useNavigate: () => mockNavigate,
 }));
 
 vi.mock('@/features/auth/_domain/auth-session-provider', () => ({
   useAuthSessionState: () => mockUseAuthSessionState(),
+  useAuthSessionActions: () => ({
+    setAnonymous: mockSetAnonymous,
+    setAuthenticated: vi.fn(),
+    setUnknown: vi.fn(),
+  }),
+}));
+
+vi.mock('@/features/auth/_domain/auth-client', () => ({
+  logout: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe('dashboard-layout', () => {
   it('renders sidebar and dashboard content', () => {
-    mockUseAuthSessionState.mockReturnValue({ status: 'authenticated' });
+    mockUseAuthSessionState.mockReturnValue({
+      status: 'authenticated',
+      accessToken: 'tok',
+      user: { id: 'u1', email: 'a@b.com', name: 'Alice' },
+    });
 
     render(
       <DashboardLayout>
@@ -27,38 +41,26 @@ describe('dashboard-layout', () => {
 
     expect(screen.getByText('後台導覽')).toBeTruthy();
     expect(screen.getByText('Dashboard Content')).toBeTruthy();
+    expect(screen.getByText('Alice')).toBeTruthy();
   });
 
-  it('navigates to home when authenticated user clicks sidebar auth action', () => {
-    mockUseAuthSessionState.mockReturnValue({ status: 'authenticated' });
+  it('shows logout button and calls setAnonymous on click', async () => {
+    mockUseAuthSessionState.mockReturnValue({
+      status: 'authenticated',
+      accessToken: 'tok',
+      user: { id: 'u1', email: 'a@b.com', name: 'Alice' },
+    });
 
     render(
       <DashboardLayout>
-        <div>Dashboard Content</div>
+        <div>Content</div>
       </DashboardLayout>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '前往前台' }));
+    fireEvent.click(screen.getByRole('button', { name: '登出' }));
 
-    expect(mockUseNavigate).toHaveBeenCalledWith({ to: '/' });
-  });
-
-  it('navigates to login with dashboard redirect for anonymous user', () => {
-    mockUseAuthSessionState.mockReturnValue({ status: 'anonymous' });
-
-    render(
-      <DashboardLayout>
-        <div>Dashboard Content</div>
-      </DashboardLayout>,
-    );
-
-    fireEvent.click(screen.getByRole('button', { name: '登入' }));
-
-    expect(mockUseNavigate).toHaveBeenCalledWith({
-      to: '/auth/login',
-      search: {
-        redirect: '/dashboard',
-      },
+    await waitFor(() => {
+      expect(mockSetAnonymous).toHaveBeenCalled();
     });
   });
 });

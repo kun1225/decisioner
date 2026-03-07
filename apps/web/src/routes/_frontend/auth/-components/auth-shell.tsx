@@ -37,7 +37,7 @@ export function AuthShell({
           <p className="text-primary text-sm font-semibold tracking-[0.2em] uppercase">
             JoyGym
           </p>
-          <h1 className="text-foreground text-3xl font-semibold tracking-tight sm:text-4xl">
+          <h1 className="text-foreground font-display text-3xl font-semibold tracking-tight sm:text-4xl">
             Build strength with secure sessions.
           </h1>
           <p className="text-muted-foreground max-w-md text-base leading-relaxed">
@@ -48,7 +48,9 @@ export function AuthShell({
 
         <Card className="border-primary/15 bg-background/90 ring-primary/10 shadow-lg backdrop-blur-sm">
           <CardHeader className="space-y-2">
-            <CardTitle className="text-2xl tracking-tight">{title}</CardTitle>
+            <CardTitle className="font-display text-2xl tracking-tight">
+              {title}
+            </CardTitle>
             <CardDescription className="text-sm leading-relaxed">
               {description}
             </CardDescription>
