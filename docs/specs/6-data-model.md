@@ -72,12 +72,13 @@ templates -> template_shares
 1. `friends(user_id, friend_user_id)` unique
 2. `privacy_settings.user_id` unique
 3. `template_versions(template_id, version_no)` unique
-4. `workout_session_revisions(session_id, revision_no)` unique
-5. `workout_checkins(user_id, checkin_date)` unique
-6. `activity_likes(event_id, user_id)` unique
-7. `reminder_settings(user_id, reminder_type)` unique
-8. `user_training_goals.user_id` unique (Pro)
-9. `user_gym_exercise_adjustments(user_id, gym_id, exercise_id)` unique (Pro)
+4. `template_items(template_id, sort_order)` unique
+5. `workout_session_revisions(session_id, revision_no)` unique
+6. `workout_checkins(user_id, checkin_date)` unique
+7. `activity_likes(event_id, user_id)` unique
+8. `reminder_settings(user_id, reminder_type)` unique
+9. `user_training_goals.user_id` unique (Pro)
+10. `user_gym_exercise_adjustments(user_id, gym_id, exercise_id)` unique (Pro)
 
 ## 6.4 Suggested Indexes
 

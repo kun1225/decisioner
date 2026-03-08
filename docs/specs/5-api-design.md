@@ -54,6 +54,14 @@
 | GET    | `/api/templates/:templateId/versions`      | Version history        | Yes  |
 | POST   | `/api/templates/:templateId/share`         | Share template to crew | Yes  |
 
+### Template Item Ordering
+
+1. Template detail responses must return `items` ordered by `sortOrder`.
+2. Server is the source of truth for template item ordering in `g-02`.
+3. Server must maintain `sortOrder` consistency within a DB transaction.
+4. Conflicting or invalid ordering writes must be rejected with a 4xx error.
+5. Client-provided `sortOrder` in the current CRUD API is an interim implementation detail and will be replaced by server-managed ordering semantics in a later `g-02` PR.
+
 ## 5.7 Workouts (`g-03`, `g-04`, `g-05`)
 
 | Method | Endpoint                                 | Description                        | Auth |
