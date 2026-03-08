@@ -67,7 +67,12 @@ export async function createTokenPair(userId: string, email: string) {
 }
 
 export async function rotateRefreshToken(oldToken: string) {
-  const decoded = verifyRefreshToken(oldToken);
+  let decoded;
+  try {
+    decoded = verifyRefreshToken(oldToken);
+  } catch {
+    throw new ApiError(401, 'Invalid refresh token');
+  }
 
   const [stored] = await db
     .select()

@@ -133,3 +133,15 @@ Data fetching: TanStack Query for server state, route loaders for prefetch, muta
 
 - Each PR must stay under 500 changed lines (`+/-` total).
 - If over 500 lines, split into smaller PRs by sub-task or layer (API, DB, UI).
+
+6. Atomic commits (mandatory):
+
+- Each commit has exactly one responsibility. Never mix unrelated changes in a single commit.
+- Commit types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `perf`, `ci`.
+- Ordering: infrastructure/dependency changes first, then bug fixes, then feature code, then tests.
+- Every commit should leave the codebase in a buildable, consistent state.
+- Never commit generated files (lockfile changes are the exception) together with logic changes — separate them if the lockfile diff is large.
+- Examples of good atomic splits:
+  - `chore: add supertest devDependency` (deps only)
+  - `fix: convert JWT errors to ApiError in rotateRefreshToken` (one bug, one fix)
+  - `test: auth integration tests for register and login` (tests only)
