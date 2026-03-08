@@ -2,8 +2,24 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createCorsOptions, parseAllowedOrigins } from './cors-config.js';
 
+type OriginCallback = (error: Error | null, allowed?: boolean) => void;
+type OriginResolver = (
+  origin: string | undefined,
+  callback: OriginCallback,
+) => void;
+
+function getOriginResolver(
+  rawOrigin: ReturnType<typeof createCorsOptions>['origin'],
+) {
+  if (typeof rawOrigin !== 'function') {
+    throw new TypeError('Expected CORS origin resolver to be a function');
+  }
+
+  return rawOrigin as OriginResolver;
+}
+
 function resolveOriginAllowance(
-  originResolver: NonNullable<ReturnType<typeof createCorsOptions>['origin']>,
+  originResolver: OriginResolver,
   origin: string | undefined,
 ) {
   return new Promise<boolean | undefined>((resolve, reject) => {
@@ -41,12 +57,10 @@ describe('cors-config', () => {
   it('allows localhost origins in non-production mode', async () => {
     vi.stubEnv('NODE_ENV', 'development');
     const options = createCorsOptions('https://app.example.com');
-    const originResolver = options.origin;
-
-    expect(typeof originResolver).toBe('function');
+    const originResolver = getOriginResolver(options.origin);
 
     const allowed = await resolveOriginAllowance(
-      originResolver as NonNullable<typeof originResolver>,
+      originResolver,
       'http://localhost:3999',
     );
 
@@ -56,16 +70,14 @@ describe('cors-config', () => {
   it('requires explicit allowlist in production mode', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     const options = createCorsOptions('https://app.example.com');
-    const originResolver = options.origin;
-
-    expect(typeof originResolver).toBe('function');
+    const originResolver = getOriginResolver(options.origin);
 
     const allowed = await resolveOriginAllowance(
-      originResolver as NonNullable<typeof originResolver>,
+      originResolver,
       'https://app.example.com/',
     );
     const blocked = await resolveOriginAllowance(
-      originResolver as NonNullable<typeof originResolver>,
+      originResolver,
       'http://localhost:3001',
     );
 
