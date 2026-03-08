@@ -8,4 +8,7 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  test: {
+    setupFiles: ['./src/test-utils/integration-env.ts'],
+  },
 });
