@@ -6,8 +6,8 @@
 
 | Status      | Goal ID | Goal Name                           | Detail                |
 | ----------- | ------- | ----------------------------------- | --------------------- |
-| Not Started | `g-18`  | Authentication and session security | [g-18](goals/g-18.md) |
-| Not Started | `g-02`  | Template versioning                 | [g-02](goals/g-02.md) |
+| Progress    | `g-18`  | Authentication and session security | [g-18](goals/g-18.md) |
+| Progress    | `g-02`  | Template versioning                 | [g-02](goals/g-02.md) |
 | Not Started | `g-04`  | Last/best reference                 | [g-04](goals/g-04.md) |
 | Not Started | `g-03`  | Session adjustment                  | [g-03](goals/g-03.md) |
 | Not Started | `g-01`  | Gym-aware record                    | [g-01](goals/g-01.md) |

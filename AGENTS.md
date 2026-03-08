@@ -69,8 +69,8 @@ Route -> Controller -> Service -> Repository(DB)
 
 Page-oriented structure under `src/routes/` (file-based routing via TanStack Router):
 
-- `/_components/` — private page components
-- `/_domain/` — private page logic (services, validation)
+- `/-components/` — private page components
+- `/-domain/` — private page logic (services, validation)
 - `src/features/` — cross-page shared features only
 - `src/lib/` — utilities
 - `src/providers/index.tsx` — single Provider export wrapping all providers
@@ -89,9 +89,8 @@ Data fetching: TanStack Query for server state, route loaders for prefetch, muta
 
 - **File naming**: kebab-case for all files (e.g., `auth-service.ts`, `practice-header.tsx`)
 - **UI components**: Always prefer shadcn. Only custom-build when shadcn has no match; document rationale in PR.
-- **Shadcn-first rule (mandatory)**: For interactive UI controls, use shadcn components first.  
+- **Shadcn-first rule (mandatory)**: For interactive UI controls, first use context7 to search for Shadcn existing components (e.g., via `npx shadcn add`) before building a new one.
   For buttons specifically, use `@/components/ui/button` (`<Button />`) instead of raw `<button>` unless there is a documented technical exception.
-- **Base UI foundation**: In this repo, shadcn Base components are built on top of Base UI primitives and use render-props composition (for example `render` / `nativeButton={false}`) when semantic element control is required.
 - **Styling**: Tailwind CSS v4 + CVA + clsx + tailwind-merge
 - **Color token reuse (mandatory)**: Define reusable colors as tokens (e.g., CSS variables in `styles.css` / `@theme`) and consume those tokens/utilities across components. Avoid ad-hoc hardcoded color values in component files.
 - **Validation**: Zod for all input validation (shared schemas in `packages/shared`)
