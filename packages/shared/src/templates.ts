@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+const requireAtLeastOneField = <T extends Record<string, unknown>>(value: T) =>
+  Object.values(value).some((field) => field !== undefined);
+
 export const templateIdParamsSchema = z.object({
   templateId: z.uuid({ error: 'Invalid template ID' }),
 });
@@ -20,17 +23,21 @@ export const createTemplateSchema = z.object({
     .optional(),
 });
 
-export const updateTemplateSchema = z.object({
-  name: z
-    .string()
-    .min(1, { error: 'Template name is required' })
-    .max(255, { error: 'Template name must be at most 255 characters' })
-    .optional(),
-  description: z
-    .string()
-    .max(1000, { error: 'Description must be at most 1000 characters' })
-    .optional(),
-});
+export const updateTemplateSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, { error: 'Template name is required' })
+      .max(255, { error: 'Template name must be at most 255 characters' })
+      .optional(),
+    description: z
+      .string()
+      .max(1000, { error: 'Description must be at most 1000 characters' })
+      .optional(),
+  })
+  .refine(requireAtLeastOneField, {
+    error: 'At least one field must be provided',
+  });
 
 export const addTemplateItemSchema = z.object({
   exerciseId: z.uuid({ error: 'Invalid exercise ID' }),
@@ -43,18 +50,22 @@ export const addTemplateItemSchema = z.object({
     .optional(),
 });
 
-export const updateTemplateItemSchema = z.object({
-  sortOrder: z
-    .int({ error: 'Sort order must be an integer' })
-    .min(0, {
-      error: 'Sort order must be non-negative',
-    })
-    .optional(),
-  note: z
-    .string()
-    .max(500, { error: 'Note must be at most 500 characters' })
-    .optional(),
-});
+export const updateTemplateItemSchema = z
+  .object({
+    sortOrder: z
+      .int({ error: 'Sort order must be an integer' })
+      .min(0, {
+        error: 'Sort order must be non-negative',
+      })
+      .optional(),
+    note: z
+      .string()
+      .max(500, { error: 'Note must be at most 500 characters' })
+      .optional(),
+  })
+  .refine(requireAtLeastOneField, {
+    error: 'At least one field must be provided',
+  });
 
 export type TemplateIdParams = z.infer<typeof templateIdParamsSchema>;
 export type TemplateItemIdParams = z.infer<typeof templateItemIdParamsSchema>;

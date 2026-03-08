@@ -125,6 +125,20 @@ export async function addTemplateItem(
 
   await verifyExerciseAccessible(input.exerciseId, userId);
 
+  const [existingItem] = await db
+    .select()
+    .from(templateItems)
+    .where(
+      and(
+        eq(templateItems.templateId, templateId),
+        eq(templateItems.sortOrder, input.sortOrder),
+      ),
+    );
+
+  if (existingItem) {
+    throw new ApiError(409, 'Sort order already exists in template');
+  }
+
   const [created] = await db
     .insert(templateItems)
     .values({
@@ -146,6 +160,22 @@ export async function updateTemplateItem(
 ) {
   const template = await findTemplateOrFail(templateId);
   verifyOwner(template, userId);
+
+  if (input.sortOrder !== undefined) {
+    const [existingItem] = await db
+      .select()
+      .from(templateItems)
+      .where(
+        and(
+          eq(templateItems.templateId, templateId),
+          eq(templateItems.sortOrder, input.sortOrder),
+        ),
+      );
+
+    if (existingItem && existingItem.id !== itemId) {
+      throw new ApiError(409, 'Sort order already exists in template');
+    }
+  }
 
   const [updated] = await db
     .update(templateItems)

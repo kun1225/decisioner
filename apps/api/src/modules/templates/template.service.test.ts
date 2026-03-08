@@ -311,9 +311,16 @@ describe('addTemplateItem', () => {
           }),
         } as never;
       }
+      if (selectCallCount === 2) {
+        return {
+          from: () => ({
+            where: () => [exercise],
+          }),
+        } as never;
+      }
       return {
         from: () => ({
-          where: () => [exercise],
+          where: () => [],
         }),
       } as never;
     });
@@ -361,9 +368,16 @@ describe('addTemplateItem', () => {
           }),
         } as never;
       }
+      if (selectCallCount === 2) {
+        return {
+          from: () => ({
+            where: () => [exercise],
+          }),
+        } as never;
+      }
       return {
         from: () => ({
-          where: () => [exercise],
+          where: () => [],
         }),
       } as never;
     });
@@ -485,6 +499,62 @@ describe('addTemplateItem', () => {
       }),
     ).rejects.toThrow(new ApiError(403, 'Forbidden'));
   });
+
+  it('should throw 409 when sort order already exists in the template', async () => {
+    const template = {
+      id: 'tpl-1',
+      ownerId: 'user-1',
+      name: 'Push Day',
+      deletedAt: null,
+    };
+    const exercise = {
+      id: 'ex-1',
+      source: 'PRESET',
+      ownerId: null,
+      deletedAt: null,
+    };
+    const existingItem = {
+      id: 'item-existing',
+      templateId: 'tpl-1',
+      exerciseId: 'ex-9',
+      sortOrder: 0,
+      note: null,
+    };
+
+    const dbMock = await import('@repo/database/index');
+    let selectCallCount = 0;
+    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) {
+        return {
+          from: () => ({
+            where: () => [template],
+          }),
+        } as never;
+      }
+      if (selectCallCount === 2) {
+        return {
+          from: () => ({
+            where: () => [exercise],
+          }),
+        } as never;
+      }
+      return {
+        from: () => ({
+          where: () => [existingItem],
+        }),
+      } as never;
+    });
+
+    await expect(
+      addTemplateItem('tpl-1', 'user-1', {
+        exerciseId: 'ex-1',
+        sortOrder: 0,
+      }),
+    ).rejects.toThrow(new ApiError(409, 'Sort order already exists in template'));
+
+    vi.mocked(dbMock.db.select).mockRestore();
+  });
 });
 
 describe('updateTemplateItem', () => {
@@ -501,14 +571,32 @@ describe('updateTemplateItem', () => {
       sortOrder: 2,
       note: null,
     };
-    selectResult = [template];
     updateResult = [updatedItem];
+    const dbMock = await import('@repo/database/index');
+    let selectCallCount = 0;
+    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) {
+        return {
+          from: () => ({
+            where: () => [template],
+          }),
+        } as never;
+      }
+      return {
+        from: () => ({
+          where: () => [updatedItem],
+        }),
+      } as never;
+    });
 
     const result = await updateTemplateItem('tpl-1', 'item-1', 'user-1', {
       sortOrder: 2,
     });
 
     expect(result).toEqual(updatedItem);
+
+    vi.mocked(dbMock.db.select).mockRestore();
   });
 
   it('should throw 404 when template not found', async () => {
@@ -526,12 +614,30 @@ describe('updateTemplateItem', () => {
       name: 'Push Day',
       deletedAt: null,
     };
-    selectResult = [template];
     updateResult = [];
+    const dbMock = await import('@repo/database/index');
+    let selectCallCount = 0;
+    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) {
+        return {
+          from: () => ({
+            where: () => [template],
+          }),
+        } as never;
+      }
+      return {
+        from: () => ({
+          where: () => [],
+        }),
+      } as never;
+    });
 
     await expect(
       updateTemplateItem('tpl-1', 'non-existent', 'user-1', { sortOrder: 2 }),
     ).rejects.toThrow(new ApiError(404, 'Template item not found'));
+
+    vi.mocked(dbMock.db.select).mockRestore();
   });
 
   it('should throw 403 when user is not the owner', async () => {
@@ -546,6 +652,45 @@ describe('updateTemplateItem', () => {
     await expect(
       updateTemplateItem('tpl-1', 'item-1', 'user-1', { sortOrder: 2 }),
     ).rejects.toThrow(new ApiError(403, 'Forbidden'));
+  });
+
+  it('should throw 409 when another item already uses the requested sortOrder', async () => {
+    const template = {
+      id: 'tpl-1',
+      ownerId: 'user-1',
+      name: 'Push Day',
+      deletedAt: null,
+    };
+    const conflictingItem = {
+      id: 'item-2',
+      templateId: 'tpl-1',
+      sortOrder: 2,
+      note: null,
+    };
+
+    const dbMock = await import('@repo/database/index');
+    let selectCallCount = 0;
+    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
+      selectCallCount++;
+      if (selectCallCount === 1) {
+        return {
+          from: () => ({
+            where: () => [template],
+          }),
+        } as never;
+      }
+      return {
+        from: () => ({
+          where: () => [conflictingItem],
+        }),
+      } as never;
+    });
+
+    await expect(
+      updateTemplateItem('tpl-1', 'item-1', 'user-1', { sortOrder: 2 }),
+    ).rejects.toThrow(new ApiError(409, 'Sort order already exists in template'));
+
+    vi.mocked(dbMock.db.select).mockRestore();
   });
 });
 
