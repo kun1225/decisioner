@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { validateLoginInput, validateRegisterInput } from './auth-form-validation';
+import {
+  validateLoginInput,
+  validateRegisterInput,
+} from './auth-form-validation';
 
 describe('auth-form-validation', () => {
   it('validates login email and password required rule', () => {

@@ -9,11 +9,25 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: joygym
+          POSTGRES_PASSWORD: joygym
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U joygym -d postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     env:
-      DATABASE_URL: "postgresql://postgres:password@localhost:5432/joy-gym"
-      ACCESS_TOKEN_SECRET: "test-access-token-secret"
-      REFRESH_TOKEN_SECRET: "test-refresh-token-secret"
+      DATABASE_URL: 'postgresql://joygym:joygym@localhost:5432/joygym_test'
+      ACCESS_TOKEN_SECRET: 'test-access-token-secret'
+      REFRESH_TOKEN_SECRET: 'test-refresh-token-secret'
 
     steps:
       - name: Checkout

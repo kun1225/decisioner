@@ -1,11 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  AuthApiError,
-  login,
-  me,
-} from '@/features/auth/_domain/auth-client';
+import { AuthApiError, login, me } from '@/features/auth/_domain/auth-client';
 
 import { LoginForm } from './login-form';
 
@@ -49,12 +45,7 @@ describe('login-form', () => {
       new AuthApiError(401, 'Invalid email or password'),
     );
 
-    render(
-      <LoginForm
-        onAuthenticated={vi.fn()}
-        onSuccessRedirect={vi.fn()}
-      />,
-    );
+    render(<LoginForm onAuthenticated={vi.fn()} onSuccessRedirect={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'joy@example.com' },
@@ -125,12 +116,7 @@ describe('login-form', () => {
       avatarUrl: null,
     });
 
-    render(
-      <LoginForm
-        onAuthenticated={vi.fn()}
-        onSuccessRedirect={vi.fn()}
-      />,
-    );
+    render(<LoginForm onAuthenticated={vi.fn()} onSuccessRedirect={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'joy@example.com' },

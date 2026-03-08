@@ -16,9 +16,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { handleLogout } = useLogout();
 
   const userName =
-    authSession.status === 'authenticated'
-      ? authSession.user.name
-      : undefined;
+    authSession.status === 'authenticated' ? authSession.user.name : undefined;
 
   const navigateToDashboard = () => {
     Promise.resolve(navigate({ to: '/dashboard' } as never)).catch(() => {});

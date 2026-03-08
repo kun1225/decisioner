@@ -551,7 +551,9 @@ describe('addTemplateItem', () => {
         exerciseId: 'ex-1',
         sortOrder: 0,
       }),
-    ).rejects.toThrow(new ApiError(409, 'Sort order already exists in template'));
+    ).rejects.toThrow(
+      new ApiError(409, 'Sort order already exists in template'),
+    );
 
     vi.mocked(dbMock.db.select).mockRestore();
   });
@@ -688,7 +690,9 @@ describe('updateTemplateItem', () => {
 
     await expect(
       updateTemplateItem('tpl-1', 'item-1', 'user-1', { sortOrder: 2 }),
-    ).rejects.toThrow(new ApiError(409, 'Sort order already exists in template'));
+    ).rejects.toThrow(
+      new ApiError(409, 'Sort order already exists in template'),
+    );
 
     vi.mocked(dbMock.db.select).mockRestore();
   });

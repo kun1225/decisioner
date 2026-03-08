@@ -1,10 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  AuthApiError,
-  register,
-} from '@/features/auth/_domain/auth-client';
+import { AuthApiError, register } from '@/features/auth/_domain/auth-client';
 
 import { RegisterForm } from './register-form';
 
@@ -20,10 +17,7 @@ vi.mock('@/features/auth/_domain/auth-client', async () => {
 describe('register-form', () => {
   it('shows client validation errors and skips api request', async () => {
     render(
-      <RegisterForm
-        onAuthenticated={vi.fn()}
-        onSuccessRedirect={vi.fn()}
-      />,
+      <RegisterForm onAuthenticated={vi.fn()} onSuccessRedirect={vi.fn()} />,
     );
 
     fireEvent.change(screen.getByLabelText('Email'), {
@@ -52,10 +46,7 @@ describe('register-form', () => {
     );
 
     render(
-      <RegisterForm
-        onAuthenticated={vi.fn()}
-        onSuccessRedirect={vi.fn()}
-      />,
+      <RegisterForm onAuthenticated={vi.fn()} onSuccessRedirect={vi.fn()} />,
     );
 
     fireEvent.change(screen.getByLabelText('Email'), {
@@ -128,7 +119,10 @@ describe('register-form', () => {
 
   it('shows loading state during submission', () => {
     let resolveRegister:
-      | ((value: { accessToken: string; user: { id: string; email: string; name: string } }) => void)
+      | ((value: {
+          accessToken: string;
+          user: { id: string; email: string; name: string };
+        }) => void)
       | undefined;
 
     vi.mocked(register).mockReturnValueOnce(
@@ -138,10 +132,7 @@ describe('register-form', () => {
     );
 
     render(
-      <RegisterForm
-        onAuthenticated={vi.fn()}
-        onSuccessRedirect={vi.fn()}
-      />,
+      <RegisterForm onAuthenticated={vi.fn()} onSuccessRedirect={vi.fn()} />,
     );
 
     fireEvent.change(screen.getByLabelText('Email'), {

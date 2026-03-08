@@ -66,12 +66,8 @@
           "name": "exercises_owner_id_users_id_fk",
           "tableFrom": "exercises",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -119,12 +115,8 @@
           "name": "gyms_user_id_users_id_fk",
           "tableFrom": "gyms",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -263,12 +255,8 @@
           "name": "exercise_session_metrics_user_id_users_id_fk",
           "tableFrom": "exercise_session_metrics",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -276,12 +264,8 @@
           "name": "exercise_session_metrics_exercise_id_exercises_id_fk",
           "tableFrom": "exercise_session_metrics",
           "tableTo": "exercises",
-          "columnsFrom": [
-            "exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -289,12 +273,8 @@
           "name": "exercise_session_metrics_session_id_workout_sessions_id_fk",
           "tableFrom": "exercise_session_metrics",
           "tableTo": "workout_sessions",
-          "columnsFrom": [
-            "session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -418,12 +398,8 @@
           "name": "refresh_tokens_user_id_users_id_fk",
           "tableFrom": "refresh_tokens",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -433,9 +409,7 @@
         "refresh_tokens_jti_unique": {
           "name": "refresh_tokens_jti_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "jti"
-          ]
+          "columns": ["jti"]
         }
       },
       "policies": {},
@@ -486,12 +460,8 @@
           "name": "crew_members_crew_id_crews_id_fk",
           "tableFrom": "crew_members",
           "tableTo": "crews",
-          "columnsFrom": [
-            "crew_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["crew_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -499,12 +469,8 @@
           "name": "crew_members_user_id_users_id_fk",
           "tableFrom": "crew_members",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -552,12 +518,8 @@
           "name": "crews_owner_id_users_id_fk",
           "tableFrom": "crews",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -613,12 +575,8 @@
           "name": "friends_user_id_users_id_fk",
           "tableFrom": "friends",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -626,12 +584,8 @@
           "name": "friends_friend_user_id_users_id_fk",
           "tableFrom": "friends",
           "tableTo": "users",
-          "columnsFrom": [
-            "friend_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["friend_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -641,10 +595,7 @@
         "friends_user_id_friend_user_id_unique": {
           "name": "friends_user_id_friend_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "friend_user_id"
-          ]
+          "columns": ["user_id", "friend_user_id"]
         }
       },
       "policies": {},
@@ -696,12 +647,8 @@
           "name": "privacy_settings_user_id_users_id_fk",
           "tableFrom": "privacy_settings",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -711,9 +658,7 @@
         "privacy_settings_user_id_unique": {
           "name": "privacy_settings_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -763,12 +708,8 @@
           "name": "template_shares_template_id_templates_id_fk",
           "tableFrom": "template_shares",
           "tableTo": "templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -776,12 +717,8 @@
           "name": "template_shares_crew_id_crews_id_fk",
           "tableFrom": "template_shares",
           "tableTo": "crews",
-          "columnsFrom": [
-            "crew_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["crew_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -789,12 +726,8 @@
           "name": "template_shares_shared_by_users_id_fk",
           "tableFrom": "template_shares",
           "tableTo": "users",
-          "columnsFrom": [
-            "shared_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["shared_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -847,12 +780,8 @@
           "name": "template_items_template_id_templates_id_fk",
           "tableFrom": "template_items",
           "tableTo": "templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -860,12 +789,8 @@
           "name": "template_items_exercise_id_exercises_id_fk",
           "tableFrom": "template_items",
           "tableTo": "exercises",
-          "columnsFrom": [
-            "exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -918,12 +843,8 @@
           "name": "template_version_items_template_version_id_template_versions_id_fk",
           "tableFrom": "template_version_items",
           "tableTo": "template_versions",
-          "columnsFrom": [
-            "template_version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_version_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -931,12 +852,8 @@
           "name": "template_version_items_exercise_id_exercises_id_fk",
           "tableFrom": "template_version_items",
           "tableTo": "exercises",
-          "columnsFrom": [
-            "exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1018,12 +935,8 @@
           "name": "template_versions_template_id_templates_id_fk",
           "tableFrom": "template_versions",
           "tableTo": "templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1031,12 +944,8 @@
           "name": "template_versions_edited_by_users_id_fk",
           "tableFrom": "template_versions",
           "tableTo": "users",
-          "columnsFrom": [
-            "edited_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["edited_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1046,10 +955,7 @@
         "template_versions_template_id_version_no_unique": {
           "name": "template_versions_template_id_version_no_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "template_id",
-            "version_no"
-          ]
+          "columns": ["template_id", "version_no"]
         }
       },
       "policies": {},
@@ -1105,12 +1011,8 @@
           "name": "templates_owner_id_users_id_fk",
           "tableFrom": "templates",
           "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1185,16 +1087,12 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "users_google_sub_unique": {
           "name": "users_google_sub_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "google_sub"
-          ]
+          "columns": ["google_sub"]
         }
       },
       "policies": {},
@@ -1260,12 +1158,8 @@
           "name": "workout_session_items_session_id_workout_sessions_id_fk",
           "tableFrom": "workout_session_items",
           "tableTo": "workout_sessions",
-          "columnsFrom": [
-            "session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1273,12 +1167,8 @@
           "name": "workout_session_items_exercise_id_exercises_id_fk",
           "tableFrom": "workout_session_items",
           "tableTo": "exercises",
-          "columnsFrom": [
-            "exercise_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["exercise_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1366,12 +1256,8 @@
           "name": "workout_session_revisions_session_id_workout_sessions_id_fk",
           "tableFrom": "workout_session_revisions",
           "tableTo": "workout_sessions",
-          "columnsFrom": [
-            "session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1379,12 +1265,8 @@
           "name": "workout_session_revisions_edited_by_users_id_fk",
           "tableFrom": "workout_session_revisions",
           "tableTo": "users",
-          "columnsFrom": [
-            "edited_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["edited_by"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1394,10 +1276,7 @@
         "workout_session_revisions_session_id_revision_no_unique": {
           "name": "workout_session_revisions_session_id_revision_no_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "session_id",
-            "revision_no"
-          ]
+          "columns": ["session_id", "revision_no"]
         }
       },
       "policies": {},
@@ -1528,12 +1407,8 @@
           "name": "workout_sessions_user_id_users_id_fk",
           "tableFrom": "workout_sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1541,12 +1416,8 @@
           "name": "workout_sessions_gym_id_gyms_id_fk",
           "tableFrom": "workout_sessions",
           "tableTo": "gyms",
-          "columnsFrom": [
-            "gym_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["gym_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1554,12 +1425,8 @@
           "name": "workout_sessions_template_id_templates_id_fk",
           "tableFrom": "workout_sessions",
           "tableTo": "templates",
-          "columnsFrom": [
-            "template_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1567,12 +1434,8 @@
           "name": "workout_sessions_template_version_id_template_versions_id_fk",
           "tableFrom": "workout_sessions",
           "tableTo": "template_versions",
-          "columnsFrom": [
-            "template_version_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["template_version_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1661,12 +1524,8 @@
           "name": "workout_sets_session_item_id_workout_session_items_id_fk",
           "tableFrom": "workout_sets",
           "tableTo": "workout_session_items",
-          "columnsFrom": [
-            "session_item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_item_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1682,69 +1541,42 @@
     "public.auth_provider": {
       "name": "auth_provider",
       "schema": "public",
-      "values": [
-        "LOCAL",
-        "GOOGLE"
-      ]
+      "values": ["LOCAL", "GOOGLE"]
     },
     "public.crew_role": {
       "name": "crew_role",
       "schema": "public",
-      "values": [
-        "OWNER",
-        "MEMBER"
-      ]
+      "values": ["OWNER", "MEMBER"]
     },
     "public.exercise_source": {
       "name": "exercise_source",
       "schema": "public",
-      "values": [
-        "PRESET",
-        "CUSTOM"
-      ]
+      "values": ["PRESET", "CUSTOM"]
     },
     "public.friend_status": {
       "name": "friend_status",
       "schema": "public",
-      "values": [
-        "PENDING",
-        "ACCEPTED",
-        "BLOCKED"
-      ]
+      "values": ["PENDING", "ACCEPTED", "BLOCKED"]
     },
     "public.session_item_origin": {
       "name": "session_item_origin",
       "schema": "public",
-      "values": [
-        "TEMPLATE",
-        "REPLACED",
-        "MANUAL"
-      ]
+      "values": ["TEMPLATE", "REPLACED", "MANUAL"]
     },
     "public.session_status": {
       "name": "session_status",
       "schema": "public",
-      "values": [
-        "IN_PROGRESS",
-        "COMPLETED"
-      ]
+      "values": ["IN_PROGRESS", "COMPLETED"]
     },
     "public.visibility_level": {
       "name": "visibility_level",
       "schema": "public",
-      "values": [
-        "PRIVATE",
-        "FRIENDS",
-        "PUBLIC"
-      ]
+      "values": ["PRIVATE", "FRIENDS", "PUBLIC"]
     },
     "public.weight_unit": {
       "name": "weight_unit",
       "schema": "public",
-      "values": [
-        "KG",
-        "LB"
-      ]
+      "values": ["KG", "LB"]
     }
   },
   "schemas": {},

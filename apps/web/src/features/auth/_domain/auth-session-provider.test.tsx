@@ -103,10 +103,7 @@ describe('auth-session-provider', () => {
       </AuthSessionProvider>
     );
 
-    const { result } = renderHook(
-      () => useAuthSessionActions(),
-      { wrapper },
-    );
+    const { result } = renderHook(() => useAuthSessionActions(), { wrapper });
 
     // Initial call with unknown state
     expect(onStateChange).toHaveBeenCalledWith({ status: 'unknown' });

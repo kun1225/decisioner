@@ -33,7 +33,9 @@ describe('redirect-target', () => {
   });
 
   it('builds auth search params with only safe redirect value', () => {
-    expect(buildAuthRedirectSearch('/history')).toEqual({ redirect: '/history' });
+    expect(buildAuthRedirectSearch('/history')).toEqual({
+      redirect: '/history',
+    });
     expect(buildAuthRedirectSearch('https://evil.example')).toEqual({});
   });
 });

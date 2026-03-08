@@ -1,6 +1,6 @@
 //  @ts-check
 
-import defaultConfig from '../../prettier.config.js';
+import defaultConfig from '../../prettier.config.mjs';
 
 /** @type {import('prettier').Config} */
 const config = {

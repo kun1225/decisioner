@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  updateTemplateItemSchema,
-  updateTemplateSchema,
-} from './templates.js';
+import { updateTemplateItemSchema, updateTemplateSchema } from './templates.js';
 
 describe('updateTemplateSchema', () => {
   it('rejects an empty patch payload', () => {
