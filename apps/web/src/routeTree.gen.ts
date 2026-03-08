@@ -9,50 +9,168 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FrontendRouteImport } from './routes/_frontend'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as FrontendIndexRouteImport } from './routes/_frontend/index'
+import { Route as FrontendAuthRegisterRouteImport } from './routes/_frontend/auth/register'
+import { Route as FrontendAuthLoginRouteImport } from './routes/_frontend/auth/login'
 
-const IndexRoute = IndexRouteImport.update({
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FrontendRoute = FrontendRouteImport.update({
+  id: '/_frontend',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => DashboardRoute,
+} as any)
+const FrontendIndexRoute = FrontendIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => FrontendRoute,
+} as any)
+const FrontendAuthRegisterRoute = FrontendAuthRegisterRouteImport.update({
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => FrontendRoute,
+} as any)
+const FrontendAuthLoginRoute = FrontendAuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => FrontendRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof FrontendIndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/': typeof DashboardIndexRoute
+  '/auth/login': typeof FrontendAuthLoginRoute
+  '/auth/register': typeof FrontendAuthRegisterRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof FrontendIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/auth/login': typeof FrontendAuthLoginRoute
+  '/auth/register': typeof FrontendAuthRegisterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_frontend': typeof FrontendRouteWithChildren
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/_frontend/': typeof FrontendIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/_frontend/auth/login': typeof FrontendAuthLoginRoute
+  '/_frontend/auth/register': typeof FrontendAuthRegisterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/dashboard/'
+    | '/auth/login'
+    | '/auth/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/dashboard' | '/auth/login' | '/auth/register'
+  id:
+    | '__root__'
+    | '/_frontend'
+    | '/dashboard'
+    | '/_frontend/'
+    | '/dashboard/'
+    | '/_frontend/auth/login'
+    | '/_frontend/auth/register'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  FrontendRoute: typeof FrontendRouteWithChildren
+  DashboardRoute: typeof DashboardRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_frontend': {
+      id: '/_frontend'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof FrontendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/_frontend/': {
+      id: '/_frontend/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof FrontendIndexRouteImport
+      parentRoute: typeof FrontendRoute
+    }
+    '/_frontend/auth/register': {
+      id: '/_frontend/auth/register'
+      path: '/auth/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof FrontendAuthRegisterRouteImport
+      parentRoute: typeof FrontendRoute
+    }
+    '/_frontend/auth/login': {
+      id: '/_frontend/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof FrontendAuthLoginRouteImport
+      parentRoute: typeof FrontendRoute
     }
   }
 }
 
+interface FrontendRouteChildren {
+  FrontendIndexRoute: typeof FrontendIndexRoute
+  FrontendAuthLoginRoute: typeof FrontendAuthLoginRoute
+  FrontendAuthRegisterRoute: typeof FrontendAuthRegisterRoute
+}
+
+const FrontendRouteChildren: FrontendRouteChildren = {
+  FrontendIndexRoute: FrontendIndexRoute,
+  FrontendAuthLoginRoute: FrontendAuthLoginRoute,
+  FrontendAuthRegisterRoute: FrontendAuthRegisterRoute,
+}
+
+const FrontendRouteWithChildren = FrontendRoute._addFileChildren(
+  FrontendRouteChildren,
+)
+
+interface DashboardRouteChildren {
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  FrontendRoute: FrontendRouteWithChildren,
+  DashboardRoute: DashboardRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

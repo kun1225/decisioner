@@ -1,19 +1,22 @@
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import type { QueryClient } from '@tanstack/react-query'
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import type { QueryClient } from '@tanstack/react-query';
 import {
   createRootRouteWithContext,
   HeadContent,
   Scripts,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+} from '@tanstack/react-router';
+import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 
-import Header from '../components/Header'
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-import appCss from '../styles.css?url'
+import type { AuthSessionState } from '@/features/auth/_domain/auth-types';
 
-interface MyRouterContext {
-  queryClient: QueryClient
-}
+import TanStackQueryDevtools from '../integrations/tanstack-query/devtools';
+import appCss from '../styles.css?url';
+
+type MyRouterContext = {
+  queryClient: QueryClient;
+  getAuthSessionState: () => AuthSessionState;
+  waitForAuthReady: () => Promise<void>;
+};
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
@@ -36,9 +39,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
-
   shellComponent: RootDocument,
-})
+  notFoundComponent: () => (
+    <main className="mx-auto max-w-3xl px-6 py-16">
+      <h1 className="font-display text-2xl font-semibold">Page not found</h1>
+      <p className="text-muted-foreground mt-2">
+        The page you requested does not exist.
+      </p>
+      <a href="/" className="text-primary mt-4 inline-block underline">
+        Back to home
+      </a>
+    </main>
+  ),
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -47,7 +60,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
         {children}
         <TanStackDevtools
           config={{
@@ -64,5 +76,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }

@@ -51,6 +51,7 @@ export const config = [
         },
       ],
       'simple-import-sort/exports': 'error',
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     },
   },
   {
