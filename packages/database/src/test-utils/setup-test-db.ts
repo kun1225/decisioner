@@ -37,7 +37,17 @@ export async function setupTestDb(): Promise<void> {
 
 export async function truncateTables(): Promise<void> {
   if (!testDb) throw new Error('Test DB not initialized');
-  await testDb.execute(sql`TRUNCATE users, refresh_tokens, exercises CASCADE`);
+
+  const result = await testDb.execute<{ tablename: string }>(
+    sql`SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename NOT LIKE 'drizzle_%'`,
+  );
+
+  if (result.rows.length > 0) {
+    const tableNames = result.rows.map((r) => `"${r.tablename}"`).join(', ');
+    await testDb.execute(
+      sql.raw(`TRUNCATE TABLE ${tableNames} RESTART IDENTITY CASCADE`),
+    );
+  }
 }
 
 export async function closeTestDb(): Promise<void> {
