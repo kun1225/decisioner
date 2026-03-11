@@ -2,48 +2,288 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/utils/api-error.js';
 
-let selectResult: unknown[] = [];
-let insertResult: unknown[] = [];
-let updateResult: unknown[] = [];
+type TemplateRecord = {
+  [key: string]: unknown;
+  id: string;
+  ownerId: string;
+  name: string;
+  description?: string;
+  createdAt: Date;
+  deletedAt: Date | null;
+};
 
-vi.mock('@repo/database/index', () => ({
-  db: {
+type TemplateItemRecord = {
+  [key: string]: unknown;
+  id: string;
+  templateId: string;
+  exerciseId: string;
+  sortOrder: number;
+  note: string | null;
+};
+
+type ExerciseRecord = {
+  [key: string]: unknown;
+  id: string;
+  ownerId: string | null;
+  source: 'PRESET' | 'CUSTOM';
+  deletedAt: Date | null;
+};
+
+type Condition =
+  | { type: 'eq'; column: string; value: unknown }
+  | { type: 'and'; conditions: Condition[] }
+  | { type: 'is-null'; column: string };
+
+type Order = { type: 'asc'; column: string };
+
+type TableName = 'templates' | 'template_items' | 'exercises';
+type MockDbClient = {
+  select: () => {
+    from: (table: { _name?: string }) => {
+      where: (condition?: Condition) => Array<Record<string, unknown>> & {
+        orderBy: (order: Order) => Array<Record<string, unknown>>;
+      };
+    };
+  };
+  insert: (table: { _name?: string }) => {
+    values: (values: Record<string, unknown> | Record<string, unknown>[]) => {
+      returning: () => Array<Record<string, unknown>>;
+    };
+  };
+  update: (table: { _name?: string }) => {
+    set: (value: Record<string, unknown>) => {
+      where: (condition?: Condition) => {
+        returning: () => Array<Record<string, unknown>>;
+      };
+    };
+  };
+  delete: (table: { _name?: string }) => {
+    where: (condition?: Condition) => {
+      returning: (
+        selection?: Record<string, unknown>,
+      ) => Array<Record<string, unknown>>;
+    };
+  };
+  transaction: <T>(callback: (tx: MockDbClient) => T | Promise<T>) => Promise<T>;
+};
+
+const mockState = vi.hoisted(() => ({
+  templates: [] as TemplateRecord[],
+  templateItems: [] as TemplateItemRecord[],
+  exercises: [] as ExerciseRecord[],
+  templateIdSequence: 0,
+  templateItemIdSequence: 0,
+  transactionCalls: 0,
+}));
+
+function cloneRows<T>(rows: T[]): T[] {
+  return structuredClone(rows);
+}
+
+function getFieldName(column: string) {
+  return column.split('.').at(-1)!;
+}
+
+function matchesCondition(
+  row: Record<string, unknown>,
+  condition?: Condition,
+): boolean {
+  if (!condition) {
+    return true;
+  }
+
+  if (condition.type === 'and') {
+    return condition.conditions.every((entry) => matchesCondition(row, entry));
+  }
+
+  if (condition.type === 'eq') {
+    return row[getFieldName(condition.column)] === condition.value;
+  }
+
+  return row[getFieldName(condition.column)] === null;
+}
+
+function sortRows<T extends Record<string, unknown>>(rows: T[], order: Order) {
+  const fieldName = getFieldName(order.column);
+
+  return cloneRows(rows).sort((left, right) => {
+    const leftValue = left[fieldName];
+    const rightValue = right[fieldName];
+
+    if (leftValue === rightValue) {
+      return 0;
+    }
+
+    return leftValue! < rightValue! ? -1 : 1;
+  });
+}
+
+function createWhereResult<T extends Record<string, unknown>>(
+  rows: T[],
+): T[] & { orderBy: (order: Order) => T[] } {
+  const filteredRows = cloneRows(rows) as T[] & {
+    orderBy: (order: Order) => T[];
+  };
+
+  filteredRows.orderBy = (order: Order) => sortRows(rows, order);
+
+  return filteredRows;
+}
+
+function getTableRows(table: { _name?: string }) {
+  if (table._name === 'templates') {
+    return mockState.templates;
+  }
+
+  if (table._name === 'template_items') {
+    return mockState.templateItems;
+  }
+
+  if (table._name === 'exercises') {
+    return mockState.exercises;
+  }
+
+  throw new Error(`Unsupported table: ${String(table._name)}`);
+}
+
+function createDbClient(): MockDbClient {
+  return {
     select: () => ({
       from: (table: { _name?: string }) => ({
-        where: () => selectResult,
-        orderBy: () => selectResult,
-        ...(table?._name === 'template_items'
-          ? { orderBy: () => selectResult }
-          : {}),
+        where: (condition?: Condition) =>
+          createWhereResult(
+            getTableRows(table).filter((row) =>
+              matchesCondition(row as Record<string, unknown>, condition),
+            ),
+          ),
       }),
     }),
-    insert: () => ({
-      values: () => ({
-        returning: () => insertResult,
+    insert: (table: { _name?: string }) => ({
+      values: (values: Record<string, unknown> | Record<string, unknown>[]) => {
+        const valueList = Array.isArray(values) ? values : [values];
+        const insertedRows = valueList.map((value) => {
+          if (table._name === 'templates') {
+            const template: TemplateRecord = {
+              id:
+                (value.id as string | undefined) ??
+                `tpl-generated-${++mockState.templateIdSequence}`,
+              ownerId: value.ownerId as string,
+              name: value.name as string,
+              description: value.description as string | undefined,
+              createdAt: new Date(),
+              deletedAt: null,
+            };
+
+            mockState.templates.push(template);
+
+            return template;
+          }
+
+          if (table._name === 'template_items') {
+            const templateItem: TemplateItemRecord = {
+              id:
+                (value.id as string | undefined) ??
+                `item-generated-${++mockState.templateItemIdSequence}`,
+              templateId: value.templateId as string,
+              exerciseId: value.exerciseId as string,
+              sortOrder: value.sortOrder as number,
+              note: (value.note as string | undefined) ?? null,
+            };
+
+            mockState.templateItems.push(templateItem);
+
+            return templateItem;
+          }
+
+          throw new Error(`Unsupported insert table: ${String(table._name)}`);
+        });
+
+        return {
+          returning: () => cloneRows(insertedRows),
+        };
+      },
+    }),
+    update: (table: { _name?: string }) => ({
+      set: (value: Record<string, unknown>) => ({
+        where: (condition?: Condition) => {
+          const rows = getTableRows(table).filter((row) =>
+            matchesCondition(row as Record<string, unknown>, condition),
+          );
+
+          rows.forEach((row) => {
+            Object.assign(row, value);
+          });
+
+          return {
+            returning: () => cloneRows(rows),
+          };
+        },
       }),
     }),
-    update: () => ({
-      set: () => ({
-        where: () => ({
-          returning: () => updateResult,
-        }),
-      }),
+    delete: (table: { _name?: string }) => ({
+      where: (condition?: Condition) => {
+        const rows = getTableRows(table);
+        const deletedRows = rows.filter((row) =>
+          matchesCondition(row as Record<string, unknown>, condition),
+        );
+
+        const remainingRows = rows.filter(
+          (row) => !matchesCondition(row as Record<string, unknown>, condition),
+        );
+
+        if (table._name === 'templates') {
+          mockState.templates = remainingRows as TemplateRecord[];
+        } else if (table._name === 'template_items') {
+          mockState.templateItems = remainingRows as TemplateItemRecord[];
+        } else if (table._name === 'exercises') {
+          mockState.exercises = remainingRows as ExerciseRecord[];
+        }
+
+        return {
+          returning: (selection?: Record<string, unknown>) => {
+            if (selection) {
+              return cloneRows(deletedRows.map((row) => ({ id: row.id })));
+            }
+
+            return cloneRows(deletedRows);
+          },
+        };
+      },
     }),
-    delete: () => ({
-      where: () => ({}),
-    }),
-  },
-  eq: vi.fn((_col, val) => val),
-  and: vi.fn((...conditions: unknown[]) => conditions),
-  isNull: vi.fn(() => 'IS_NULL'),
-  asc: vi.fn(() => 'ASC'),
+    transaction: async <T>(callback: (tx: MockDbClient) => T | Promise<T>) => {
+      mockState.transactionCalls += 1;
+
+      return callback(createDbClient());
+    },
+  };
+}
+
+vi.mock('@repo/database/index', () => ({
+  db: createDbClient(),
+  eq: (column: string, value: unknown): Condition => ({
+    type: 'eq',
+    column,
+    value,
+  }),
+  and: (...conditions: Condition[]): Condition => ({
+    type: 'and',
+    conditions,
+  }),
+  isNull: (column: string): Condition => ({
+    type: 'is-null',
+    column,
+  }),
+  asc: (column: string): Order => ({
+    type: 'asc',
+    column,
+  }),
   templates: {
     id: 'templates.id',
     ownerId: 'templates.ownerId',
     name: 'templates.name',
     description: 'templates.description',
     deletedAt: 'templates.deletedAt',
-    _name: 'templates',
+    _name: 'templates' satisfies TableName,
   },
   templateItems: {
     id: 'templateItems.id',
@@ -51,725 +291,429 @@ vi.mock('@repo/database/index', () => ({
     exerciseId: 'templateItems.exerciseId',
     sortOrder: 'templateItems.sortOrder',
     note: 'templateItems.note',
-    _name: 'template_items',
+    _name: 'template_items' satisfies TableName,
   },
   exercises: {
     id: 'exercises.id',
     ownerId: 'exercises.ownerId',
     source: 'exercises.source',
     deletedAt: 'exercises.deletedAt',
+    _name: 'exercises' satisfies TableName,
   },
 }));
 
 const {
-  createTemplate,
-  listOwnTemplates,
-  getTemplateById,
-  updateTemplate,
-  deleteTemplate,
   addTemplateItem,
-  updateTemplateItem,
+  createTemplate,
+  deleteTemplate,
   deleteTemplateItem,
+  getTemplateById,
+  listOwnTemplates,
+  updateTemplate,
+  updateTemplateItem,
 } = await import('./template.service.js');
 
+function resetMockState() {
+  mockState.templates = [];
+  mockState.templateItems = [];
+  mockState.exercises = [];
+  mockState.templateIdSequence = 0;
+  mockState.templateItemIdSequence = 0;
+  mockState.transactionCalls = 0;
+}
+
+function seedTemplate(overrides: Partial<TemplateRecord> = {}) {
+  const template: TemplateRecord = {
+    id: overrides.id ?? `tpl-${mockState.templates.length + 1}`,
+    ownerId: overrides.ownerId ?? 'user-1',
+    name: overrides.name ?? 'Push Day',
+    description: overrides.description,
+    createdAt: overrides.createdAt ?? new Date('2026-03-11T00:00:00.000Z'),
+    deletedAt: overrides.deletedAt ?? null,
+  };
+
+  mockState.templates.push(template);
+
+  return template;
+}
+
+function seedTemplateItem(overrides: Partial<TemplateItemRecord> = {}) {
+  const templateItem: TemplateItemRecord = {
+    id: overrides.id ?? `item-${mockState.templateItems.length + 1}`,
+    templateId: overrides.templateId ?? 'tpl-1',
+    exerciseId: overrides.exerciseId ?? 'ex-1',
+    sortOrder: overrides.sortOrder ?? 0,
+    note: overrides.note ?? null,
+  };
+
+  mockState.templateItems.push(templateItem);
+
+  return templateItem;
+}
+
+function seedExercise(overrides: Partial<ExerciseRecord> = {}) {
+  const exercise: ExerciseRecord = {
+    id: overrides.id ?? `ex-${mockState.exercises.length + 1}`,
+    ownerId: overrides.ownerId ?? null,
+    source: overrides.source ?? 'PRESET',
+    deletedAt: overrides.deletedAt ?? null,
+  };
+
+  mockState.exercises.push(exercise);
+
+  return exercise;
+}
+
+function listTemplateItems(templateId: string) {
+  return cloneRows(
+    mockState.templateItems
+      .filter((item) => item.templateId === templateId)
+      .sort((left, right) => left.sortOrder - right.sortOrder),
+  );
+}
+
 beforeEach(() => {
-  selectResult = [];
-  insertResult = [];
-  updateResult = [];
+  resetMockState();
 });
 
 describe('createTemplate', () => {
-  it('should create a template with name and description', async () => {
-    const created = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      description: 'Chest and triceps',
-      createdAt: new Date(),
-      deletedAt: null,
-    };
-    insertResult = [created];
-
-    const result = await createTemplate('user-1', {
+  it('creates a template with its owner metadata', async () => {
+    const created = await createTemplate('user-1', {
       name: 'Push Day',
       description: 'Chest and triceps',
     });
 
-    expect(result).toEqual(created);
-  });
-
-  it('should create a template without description', async () => {
-    const created = {
-      id: 'tpl-2',
-      ownerId: 'user-1',
-      name: 'Leg Day',
-      createdAt: new Date(),
-      deletedAt: null,
-    };
-    insertResult = [created];
-
-    const result = await createTemplate('user-1', { name: 'Leg Day' });
-
-    expect(result).toEqual(created);
+    expect(created.ownerId).toBe('user-1');
+    expect(created.name).toBe('Push Day');
+    expect(created.description).toBe('Chest and triceps');
   });
 });
 
 describe('listOwnTemplates', () => {
-  it('should return own templates', async () => {
-    const mockTemplates = [
-      { id: 'tpl-1', ownerId: 'user-1', name: 'Push Day' },
-      { id: 'tpl-2', ownerId: 'user-1', name: 'Pull Day' },
-    ];
-    selectResult = mockTemplates;
+  it('returns only active templates for the current owner', async () => {
+    seedTemplate({ id: 'tpl-1', ownerId: 'user-1', deletedAt: null });
+    seedTemplate({ id: 'tpl-2', ownerId: 'user-1', deletedAt: new Date() });
+    seedTemplate({ id: 'tpl-3', ownerId: 'user-2', deletedAt: null });
 
-    const result = await listOwnTemplates('user-1');
+    const templates = await listOwnTemplates('user-1');
 
-    expect(result).toEqual(mockTemplates);
-  });
-
-  it('should return empty array when no templates', async () => {
-    selectResult = [];
-
-    const result = await listOwnTemplates('user-1');
-
-    expect(result).toEqual([]);
+    expect(templates.map((template) => template.id)).toEqual(['tpl-1']);
   });
 });
 
 describe('getTemplateById', () => {
-  it('should return template with items sorted by sortOrder', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const items = [
-      { id: 'item-1', sortOrder: 0, exerciseId: 'ex-1' },
-      { id: 'item-2', sortOrder: 1, exerciseId: 'ex-2' },
-    ];
+  it('returns items sorted by sortOrder', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
 
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => ({
-            orderBy: () => items,
-          }),
-        }),
-      } as never;
+    seedTemplateItem({
+      id: 'item-2',
+      templateId: template.id,
+      exerciseId: 'ex-2',
+      sortOrder: 2,
+    });
+    seedTemplateItem({
+      id: 'item-1',
+      templateId: template.id,
+      exerciseId: 'ex-1',
+      sortOrder: 0,
+    });
+    seedTemplateItem({
+      id: 'item-3',
+      templateId: template.id,
+      exerciseId: 'ex-3',
+      sortOrder: 1,
     });
 
-    const result = await getTemplateById('tpl-1', 'user-1');
+    const result = await getTemplateById(template.id, 'user-1');
 
-    expect(result).toEqual({ ...template, items });
-
-    vi.mocked(dbMock.db.select).mockRestore();
-  });
-
-  it('should throw 404 when template not found', async () => {
-    selectResult = [];
-
-    await expect(getTemplateById('non-existent', 'user-1')).rejects.toThrow(
-      new ApiError(404, 'Template not found'),
-    );
-  });
-
-  it('should throw 403 when user is not the owner', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-2',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
-
-    await expect(getTemplateById('tpl-1', 'user-1')).rejects.toThrow(
-      new ApiError(403, 'Forbidden'),
-    );
+    expect(result.items.map((item) => item.id)).toEqual([
+      'item-1',
+      'item-3',
+      'item-2',
+    ]);
   });
 });
 
 describe('updateTemplate', () => {
-  it('should update template name', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const updated = { ...template, name: 'Push Day v2' };
-    selectResult = [template];
-    updateResult = [updated];
+  it('updates template metadata for the owner', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
 
-    const result = await updateTemplate('tpl-1', 'user-1', {
-      name: 'Push Day v2',
+    const updated = await updateTemplate(template.id, 'user-1', {
+      name: 'Pull Day',
+      description: 'Back and biceps',
     });
 
-    expect(result).toEqual(updated);
-  });
-
-  it('should throw 404 when template not found', async () => {
-    selectResult = [];
-
-    await expect(
-      updateTemplate('non-existent', 'user-1', { name: 'New Name' }),
-    ).rejects.toThrow(new ApiError(404, 'Template not found'));
-  });
-
-  it('should throw 403 when user is not the owner', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-2',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
-
-    await expect(
-      updateTemplate('tpl-1', 'user-1', { name: 'Push Day v2' }),
-    ).rejects.toThrow(new ApiError(403, 'Forbidden'));
+    expect(updated.name).toBe('Pull Day');
+    expect(updated.description).toBe('Back and biceps');
   });
 });
 
 describe('deleteTemplate', () => {
-  it('should soft delete a template', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
-    updateResult = [{ ...template, deletedAt: new Date() }];
+  it('soft deletes a template', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
 
-    await expect(deleteTemplate('tpl-1', 'user-1')).resolves.toBeUndefined();
-  });
+    await deleteTemplate(template.id, 'user-1');
 
-  it('should throw 404 when template not found', async () => {
-    selectResult = [];
-
-    await expect(deleteTemplate('non-existent', 'user-1')).rejects.toThrow(
-      new ApiError(404, 'Template not found'),
-    );
-  });
-
-  it('should throw 403 when user is not the owner', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-2',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
-
-    await expect(deleteTemplate('tpl-1', 'user-1')).rejects.toThrow(
-      new ApiError(403, 'Forbidden'),
-    );
+    expect(mockState.templates[0]?.deletedAt).toBeInstanceOf(Date);
   });
 });
 
 describe('addTemplateItem', () => {
-  it('should add an item to template', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const exercise = {
-      id: 'ex-1',
-      source: 'PRESET',
-      ownerId: null,
-      deletedAt: null,
-    };
-    const createdItem = {
-      id: 'item-1',
-      templateId: 'tpl-1',
-      exerciseId: 'ex-1',
-      sortOrder: 0,
-      note: null,
-    };
+  it('creates the first item in an empty template at sortOrder 0', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedExercise({ id: 'ex-1', source: 'PRESET' });
 
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      if (selectCallCount === 2) {
-        return {
-          from: () => ({
-            where: () => [exercise],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [],
-        }),
-      } as never;
-    });
-    insertResult = [createdItem];
-
-    const result = await addTemplateItem('tpl-1', 'user-1', {
+    const created = await addTemplateItem(template.id, 'user-1', {
       exerciseId: 'ex-1',
-      sortOrder: 0,
     });
 
-    expect(result).toEqual(createdItem);
-
-    vi.mocked(dbMock.db.select).mockRestore();
+    expect(created.sortOrder).toBe(0);
+    expect(listTemplateItems(template.id).map((item) => item.sortOrder)).toEqual([
+      0,
+    ]);
+    expect(mockState.transactionCalls).toBe(1);
   });
 
-  it('should add an item with note', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const exercise = {
-      id: 'ex-1',
-      source: 'CUSTOM',
-      ownerId: 'user-1',
-      deletedAt: null,
-    };
-    const createdItem = {
-      id: 'item-2',
-      templateId: 'tpl-1',
-      exerciseId: 'ex-1',
-      sortOrder: 1,
-      note: 'Go heavy',
-    };
+  it('appends to the end when position is omitted', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedExercise({ id: 'ex-2', source: 'PRESET' });
+    seedTemplateItem({ id: 'item-1', templateId: template.id, sortOrder: 0 });
+    seedTemplateItem({ id: 'item-2', templateId: template.id, sortOrder: 1 });
 
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      if (selectCallCount === 2) {
-        return {
-          from: () => ({
-            where: () => [exercise],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [],
-        }),
-      } as never;
-    });
-    insertResult = [createdItem];
-
-    const result = await addTemplateItem('tpl-1', 'user-1', {
-      exerciseId: 'ex-1',
-      sortOrder: 1,
-      note: 'Go heavy',
+    const created = await addTemplateItem(template.id, 'user-1', {
+      exerciseId: 'ex-2',
     });
 
-    expect(result).toEqual(createdItem);
-
-    vi.mocked(dbMock.db.select).mockRestore();
+    expect(created.sortOrder).toBe(2);
+    expect(listTemplateItems(template.id).map((item) => item.id)).toEqual([
+      'item-1',
+      'item-2',
+      created.id,
+    ]);
+    expect(mockState.transactionCalls).toBe(1);
   });
 
-  it('should throw 404 when template not found', async () => {
-    selectResult = [];
+  it('inserts at the requested position and shifts trailing items', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedExercise({ id: 'ex-3', source: 'PRESET' });
+    seedTemplateItem({ id: 'item-1', templateId: template.id, sortOrder: 0 });
+    seedTemplateItem({ id: 'item-2', templateId: template.id, sortOrder: 1 });
+
+    const created = await addTemplateItem(template.id, 'user-1', {
+      exerciseId: 'ex-3',
+      position: 1,
+      note: 'Superset',
+    });
+
+    expect(created.sortOrder).toBe(1);
+    expect(created.note).toBe('Superset');
+    expect(listTemplateItems(template.id)).toEqual([
+      expect.objectContaining({ id: 'item-1', sortOrder: 0 }),
+      expect.objectContaining({ id: created.id, sortOrder: 1, note: 'Superset' }),
+      expect.objectContaining({ id: 'item-2', sortOrder: 2 }),
+    ]);
+    expect(mockState.transactionCalls).toBe(1);
+  });
+
+  it('rejects an out-of-range insert position', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedExercise({ id: 'ex-4', source: 'PRESET' });
+    seedTemplateItem({ templateId: template.id, sortOrder: 0 });
 
     await expect(
-      addTemplateItem('non-existent', 'user-1', {
-        exerciseId: 'ex-1',
-        sortOrder: 0,
+      addTemplateItem(template.id, 'user-1', {
+        exerciseId: 'ex-4',
+        position: 2,
       }),
-    ).rejects.toThrow(new ApiError(404, 'Template not found'));
+    ).rejects.toThrow(new ApiError(400, 'Position out of range'));
   });
 
-  it('should throw 400 when exercise is not accessible', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [],
-        }),
-      } as never;
-    });
-
-    await expect(
-      addTemplateItem('tpl-1', 'user-1', {
-        exerciseId: 'ex-999',
-        sortOrder: 0,
-      }),
-    ).rejects.toThrow(new ApiError(400, 'Exercise not accessible'));
-
-    vi.mocked(dbMock.db.select).mockRestore();
-  });
-
-  it('should throw 400 when custom exercise belongs to another user', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const exercise = {
-      id: 'ex-2',
+  it('rejects exercises that are not accessible to the owner', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedExercise({
+      id: 'ex-5',
       source: 'CUSTOM',
       ownerId: 'user-2',
-      deletedAt: null,
-    };
-
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [exercise],
-        }),
-      } as never;
     });
 
     await expect(
-      addTemplateItem('tpl-1', 'user-1', {
-        exerciseId: 'ex-2',
-        sortOrder: 0,
+      addTemplateItem(template.id, 'user-1', {
+        exerciseId: 'ex-5',
       }),
     ).rejects.toThrow(new ApiError(400, 'Exercise not accessible'));
-
-    vi.mocked(dbMock.db.select).mockRestore();
   });
 
-  it('should throw 403 when user is not the owner', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-2',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
+  it('rejects non-owners', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-2' });
 
     await expect(
-      addTemplateItem('tpl-1', 'user-1', {
-        exerciseId: 'ex-1',
-        sortOrder: 0,
+      addTemplateItem(template.id, 'user-1', {
+        exerciseId: 'ex-6',
       }),
     ).rejects.toThrow(new ApiError(403, 'Forbidden'));
-  });
-
-  it('should throw 409 when sort order already exists in the template', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const exercise = {
-      id: 'ex-1',
-      source: 'PRESET',
-      ownerId: null,
-      deletedAt: null,
-    };
-    const existingItem = {
-      id: 'item-existing',
-      templateId: 'tpl-1',
-      exerciseId: 'ex-9',
-      sortOrder: 0,
-      note: null,
-    };
-
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      if (selectCallCount === 2) {
-        return {
-          from: () => ({
-            where: () => [exercise],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [existingItem],
-        }),
-      } as never;
-    });
-
-    await expect(
-      addTemplateItem('tpl-1', 'user-1', {
-        exerciseId: 'ex-1',
-        sortOrder: 0,
-      }),
-    ).rejects.toThrow(
-      new ApiError(409, 'Sort order already exists in template'),
-    );
-
-    vi.mocked(dbMock.db.select).mockRestore();
   });
 });
 
 describe('updateTemplateItem', () => {
-  it('should update an item sortOrder', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const updatedItem = {
+  it('updates note without reordering', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedTemplateItem({
       id: 'item-1',
-      templateId: 'tpl-1',
-      sortOrder: 2,
+      templateId: template.id,
+      sortOrder: 0,
       note: null,
-    };
-    updateResult = [updatedItem];
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [updatedItem],
-        }),
-      } as never;
     });
 
-    const result = await updateTemplateItem('tpl-1', 'item-1', 'user-1', {
-      sortOrder: 2,
+    const updated = await updateTemplateItem(template.id, 'item-1', 'user-1', {
+      note: 'Pause reps',
     });
 
-    expect(result).toEqual(updatedItem);
-
-    vi.mocked(dbMock.db.select).mockRestore();
+    expect(updated.note).toBe('Pause reps');
+    expect(listTemplateItems(template.id)).toEqual([
+      expect.objectContaining({ id: 'item-1', sortOrder: 0, note: 'Pause reps' }),
+    ]);
   });
 
-  it('should throw 404 when template not found', async () => {
-    selectResult = [];
-
-    await expect(
-      updateTemplateItem('non-existent', 'item-1', 'user-1', { sortOrder: 2 }),
-    ).rejects.toThrow(new ApiError(404, 'Template not found'));
-  });
-
-  it('should throw 404 when item not found', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    updateResult = [];
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [],
-        }),
-      } as never;
+  it('moves an item to a new position and keeps sortOrder contiguous', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedTemplateItem({
+      id: 'item-1',
+      templateId: template.id,
+      sortOrder: 0,
+      note: null,
     });
-
-    await expect(
-      updateTemplateItem('tpl-1', 'non-existent', 'user-1', { sortOrder: 2 }),
-    ).rejects.toThrow(new ApiError(404, 'Template item not found'));
-
-    vi.mocked(dbMock.db.select).mockRestore();
-  });
-
-  it('should throw 403 when user is not the owner', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-2',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
-
-    await expect(
-      updateTemplateItem('tpl-1', 'item-1', 'user-1', { sortOrder: 2 }),
-    ).rejects.toThrow(new ApiError(403, 'Forbidden'));
-  });
-
-  it('should throw 409 when another item already uses the requested sortOrder', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    const conflictingItem = {
+    seedTemplateItem({
       id: 'item-2',
-      templateId: 'tpl-1',
+      templateId: template.id,
+      sortOrder: 1,
+      note: null,
+    });
+    seedTemplateItem({
+      id: 'item-3',
+      templateId: template.id,
       sortOrder: 2,
       note: null,
-    };
-
-    const dbMock = await import('@repo/database/index');
-    let selectCallCount = 0;
-    vi.spyOn(dbMock.db, 'select').mockImplementation(() => {
-      selectCallCount++;
-      if (selectCallCount === 1) {
-        return {
-          from: () => ({
-            where: () => [template],
-          }),
-        } as never;
-      }
-      return {
-        from: () => ({
-          where: () => [conflictingItem],
-        }),
-      } as never;
     });
 
-    await expect(
-      updateTemplateItem('tpl-1', 'item-1', 'user-1', { sortOrder: 2 }),
-    ).rejects.toThrow(
-      new ApiError(409, 'Sort order already exists in template'),
-    );
+    const updated = await updateTemplateItem(template.id, 'item-1', 'user-1', {
+      position: 2,
+      note: 'Drop set finisher',
+    });
 
-    vi.mocked(dbMock.db.select).mockRestore();
+    expect(updated).toEqual(
+      expect.objectContaining({
+        id: 'item-1',
+        sortOrder: 2,
+        note: 'Drop set finisher',
+      }),
+    );
+    expect(listTemplateItems(template.id)).toEqual([
+      expect.objectContaining({ id: 'item-2', sortOrder: 0 }),
+      expect.objectContaining({ id: 'item-3', sortOrder: 1 }),
+      expect.objectContaining({
+        id: 'item-1',
+        sortOrder: 2,
+        note: 'Drop set finisher',
+      }),
+    ]);
+    expect(mockState.transactionCalls).toBe(1);
+  });
+
+  it('returns the current item when moved to the same position', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedTemplateItem({
+      id: 'item-1',
+      templateId: template.id,
+      sortOrder: 1,
+      note: 'Keep tempo',
+    });
+    seedTemplateItem({
+      id: 'item-2',
+      templateId: template.id,
+      sortOrder: 0,
+      note: null,
+    });
+
+    const updated = await updateTemplateItem(template.id, 'item-1', 'user-1', {
+      position: 1,
+    });
+
+    expect(updated).toEqual(
+      expect.objectContaining({
+        id: 'item-1',
+        sortOrder: 1,
+        note: 'Keep tempo',
+      }),
+    );
+  });
+
+  it('rejects an out-of-range move position', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedTemplateItem({ id: 'item-1', templateId: template.id, sortOrder: 0 });
+
+    await expect(
+      updateTemplateItem(template.id, 'item-1', 'user-1', {
+        position: 1,
+      }),
+    ).rejects.toThrow(new ApiError(400, 'Position out of range'));
+  });
+
+  it('throws 404 when the item does not exist', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+
+    await expect(
+      updateTemplateItem(template.id, 'missing-item', 'user-1', {
+        position: 0,
+      }),
+    ).rejects.toThrow(new ApiError(404, 'Template item not found'));
+  });
+
+  it('rejects non-owners', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-2' });
+
+    await expect(
+      updateTemplateItem(template.id, 'item-1', 'user-1', {
+        position: 0,
+      }),
+    ).rejects.toThrow(new ApiError(403, 'Forbidden'));
   });
 });
 
 describe('deleteTemplateItem', () => {
-  it('should delete an item', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
+  it('deletes an item and compacts remaining sortOrder values', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedTemplateItem({ id: 'item-1', templateId: template.id, sortOrder: 0 });
+    seedTemplateItem({ id: 'item-2', templateId: template.id, sortOrder: 1 });
+    seedTemplateItem({ id: 'item-3', templateId: template.id, sortOrder: 2 });
 
-    const dbMock = await import('@repo/database/index');
-    const deleteSpy = vi.spyOn(dbMock.db, 'delete').mockImplementation(
-      () =>
-        ({
-          where: () => ({
-            returning: () => [{ id: 'item-1' }],
-          }),
-        }) as never,
-    );
+    await deleteTemplateItem(template.id, 'item-2', 'user-1');
 
-    await expect(
-      deleteTemplateItem('tpl-1', 'item-1', 'user-1'),
-    ).resolves.toBeUndefined();
-
-    deleteSpy.mockRestore();
+    expect(listTemplateItems(template.id)).toEqual([
+      expect.objectContaining({ id: 'item-1', sortOrder: 0 }),
+      expect.objectContaining({ id: 'item-3', sortOrder: 1 }),
+    ]);
+    expect(mockState.transactionCalls).toBe(1);
   });
 
-  it('should throw 404 when template not found', async () => {
-    selectResult = [];
+  it('throws 404 when the item does not exist', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
 
     await expect(
-      deleteTemplateItem('non-existent', 'item-1', 'user-1'),
+      deleteTemplateItem(template.id, 'missing-item', 'user-1'),
+    ).rejects.toThrow(new ApiError(404, 'Template item not found'));
+  });
+
+  it('throws 404 when the template does not exist', async () => {
+    await expect(
+      deleteTemplateItem('missing-template', 'item-1', 'user-1'),
     ).rejects.toThrow(new ApiError(404, 'Template not found'));
   });
 
-  it('should throw 404 when item not found', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-1',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
-
-    const dbMock = await import('@repo/database/index');
-    vi.spyOn(dbMock.db, 'delete').mockImplementation(
-      () =>
-        ({
-          where: () => ({
-            returning: () => [],
-          }),
-        }) as never,
-    );
+  it('rejects non-owners', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-2' });
 
     await expect(
-      deleteTemplateItem('tpl-1', 'non-existent', 'user-1'),
-    ).rejects.toThrow(new ApiError(404, 'Template item not found'));
-
-    vi.mocked(dbMock.db.delete).mockRestore();
-  });
-
-  it('should throw 403 when user is not the owner', async () => {
-    const template = {
-      id: 'tpl-1',
-      ownerId: 'user-2',
-      name: 'Push Day',
-      deletedAt: null,
-    };
-    selectResult = [template];
-
-    await expect(
-      deleteTemplateItem('tpl-1', 'item-1', 'user-1'),
+      deleteTemplateItem(template.id, 'item-1', 'user-1'),
     ).rejects.toThrow(new ApiError(403, 'Forbidden'));
   });
 });
