@@ -25,17 +25,21 @@ export const templates = pgTable('templates', {
   deletedAt: timestamp('deleted_at', { withTimezone: true }),
 });
 
-export const templateItems = pgTable('template_items', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  templateId: uuid('template_id')
-    .notNull()
-    .references(() => templates.id),
-  exerciseId: uuid('exercise_id')
-    .notNull()
-    .references(() => exercises.id),
-  sortOrder: integer('sort_order').notNull(),
-  note: varchar('note', { length: 500 }),
-});
+export const templateItems = pgTable(
+  'template_items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    templateId: uuid('template_id')
+      .notNull()
+      .references(() => templates.id),
+    exerciseId: uuid('exercise_id')
+      .notNull()
+      .references(() => exercises.id),
+    sortOrder: integer('sort_order').notNull(),
+    note: varchar('note', { length: 500 }),
+  },
+  (t) => [unique().on(t.templateId, t.sortOrder)],
+);
 
 export const templateVersions = pgTable(
   'template_versions',
