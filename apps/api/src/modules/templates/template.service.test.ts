@@ -76,6 +76,12 @@ const mockState = vi.hoisted(() => ({
   transactionCalls: 0,
 }));
 
+function createUniqueViolationError() {
+  return Object.assign(new Error('duplicate key value violates unique constraint'), {
+    code: '23505',
+  });
+}
+
 function cloneRows<T>(rows: T[]): T[] {
   return structuredClone(rows);
 }
@@ -146,6 +152,20 @@ function getTableRows(table: { _name?: string }) {
   throw new Error(`Unsupported table: ${String(table._name)}`);
 }
 
+function ensureTemplateItemOrderingUnique() {
+  const seenKeys = new Set<string>();
+
+  for (const item of mockState.templateItems) {
+    const key = `${item.templateId}:${item.sortOrder}`;
+
+    if (seenKeys.has(key)) {
+      throw createUniqueViolationError();
+    }
+
+    seenKeys.add(key);
+  }
+}
+
 function createDbClient(): MockDbClient {
   return {
     select: () => ({
@@ -191,6 +211,7 @@ function createDbClient(): MockDbClient {
             };
 
             mockState.templateItems.push(templateItem);
+            ensureTemplateItemOrderingUnique();
 
             return templateItem;
           }
@@ -213,6 +234,10 @@ function createDbClient(): MockDbClient {
           rows.forEach((row) => {
             Object.assign(row, value);
           });
+
+          if (table._name === 'template_items') {
+            ensureTemplateItemOrderingUnique();
+          }
 
           return {
             returning: () => cloneRows(rows),
@@ -252,8 +277,25 @@ function createDbClient(): MockDbClient {
     }),
     transaction: async <T>(callback: (tx: MockDbClient) => T | Promise<T>) => {
       mockState.transactionCalls += 1;
+      const snapshot = {
+        templates: cloneRows(mockState.templates),
+        templateItems: cloneRows(mockState.templateItems),
+        exercises: cloneRows(mockState.exercises),
+        templateIdSequence: mockState.templateIdSequence,
+        templateItemIdSequence: mockState.templateItemIdSequence,
+      };
 
-      return callback(createDbClient());
+      try {
+        return await callback(createDbClient());
+      } catch (error) {
+        mockState.templates = snapshot.templates;
+        mockState.templateItems = snapshot.templateItems;
+        mockState.exercises = snapshot.exercises;
+        mockState.templateIdSequence = snapshot.templateIdSequence;
+        mockState.templateItemIdSequence = snapshot.templateItemIdSequence;
+
+        throw error;
+      }
     },
   };
 }
@@ -312,6 +354,7 @@ const {
   updateTemplate,
   updateTemplateItem,
 } = await import('./template.service.js');
+const { db } = await import('@repo/database/index');
 
 function resetMockState() {
   mockState.templates = [];
@@ -551,6 +594,22 @@ describe('addTemplateItem', () => {
         exerciseId: 'ex-6',
       }),
     ).rejects.toThrow(new ApiError(403, 'Forbidden'));
+  });
+
+  it('maps unique constraint races to a 409 conflict', async () => {
+    const template = seedTemplate({ id: 'tpl-1', ownerId: 'user-1' });
+    seedExercise({ id: 'ex-7', source: 'PRESET' });
+    const transactionSpy = vi
+      .spyOn(db, 'transaction')
+      .mockRejectedValueOnce(createUniqueViolationError());
+
+    await expect(
+      addTemplateItem(template.id, 'user-1', {
+        exerciseId: 'ex-7',
+      }),
+    ).rejects.toThrow(new ApiError(409, 'Template item ordering conflict'));
+
+    transactionSpy.mockRestore();
   });
 });
 

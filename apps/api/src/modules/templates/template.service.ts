@@ -43,6 +43,29 @@ function invalidPositionError() {
   return new ApiError(400, 'Position out of range');
 }
 
+function isUniqueConstraintError(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    error.code === '23505'
+  );
+}
+
+async function runTemplateItemTransaction<T>(
+  callback: (tx: DatabaseClient) => Promise<T>,
+) {
+  try {
+    return await db.transaction((tx) => callback(tx));
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throw new ApiError(409, 'Template item ordering conflict');
+    }
+
+    throw error;
+  }
+}
+
 function resolveInsertPosition(position: number | undefined, itemCount: number) {
   if (position === undefined) {
     return itemCount;
@@ -212,7 +235,7 @@ export async function addTemplateItem(
 
   await verifyExerciseAccessible(input.exerciseId, userId);
 
-  return db.transaction(async (tx) => {
+  return runTemplateItemTransaction(async (tx) => {
     const existingItems = await listTemplateItems(templateId, tx);
     const insertPosition = resolveInsertPosition(
       input.position,
@@ -249,7 +272,7 @@ export async function updateTemplateItem(
   const template = await findTemplateOrFail(templateId);
   verifyOwner(template, userId);
 
-  return db.transaction(async (tx) => {
+  return runTemplateItemTransaction(async (tx) => {
     const existingItems = await listTemplateItems(templateId, tx);
     const currentIndex = existingItems.findIndex((item) => item.id === itemId);
 
@@ -307,7 +330,7 @@ export async function deleteTemplateItem(
   const template = await findTemplateOrFail(templateId);
   verifyOwner(template, userId);
 
-  await db.transaction(async (tx) => {
+  await runTemplateItemTransaction(async (tx) => {
     const existingItems = await listTemplateItems(templateId, tx);
     const deletedItem = existingItems.find((item) => item.id === itemId);
 
