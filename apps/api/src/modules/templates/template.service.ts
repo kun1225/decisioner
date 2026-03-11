@@ -44,12 +44,25 @@ function invalidPositionError() {
 }
 
 function isUniqueConstraintError(error: unknown) {
-  return (
+  const directCode =
     typeof error === 'object' &&
     error !== null &&
     'code' in error &&
-    error.code === '23505'
-  );
+    typeof error.code === 'string'
+      ? error.code
+      : undefined;
+  const causeCode =
+    typeof error === 'object' &&
+    error !== null &&
+    'cause' in error &&
+    typeof error.cause === 'object' &&
+    error.cause !== null &&
+    'code' in error.cause &&
+    typeof error.cause.code === 'string'
+      ? error.cause.code
+      : undefined;
+
+  return directCode === '23505' || causeCode === '23505';
 }
 
 async function runTemplateItemTransaction<T>(

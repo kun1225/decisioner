@@ -143,69 +143,55 @@ async function getTemplateDetail(
   return response.body as TemplateDetailResponse;
 }
 
-async function installNegativeSortOrderDelayTrigger(templateId: string) {
-  await db.execute(sql`
-    CREATE OR REPLACE FUNCTION test_sleep_template_item_negative_sort_order()
-    RETURNS trigger AS $$
-    BEGIN
-      IF NEW.template_id::text = ${templateId} AND NEW.sort_order < 0 THEN
-        PERFORM pg_sleep(0.35);
-      END IF;
-      RETURN NEW;
-    END;
-    $$ LANGUAGE plpgsql;
-  `);
-  await db.execute(sql`
-    DROP TRIGGER IF EXISTS test_sleep_template_item_negative_sort_order_trigger
-    ON template_items
-  `);
-  await db.execute(sql`
-    CREATE TRIGGER test_sleep_template_item_negative_sort_order_trigger
-    BEFORE UPDATE ON template_items
-    FOR EACH ROW
-    EXECUTE FUNCTION test_sleep_template_item_negative_sort_order()
-  `);
-}
-
-async function removeNegativeSortOrderDelayTrigger() {
-  await db.execute(sql`
-    DROP TRIGGER IF EXISTS test_sleep_template_item_negative_sort_order_trigger
-    ON template_items
-  `);
-  await db.execute(sql`
-    DROP FUNCTION IF EXISTS test_sleep_template_item_negative_sort_order()
-  `);
-}
-
-async function insertConflictingTemplateItemWhenSlotIsFree(
+async function installOrderingConflictTrigger(
   templateId: string,
   exerciseId: string,
 ) {
-  const deadline = Date.now() + 1_500;
+  const escapedTemplateId = templateId.replaceAll("'", "''");
+  const escapedExerciseId = exerciseId.replaceAll("'", "''");
 
-  while (Date.now() < deadline) {
-    try {
-      await db.execute(sql`
-        INSERT INTO template_items (template_id, exercise_id, sort_order, note)
-        VALUES (${templateId}, ${exerciseId}, 0, NULL)
-      `);
-      return;
-    } catch (error) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'code' in error &&
-        error.code === '23505'
-      ) {
-        await new Promise((resolve) => setTimeout(resolve, 25));
-        continue;
-      }
+  await db.execute(
+    sql.raw(`
+      CREATE OR REPLACE FUNCTION test_force_template_item_ordering_conflict()
+      RETURNS trigger AS $$
+      BEGIN
+        IF NEW.template_id::text = '${escapedTemplateId}'
+          AND NEW.sort_order = 0
+          AND NOT EXISTS (
+            SELECT 1
+            FROM template_items
+            WHERE template_id = '${escapedTemplateId}'::uuid
+              AND exercise_id = '${escapedExerciseId}'::uuid
+          )
+        THEN
+          INSERT INTO template_items (template_id, exercise_id, sort_order, note)
+          VALUES ('${escapedTemplateId}'::uuid, '${escapedExerciseId}'::uuid, 0, NULL);
+        END IF;
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `),
+  );
+  await db.execute(sql`
+    DROP TRIGGER IF EXISTS test_force_template_item_ordering_conflict_trigger
+    ON template_items
+  `);
+  await db.execute(sql`
+    CREATE TRIGGER test_force_template_item_ordering_conflict_trigger
+    BEFORE UPDATE ON template_items
+    FOR EACH ROW WHEN (NEW.sort_order = 0)
+    EXECUTE FUNCTION test_force_template_item_ordering_conflict()
+  `);
+}
 
-      throw error;
-    }
-  }
-
-  throw new Error('Failed to create a runtime ordering conflict');
+async function removeOrderingConflictTrigger() {
+  await db.execute(sql`
+    DROP TRIGGER IF EXISTS test_force_template_item_ordering_conflict_trigger
+    ON template_items
+  `);
+  await db.execute(sql`
+    DROP FUNCTION IF EXISTS test_force_template_item_ordering_conflict()
+  `);
 }
 
 describe('template ordering integration', () => {
@@ -424,7 +410,7 @@ describe('template ordering integration', () => {
       .send({ exerciseId: bike.id, position: 1 });
 
     expect(response.status).toBe(400);
-    expect(response.body.message).toBe('Position out of range');
+    expect(response.body.error).toBe('Position out of range');
   });
 
   it('returns 403 when another user tries to mutate the template', async () => {
@@ -452,7 +438,7 @@ describe('template ordering integration', () => {
       .send({ position: 0 });
 
     expect(response.status).toBe(403);
-    expect(response.body.message).toBe('Forbidden');
+    expect(response.body.error).toBe('Forbidden');
   });
 
   it('returns 409 when a live ordering conflict hits the unique constraint', async () => {
@@ -485,22 +471,15 @@ describe('template ordering integration', () => {
       existingExercise.id,
     );
 
-    await installNegativeSortOrderDelayTrigger(template.id);
+    await installOrderingConflictTrigger(template.id, conflictingExercise.id);
 
     try {
-      const responsePromise = withAuth(auth.agent, auth.accessToken)
+      const response = await withAuth(auth.agent, auth.accessToken)
         .post(`/api/templates/${template.id}/items`)
         .send({ exerciseId: requestedExercise.id, position: 0 });
 
-      await insertConflictingTemplateItemWhenSlotIsFree(
-        template.id,
-        conflictingExercise.id,
-      );
-
-      const response = await responsePromise;
-
       expect(response.status).toBe(409);
-      expect(response.body.message).toBe('Template item ordering conflict');
+      expect(response.body.error).toBe('Template item ordering conflict');
 
       const detail = await getTemplateDetail(
         auth.agent,
@@ -508,14 +487,13 @@ describe('template ordering integration', () => {
         template.id,
       );
 
-      expect(detail.items).toHaveLength(2);
+      expect(detail.items).toHaveLength(1);
       expect(detail.items.map((item) => item.exerciseId)).toEqual([
         existingExercise.id,
-        conflictingExercise.id,
       ]);
-      expect(detail.items.map((item) => item.sortOrder)).toEqual([0, 1]);
+      expect(detail.items.map((item) => item.sortOrder)).toEqual([0]);
     } finally {
-      await removeNegativeSortOrderDelayTrigger();
+      await removeOrderingConflictTrigger();
     }
   });
 });

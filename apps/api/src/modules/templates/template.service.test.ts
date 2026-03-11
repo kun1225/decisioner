@@ -393,6 +393,29 @@ describe('addTemplateItem', () => {
 
     transactionSpy.mockRestore();
   });
+
+  it('maps wrapped unique constraint races to a 409 conflict', async () => {
+    const template = makeTemplate();
+    const exercise = makeExercise();
+    queueSelectResults([template], [exercise]);
+    const transactionSpy = vi
+      .spyOn(db, 'transaction')
+      .mockRejectedValueOnce(
+        Object.assign(new Error('Failed query'), {
+          cause: {
+            code: '23505',
+          },
+        }),
+      );
+
+    await expect(
+      addTemplateItem(template.id, template.ownerId, {
+        exerciseId: exercise.id,
+      }),
+    ).rejects.toThrow(new ApiError(409, 'Template item ordering conflict'));
+
+    transactionSpy.mockRestore();
+  });
 });
 
 describe('updateTemplateItem', () => {
