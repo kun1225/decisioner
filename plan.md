@@ -11,11 +11,11 @@
 
 ## Current State
 
-- 現有 template item CRUD 已完成，但 `sortOrder` 仍由 client 直接指定。
-- `apps/api/src/modules/templates/template.service.ts` 目前採用「撞號即回 409」的模式，尚未做 transaction-based reorder。
-- `packages/database/src/schema/template.ts` 尚未對 `template_items(template_id, sort_order)` 宣告唯一性約束，與 `docs/specs/6-data-model.md` 不一致。
-- `packages/shared/src/templates.ts` 的 payload 仍偏向基礎 CRUD，尚未充分對齊未來 editor 的操作語意。
-- `apps/api/src/modules/templates/template.service.test.ts` 目前覆蓋一般 CRUD 與衝突情境，但缺少 ordering、reorder、delete consistency 的測試。
+- PR-4 核心實作已完成：template item ordering 已改由 server 端 transaction 維護。
+- `packages/shared/src/templates.ts` 已改成 `position` 語意，並拒絕舊的 `sortOrder` payload。
+- `packages/database/src/schema/template.ts` 與 drizzle migration 已補上 `template_items(template_id, sort_order)` unique constraint，且 migration 會先做資料正規化。
+- `apps/api/src/modules/templates/template.service.ts` 已實作 add / reorder / delete consistency，並將 DB unique violation 轉成 `409` API error。
+- `apps/api/src/modules/templates/template.service.test.ts` 目前已覆蓋 ordering、reorder、delete consistency、constraint collision 與 rollback 模擬，但測試檔明顯偏大，後續需要由 integration tests 承接 DB invariant 驗證。
 
 ## Implementation Strategy
 
@@ -113,11 +113,56 @@
 
 ## Verification Checklist
 
-- [ ] `template_items(template_id, sort_order)` unique constraint 已進入 schema 與 migration
-- [ ] add / reorder / delete 全由 server 維護排序
-- [ ] 同一 template 內 `sortOrder` 唯一且連續
-- [ ] 非法 `position` 會被拒絕並回 400
-- [ ] template detail 仍按 `sortOrder` 回傳
-- [ ] template service tests 覆蓋 ordering、reorder、delete consistency
-- [ ] shared schema tests 覆蓋新 payload 規則
-- [ ] 相關測試與 typecheck 通過
+- [x] `template_items(template_id, sort_order)` unique constraint 已進入 schema 與 migration
+- [x] add / reorder / delete 全由 server 維護排序
+- [x] 同一 template 內 `sortOrder` 唯一且連續
+- [x] 非法 `position` 會被拒絕並回 400
+- [x] template detail 仍按 `sortOrder` 回傳
+- [x] template service tests 覆蓋 ordering、reorder、delete consistency
+- [x] shared schema tests 覆蓋新 payload 規則
+- [x] 相關測試與 typecheck 通過
+
+## Next Step: Option B
+
+### Goal
+
+- 導入 template integration tests，讓真 DB 驗證 transaction、unique constraint、rollback 與 API error mapping。
+- 將目前過重的 `template.service.test.ts` 收斂為較薄的 service unit tests，把 DB invariant 驗證責任轉移到 integration layer。
+
+### Why This Path
+
+- repo 已有 integration test 基礎設施，後續擴充 template 線的成本低於長期維護一份大型 fake DB 測試。
+- `template.service.test.ts` 目前為了驗證 ordering invariant，內含 stateful fake DB 與 transaction/rollback 模擬，維護成本偏高。
+- PR-4 的真正風險點是 DB constraint 與 transaction 行為；這些用 integration tests 驗證更可信。
+
+### Follow-up Steps
+
+1. 建立 `apps/api/src/modules/templates/template.integration.test.ts`。
+2. 參考既有 integration test setup，接上測試 DB、auth helper 與 API app instance。
+3. 補 template ordering 關鍵整合案例：
+   - add item append to end
+   - add item insert at position
+   - reorder item forward/backward
+   - delete item 後 compact `sortOrder`
+   - invalid position 回 400
+   - concurrent/conflicting ordering write 回 409
+4. 用真 DB 驗證 runtime 下的 unique constraint 與 transaction rollback 行為。
+5. 另外補一個 migration 驗證工作，確認既有髒資料的 sortOrder 正規化路徑正確。
+6. 收斂 `apps/api/src/modules/templates/template.service.test.ts`：
+   - 移除重型 fake DB invariant 驗證
+   - 保留純 service-level 決策與錯誤分流測試
+7. 若有共用 setup / helper，抽到 template 測試專用 helper，避免 integration 與 unit test 各自複製。
+
+### Atomic Commit Plan
+
+1. `test: add template integration coverage for ordering flows`
+2. `test: verify template ordering migration normalization`
+3. `refactor: slim template service unit tests`
+
+### Verification For Option B
+
+- [ ] `template.integration.test.ts` 可在真 DB 下驗證 ordering invariant
+- [ ] conflict / rollback / unique constraint 由 integration tests 承接
+- [ ] migration 正規化路徑有獨立驗證
+- [ ] `template.service.test.ts` 行數明顯下降且仍保留高價值 unit coverage
+- [ ] template API 相關 unit + integration tests 通過
