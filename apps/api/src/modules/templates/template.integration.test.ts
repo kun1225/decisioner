@@ -1,4 +1,12 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest';
 
 import { db, sql } from '@repo/database/index';
 import {
@@ -7,34 +15,11 @@ import {
   truncateTables,
 } from '@repo/database/test-utils/setup-test-db';
 
-import { createTestAgent, type TestAgent } from '@/test-utils/test-agent.js';
-
-type AuthContext = {
-  accessToken: string;
-  agent: TestAgent;
-  user: {
-    id: string;
-  };
-};
-
-type TemplateResponse = {
-  id: string;
-  name: string;
-};
-
-type ExerciseResponse = {
-  id: string;
-  name: string;
-};
-
-type TemplateDetailResponse = TemplateResponse & {
-  items: Array<{
-    exerciseId: string;
-    id: string;
-    note: string | null;
-    sortOrder: number;
-  }>;
-};
+import {
+  createTestAgent,
+  type TestAgent,
+  withAuth,
+} from '@/test-utils/test-agent.js';
 
 const VALID_REGISTER = {
   email: 'template-test@example.com',
@@ -55,94 +40,402 @@ afterAll(async () => {
   await closeTestDb();
 });
 
-function withAuth(agent: TestAgent, accessToken: string) {
-  return {
-    delete: (path: string) =>
-      agent.delete(path).set('Authorization', `Bearer ${accessToken}`),
-    get: (path: string) =>
-      agent.get(path).set('Authorization', `Bearer ${accessToken}`),
-    patch: (path: string) =>
-      agent.patch(path).set('Authorization', `Bearer ${accessToken}`),
-    post: (path: string) =>
-      agent.post(path).set('Authorization', `Bearer ${accessToken}`),
-  };
-}
+// ---------------------------------------------------------------------------
+// Template CRUD
+// ---------------------------------------------------------------------------
+describe('template CRUD integration', () => {
+  let agent: TestAgent;
+  let accessToken: string;
 
-async function registerAndAuthenticate(index: number): Promise<AuthContext> {
-  const agent = createTestAgent();
-  const response = await agent.post('/api/auth/register').send({
-    ...VALID_REGISTER,
-    email: `template-test-${index}@example.com`,
-    name: `Template Test User ${index}`,
+  beforeEach(async () => {
+    agent = createTestAgent();
+    const res = await agent.post('/api/auth/register').send(VALID_REGISTER);
+    accessToken = res.body.accessToken as string;
   });
 
-  expect(response.status).toBe(201);
+  it('creates, lists, updates, and soft deletes templates', async () => {
+    const createPush = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Push Day', description: 'Chest and shoulders' });
+    expect(createPush.status).toBe(201);
 
-  return {
-    accessToken: response.body.accessToken as string,
-    agent,
-    user: response.body.user as { id: string },
-  };
-}
+    const createLeg = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Leg Day' });
+    expect(createLeg.status).toBe(201);
 
-async function createTemplate(
-  agent: TestAgent,
-  accessToken: string,
-  name: string,
-): Promise<TemplateResponse> {
-  const response = await withAuth(agent, accessToken)
-    .post('/api/templates')
-    .send({ name });
+    const listRes = await withAuth(agent, accessToken).get('/api/templates');
+    expect(listRes.status).toBe(200);
+    expect(listRes.body).toHaveLength(2);
+    expect(listRes.body.map((t: { id: string }) => t.id)).toEqual(
+      expect.arrayContaining([createPush.body.id, createLeg.body.id]),
+    );
 
-  expect(response.status).toBe(201);
+    const updateRes = await withAuth(agent, accessToken)
+      .patch(`/api/templates/${createPush.body.id}`)
+      .send({
+        name: 'Upper Push Day',
+        description: 'Chest, shoulders, and triceps',
+      });
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.name).toBe('Upper Push Day');
+    expect(updateRes.body.description).toBe('Chest, shoulders, and triceps');
 
-  return response.body as TemplateResponse;
-}
+    const detailRes = await withAuth(agent, accessToken).get(
+      `/api/templates/${createPush.body.id}`,
+    );
+    expect(detailRes.status).toBe(200);
+    expect(detailRes.body.name).toBe('Upper Push Day');
+    expect(detailRes.body.description).toBe('Chest, shoulders, and triceps');
+    expect(detailRes.body.items).toEqual([]);
 
-async function createCustomExercise(
-  agent: TestAgent,
-  accessToken: string,
-  name: string,
-): Promise<ExerciseResponse> {
-  const response = await withAuth(agent, accessToken)
-    .post('/api/exercises/custom')
-    .send({ name });
+    const deleteRes = await withAuth(agent, accessToken).delete(
+      `/api/templates/${createPush.body.id}`,
+    );
+    expect(deleteRes.status).toBe(204);
 
-  expect(response.status).toBe(201);
+    const remainingRes = await withAuth(agent, accessToken).get(
+      '/api/templates',
+    );
+    expect(remainingRes.status).toBe(200);
+    expect(remainingRes.body).toHaveLength(1);
+    expect(remainingRes.body[0].id).toBe(createLeg.body.id);
 
-  return response.body as ExerciseResponse;
-}
+    const deletedRes = await withAuth(agent, accessToken).get(
+      `/api/templates/${createPush.body.id}`,
+    );
+    expect(deletedRes.status).toBe(404);
+    expect(deletedRes.body.error).toBe('Template not found');
+  });
+});
 
-async function addTemplateItem(
-  agent: TestAgent,
-  accessToken: string,
-  templateId: string,
-  exerciseId: string,
-  position?: number,
-) {
-  const response = await withAuth(agent, accessToken)
-    .post(`/api/templates/${templateId}/items`)
-    .send(position === undefined ? { exerciseId } : { exerciseId, position });
+// ---------------------------------------------------------------------------
+// Template ordering
+// ---------------------------------------------------------------------------
+describe('template ordering integration', () => {
+  let agent: TestAgent;
+  let accessToken: string;
 
-  expect(response.status).toBe(201);
+  beforeEach(async () => {
+    agent = createTestAgent();
+    const res = await agent.post('/api/auth/register').send(VALID_REGISTER);
+    accessToken = res.body.accessToken as string;
+  });
 
-  return response.body as TemplateDetailResponse['items'][number];
-}
+  it('appends items to the end when position is omitted', async () => {
+    const tplRes = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Push Day' });
+    expect(tplRes.status).toBe(201);
+    const templateId = tplRes.body.id as string;
 
-async function getTemplateDetail(
-  agent: TestAgent,
-  accessToken: string,
-  templateId: string,
-) {
-  const response = await withAuth(agent, accessToken).get(
-    `/api/templates/${templateId}`,
-  );
+    const squatRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Back Squat' });
+    expect(squatRes.status).toBe(201);
 
-  expect(response.status).toBe(200);
+    const benchRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Bench Press' });
+    expect(benchRes.status).toBe(201);
 
-  return response.body as TemplateDetailResponse;
-}
+    const item1 = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: squatRes.body.id });
+    expect(item1.status).toBe(201);
 
+    const item2 = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: benchRes.body.id });
+    expect(item2.status).toBe(201);
+
+    const detail = await withAuth(agent, accessToken).get(
+      `/api/templates/${templateId}`,
+    );
+    expect(detail.status).toBe(200);
+    expect(detail.body.items.map((i: { id: string }) => i.id)).toEqual([
+      item1.body.id,
+      item2.body.id,
+    ]);
+    expect(
+      detail.body.items.map((i: { sortOrder: number }) => i.sortOrder),
+    ).toEqual([0, 1]);
+  });
+
+  it('inserts an item at a specific position and shifts trailing items', async () => {
+    const tplRes = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Leg Day' });
+    expect(tplRes.status).toBe(201);
+    const templateId = tplRes.body.id as string;
+
+    const squatRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Front Squat' });
+    expect(squatRes.status).toBe(201);
+
+    const lungeRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Walking Lunge' });
+    expect(lungeRes.status).toBe(201);
+
+    const hingeRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Romanian Deadlift' });
+    expect(hingeRes.status).toBe(201);
+
+    const addSquat = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: squatRes.body.id });
+    expect(addSquat.status).toBe(201);
+
+    const addHinge = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: hingeRes.body.id });
+    expect(addHinge.status).toBe(201);
+
+    const insertLunge = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: lungeRes.body.id, position: 1 });
+    expect(insertLunge.status).toBe(201);
+
+    const detail = await withAuth(agent, accessToken).get(
+      `/api/templates/${templateId}`,
+    );
+    expect(detail.status).toBe(200);
+    expect(
+      detail.body.items.map((i: { exerciseId: string }) => i.exerciseId),
+    ).toEqual([squatRes.body.id, lungeRes.body.id, hingeRes.body.id]);
+    expect(
+      detail.body.items.map((i: { sortOrder: number }) => i.sortOrder),
+    ).toEqual([0, 1, 2]);
+  });
+
+  it('reorders items forward and backward through the patch endpoint', async () => {
+    const tplRes = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Pull Day' });
+    expect(tplRes.status).toBe(201);
+    const templateId = tplRes.body.id as string;
+
+    const rowRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Barbell Row' });
+    expect(rowRes.status).toBe(201);
+
+    const curlRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'EZ Curl' });
+    expect(curlRes.status).toBe(201);
+
+    const pullupRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Pull Up' });
+    expect(pullupRes.status).toBe(201);
+
+    const rowItem = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: rowRes.body.id });
+    expect(rowItem.status).toBe(201);
+
+    const curlItem = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: curlRes.body.id });
+    expect(curlItem.status).toBe(201);
+
+    const pullupItem = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: pullupRes.body.id });
+    expect(pullupItem.status).toBe(201);
+
+    const moveToEnd = await withAuth(agent, accessToken)
+      .patch(`/api/templates/${templateId}/items/${rowItem.body.id}`)
+      .send({ position: 2 });
+    expect(moveToEnd.status).toBe(200);
+
+    const moveToFront = await withAuth(agent, accessToken)
+      .patch(`/api/templates/${templateId}/items/${pullupItem.body.id}`)
+      .send({ position: 0 });
+    expect(moveToFront.status).toBe(200);
+
+    const detail = await withAuth(agent, accessToken).get(
+      `/api/templates/${templateId}`,
+    );
+    expect(detail.status).toBe(200);
+    expect(
+      detail.body.items.map((i: { exerciseId: string }) => i.exerciseId),
+    ).toEqual([pullupRes.body.id, curlRes.body.id, rowRes.body.id]);
+    expect(
+      detail.body.items.map((i: { sortOrder: number }) => i.sortOrder),
+    ).toEqual([0, 1, 2]);
+  });
+
+  it('compacts sortOrder after deleting a middle item', async () => {
+    const tplRes = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Upper Day' });
+    expect(tplRes.status).toBe(201);
+    const templateId = tplRes.body.id as string;
+
+    const pressRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Overhead Press' });
+    expect(pressRes.status).toBe(201);
+
+    const flyRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Cable Fly' });
+    expect(flyRes.status).toBe(201);
+
+    const dipRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Dip' });
+    expect(dipRes.status).toBe(201);
+
+    const addPress = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: pressRes.body.id });
+    expect(addPress.status).toBe(201);
+
+    const addFly = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: flyRes.body.id });
+    expect(addFly.status).toBe(201);
+
+    const addDip = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: dipRes.body.id });
+    expect(addDip.status).toBe(201);
+
+    const removeRes = await withAuth(agent, accessToken).delete(
+      `/api/templates/${templateId}/items/${addFly.body.id}`,
+    );
+    expect(removeRes.status).toBe(204);
+
+    const detail = await withAuth(agent, accessToken).get(
+      `/api/templates/${templateId}`,
+    );
+    expect(detail.status).toBe(200);
+    expect(
+      detail.body.items.map((i: { exerciseId: string }) => i.exerciseId),
+    ).toEqual([pressRes.body.id, dipRes.body.id]);
+    expect(
+      detail.body.items.map((i: { sortOrder: number }) => i.sortOrder),
+    ).toEqual([0, 1]);
+  });
+
+  it('returns 400 for an out-of-range item position', async () => {
+    const tplRes = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Conditioning' });
+    expect(tplRes.status).toBe(201);
+
+    const bikeRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Bike Sprint' });
+    expect(bikeRes.status).toBe(201);
+
+    const res = await withAuth(agent, accessToken)
+      .post(`/api/templates/${tplRes.body.id}/items`)
+      .send({ exerciseId: bikeRes.body.id, position: 1 });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('Position out of range');
+  });
+
+  it('returns 403 when another user tries to mutate the template', async () => {
+    // Register a second user (owner is from beforeEach)
+    const strangerAgent = createTestAgent();
+    const strangerRes = await strangerAgent.post('/api/auth/register').send({
+      ...VALID_REGISTER,
+      email: 'stranger@example.com',
+      name: 'Stranger',
+    });
+    const strangerToken = strangerRes.body.accessToken as string;
+
+    const tplRes = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Owner Only' });
+    expect(tplRes.status).toBe(201);
+
+    const exerciseRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Single-arm Row' });
+    expect(exerciseRes.status).toBe(201);
+
+    const itemRes = await withAuth(agent, accessToken)
+      .post(`/api/templates/${tplRes.body.id}/items`)
+      .send({ exerciseId: exerciseRes.body.id });
+    expect(itemRes.status).toBe(201);
+
+    const res = await withAuth(strangerAgent, strangerToken)
+      .patch(`/api/templates/${tplRes.body.id}/items/${itemRes.body.id}`)
+      .send({ position: 0 });
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('Forbidden');
+  });
+
+  it('returns 409 when a live ordering conflict hits the unique constraint', async () => {
+    const tplRes = await withAuth(agent, accessToken)
+      .post('/api/templates')
+      .send({ name: 'Conflict Day' });
+    expect(tplRes.status).toBe(201);
+    const templateId = tplRes.body.id as string;
+
+    const existingRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Incline Press' });
+    expect(existingRes.status).toBe(201);
+
+    const requestedRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Cable Raise' });
+    expect(requestedRes.status).toBe(201);
+
+    const conflictingRes = await withAuth(agent, accessToken)
+      .post('/api/exercises/custom')
+      .send({ name: 'Machine Fly' });
+    expect(conflictingRes.status).toBe(201);
+
+    const addExisting = await withAuth(agent, accessToken)
+      .post(`/api/templates/${templateId}/items`)
+      .send({ exerciseId: existingRes.body.id });
+    expect(addExisting.status).toBe(201);
+
+    await installOrderingConflictTrigger(
+      templateId,
+      conflictingRes.body.id as string,
+    );
+
+    try {
+      const res = await withAuth(agent, accessToken)
+        .post(`/api/templates/${templateId}/items`)
+        .send({ exerciseId: requestedRes.body.id, position: 0 });
+
+      expect(res.status).toBe(409);
+      expect(res.body.error).toBe('Template item ordering conflict');
+
+      const detail = await withAuth(agent, accessToken).get(
+        `/api/templates/${templateId}`,
+      );
+      expect(detail.status).toBe(200);
+      expect(detail.body.items).toHaveLength(1);
+      expect(
+        detail.body.items.map((i: { exerciseId: string }) => i.exerciseId),
+      ).toEqual([existingRes.body.id]);
+      expect(
+        detail.body.items.map((i: { sortOrder: number }) => i.sortOrder),
+      ).toEqual([0]);
+    } finally {
+      await removeOrderingConflictTrigger();
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DB trigger helpers (used only by the ordering-conflict test)
+// ---------------------------------------------------------------------------
 async function installOrderingConflictTrigger(
   templateId: string,
   exerciseId: string,
@@ -193,307 +486,3 @@ async function removeOrderingConflictTrigger() {
     DROP FUNCTION IF EXISTS test_force_template_item_ordering_conflict()
   `);
 }
-
-describe('template ordering integration', () => {
-  it('appends items to the end when position is omitted', async () => {
-    const auth = await registerAndAuthenticate(1);
-    const template = await createTemplate(
-      auth.agent,
-      auth.accessToken,
-      'Push Day',
-    );
-    const squat = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Back Squat',
-    );
-    const bench = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Bench Press',
-    );
-
-    const firstItem = await addTemplateItem(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-      squat.id,
-    );
-    const secondItem = await addTemplateItem(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-      bench.id,
-    );
-    const detail = await getTemplateDetail(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-    );
-
-    expect(detail.items.map((item) => item.id)).toEqual([
-      firstItem.id,
-      secondItem.id,
-    ]);
-    expect(detail.items.map((item) => item.sortOrder)).toEqual([0, 1]);
-  });
-
-  it('inserts an item at a specific position and shifts trailing items', async () => {
-    const auth = await registerAndAuthenticate(2);
-    const template = await createTemplate(
-      auth.agent,
-      auth.accessToken,
-      'Leg Day',
-    );
-    const squat = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Front Squat',
-    );
-    const lunge = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Walking Lunge',
-    );
-    const hinge = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Romanian Deadlift',
-    );
-
-    await addTemplateItem(auth.agent, auth.accessToken, template.id, squat.id);
-    await addTemplateItem(auth.agent, auth.accessToken, template.id, hinge.id);
-    await addTemplateItem(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-      lunge.id,
-      1,
-    );
-
-    const detail = await getTemplateDetail(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-    );
-
-    expect(detail.items.map((item) => item.exerciseId)).toEqual([
-      squat.id,
-      lunge.id,
-      hinge.id,
-    ]);
-    expect(detail.items.map((item) => item.sortOrder)).toEqual([0, 1, 2]);
-  });
-
-  it('reorders items forward and backward through the patch endpoint', async () => {
-    const auth = await registerAndAuthenticate(3);
-    const template = await createTemplate(
-      auth.agent,
-      auth.accessToken,
-      'Pull Day',
-    );
-    const row = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Barbell Row',
-    );
-    const curl = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'EZ Curl',
-    );
-    const pullup = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Pull Up',
-    );
-
-    const rowItem = await addTemplateItem(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-      row.id,
-    );
-    await addTemplateItem(auth.agent, auth.accessToken, template.id, curl.id);
-    const pullupItem = await addTemplateItem(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-      pullup.id,
-    );
-
-    const moveToEnd = await withAuth(auth.agent, auth.accessToken)
-      .patch(`/api/templates/${template.id}/items/${rowItem.id}`)
-      .send({ position: 2 });
-    expect(moveToEnd.status).toBe(200);
-
-    const moveToFront = await withAuth(auth.agent, auth.accessToken)
-      .patch(`/api/templates/${template.id}/items/${pullupItem.id}`)
-      .send({ position: 0 });
-    expect(moveToFront.status).toBe(200);
-
-    const detail = await getTemplateDetail(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-    );
-
-    expect(detail.items.map((item) => item.exerciseId)).toEqual([
-      pullup.id,
-      curl.id,
-      row.id,
-    ]);
-    expect(detail.items.map((item) => item.sortOrder)).toEqual([0, 1, 2]);
-  });
-
-  it('compacts sortOrder after deleting a middle item', async () => {
-    const auth = await registerAndAuthenticate(4);
-    const template = await createTemplate(
-      auth.agent,
-      auth.accessToken,
-      'Upper Day',
-    );
-    const press = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Overhead Press',
-    );
-    const fly = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Cable Fly',
-    );
-    const dip = await createCustomExercise(auth.agent, auth.accessToken, 'Dip');
-
-    await addTemplateItem(auth.agent, auth.accessToken, template.id, press.id);
-    const flyItem = await addTemplateItem(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-      fly.id,
-    );
-    await addTemplateItem(auth.agent, auth.accessToken, template.id, dip.id);
-
-    const removeResponse = await withAuth(auth.agent, auth.accessToken).delete(
-      `/api/templates/${template.id}/items/${flyItem.id}`,
-    );
-    expect(removeResponse.status).toBe(204);
-
-    const detail = await getTemplateDetail(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-    );
-
-    expect(detail.items.map((item) => item.exerciseId)).toEqual([
-      press.id,
-      dip.id,
-    ]);
-    expect(detail.items.map((item) => item.sortOrder)).toEqual([0, 1]);
-  });
-
-  it('returns 400 for an out-of-range item position', async () => {
-    const auth = await registerAndAuthenticate(5);
-    const template = await createTemplate(
-      auth.agent,
-      auth.accessToken,
-      'Conditioning',
-    );
-    const bike = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Bike Sprint',
-    );
-
-    const response = await withAuth(auth.agent, auth.accessToken)
-      .post(`/api/templates/${template.id}/items`)
-      .send({ exerciseId: bike.id, position: 1 });
-
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBe('Position out of range');
-  });
-
-  it('returns 403 when another user tries to mutate the template', async () => {
-    const owner = await registerAndAuthenticate(6);
-    const stranger = await registerAndAuthenticate(7);
-    const template = await createTemplate(
-      owner.agent,
-      owner.accessToken,
-      'Owner Only',
-    );
-    const exercise = await createCustomExercise(
-      owner.agent,
-      owner.accessToken,
-      'Single-arm Row',
-    );
-    const item = await addTemplateItem(
-      owner.agent,
-      owner.accessToken,
-      template.id,
-      exercise.id,
-    );
-
-    const response = await withAuth(stranger.agent, stranger.accessToken)
-      .patch(`/api/templates/${template.id}/items/${item.id}`)
-      .send({ position: 0 });
-
-    expect(response.status).toBe(403);
-    expect(response.body.error).toBe('Forbidden');
-  });
-
-  it('returns 409 when a live ordering conflict hits the unique constraint', async () => {
-    const auth = await registerAndAuthenticate(8);
-    const template = await createTemplate(
-      auth.agent,
-      auth.accessToken,
-      'Conflict Day',
-    );
-    const existingExercise = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Incline Press',
-    );
-    const requestedExercise = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Cable Raise',
-    );
-    const conflictingExercise = await createCustomExercise(
-      auth.agent,
-      auth.accessToken,
-      'Machine Fly',
-    );
-
-    await addTemplateItem(
-      auth.agent,
-      auth.accessToken,
-      template.id,
-      existingExercise.id,
-    );
-
-    await installOrderingConflictTrigger(template.id, conflictingExercise.id);
-
-    try {
-      const response = await withAuth(auth.agent, auth.accessToken)
-        .post(`/api/templates/${template.id}/items`)
-        .send({ exerciseId: requestedExercise.id, position: 0 });
-
-      expect(response.status).toBe(409);
-      expect(response.body.error).toBe('Template item ordering conflict');
-
-      const detail = await getTemplateDetail(
-        auth.agent,
-        auth.accessToken,
-        template.id,
-      );
-
-      expect(detail.items).toHaveLength(1);
-      expect(detail.items.map((item) => item.exerciseId)).toEqual([
-        existingExercise.id,
-      ]);
-      expect(detail.items.map((item) => item.sortOrder)).toEqual([0]);
-    } finally {
-      await removeOrderingConflictTrigger();
-    }
-  });
-});

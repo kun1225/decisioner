@@ -5,6 +5,7 @@ import {
   eq,
   exercises,
   isNull,
+  sql,
   templateItems,
   templates,
 } from '@repo/database/index';
@@ -19,9 +20,11 @@ import { ApiError } from '@/utils/api-error.js';
 
 type DatabaseClient = Pick<
   typeof db,
-  'select' | 'insert' | 'update' | 'delete'
+  'select' | 'insert' | 'update' | 'delete' | 'execute'
 >;
 type TemplateItemRecord = Awaited<ReturnType<typeof listTemplateItems>>[number];
+const TEMPLATE_ITEM_ORDER_CONSTRAINT =
+  'template_items_template_id_sort_order_unique';
 
 async function findTemplateOrFail(templateId: string) {
   const [template] = await db
@@ -42,30 +45,24 @@ function verifyOwner(template: { ownerId: string }, userId: string) {
   }
 }
 
-function invalidPositionError() {
-  return new ApiError(400, 'Position out of range');
+function getErrorConstraint(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  if ('constraint' in error && typeof error.constraint === 'string') {
+    return error.constraint;
+  }
+
+  if ('cause' in error) {
+    return getErrorConstraint(error.cause);
+  }
+
+  return undefined;
 }
 
-function isUniqueConstraintError(error: unknown) {
-  const directCode =
-    typeof error === 'object' &&
-    error !== null &&
-    'code' in error &&
-    typeof error.code === 'string'
-      ? error.code
-      : undefined;
-  const causeCode =
-    typeof error === 'object' &&
-    error !== null &&
-    'cause' in error &&
-    typeof error.cause === 'object' &&
-    error.cause !== null &&
-    'code' in error.cause &&
-    typeof error.cause.code === 'string'
-      ? error.cause.code
-      : undefined;
-
-  return directCode === '23505' || causeCode === '23505';
+function isTemplateItemOrderingConflict(error: unknown) {
+  return getErrorConstraint(error) === TEMPLATE_ITEM_ORDER_CONSTRAINT;
 }
 
 async function runTemplateItemTransaction<T>(
@@ -74,39 +71,12 @@ async function runTemplateItemTransaction<T>(
   try {
     return await db.transaction((tx) => callback(tx));
   } catch (error) {
-    if (isUniqueConstraintError(error)) {
+    if (isTemplateItemOrderingConflict(error)) {
       throw new ApiError(409, 'Template item ordering conflict');
     }
 
     throw error;
   }
-}
-
-function resolveInsertPosition(
-  position: number | undefined,
-  itemCount: number,
-) {
-  if (position === undefined) {
-    return itemCount;
-  }
-
-  if (position < 0 || position > itemCount) {
-    throw invalidPositionError();
-  }
-
-  return position;
-}
-
-function resolveMovePosition(position: number | undefined, itemCount: number) {
-  if (position === undefined) {
-    return undefined;
-  }
-
-  if (position < 0 || position >= itemCount) {
-    throw invalidPositionError();
-  }
-
-  return position;
 }
 
 function moveItem<T>(items: T[], fromIndex: number, toIndex: number) {
@@ -141,32 +111,46 @@ async function persistTemplateItemOrder(
   items: TemplateItemRecord[],
   database: DatabaseClient,
 ) {
-  for (const [index, item] of items.entries()) {
-    await database
-      .update(templateItems)
-      .set({ sortOrder: -(index + 1) })
-      .where(eq(templateItems.id, item.id))
-      .returning();
+  if (items.length === 0) {
+    return [];
   }
 
-  const updatedItems: TemplateItemRecord[] = [];
+  const temporaryOrderValues = sql.join(
+    items.map(
+      (item, index) =>
+        sql`(${item.id}::uuid, ${-(items.length + index + 1)}::integer)`,
+    ),
+    sql`, `,
+  );
 
-  for (const [index, item] of items.entries()) {
-    const [updatedItem] = await database
-      .update(templateItems)
-      .set({
-        sortOrder: index,
-        note: item.note,
-      })
-      .where(eq(templateItems.id, item.id))
-      .returning();
+  await database.execute(sql`
+    UPDATE ${templateItems} AS template_item
+    SET sort_order = ordering.sort_order
+    FROM (VALUES ${temporaryOrderValues}) AS ordering(id, sort_order)
+    WHERE template_item.id = ordering.id
+  `);
 
-    if (updatedItem) {
-      updatedItems.push(updatedItem);
-    }
-  }
+  const finalOrderValues = sql.join(
+    items.map(
+      (item, index) => sql`(${item.id}::uuid, ${index}::integer, ${item.note})`,
+    ),
+    sql`, `,
+  );
 
-  return updatedItems;
+  await database.execute(sql`
+    UPDATE ${templateItems} AS template_item
+    SET
+      sort_order = ordering.sort_order,
+      note = ordering.note
+    FROM (VALUES ${finalOrderValues}) AS ordering(id, sort_order, note)
+    WHERE template_item.id = ordering.id
+  `);
+
+  return items.map((item, index) => ({
+    ...item,
+    note: item.note ?? null,
+    sortOrder: index,
+  }));
 }
 
 async function verifyExerciseAccessible(exerciseId: string, userId: string) {
@@ -256,10 +240,12 @@ export async function addTemplateItem(
 
   return runTemplateItemTransaction(async (tx) => {
     const existingItems = await listTemplateItems(templateId, tx);
-    const insertPosition = resolveInsertPosition(
-      input.position,
-      existingItems.length,
-    );
+    const insertPosition = input.position ?? existingItems.length;
+
+    if (insertPosition < 0 || insertPosition > existingItems.length) {
+      throw new ApiError(400, 'Position out of range');
+    }
+
     const temporarySortOrder = -(existingItems.length + 1);
     const [created] = await tx
       .insert(templateItems)
@@ -300,12 +286,16 @@ export async function updateTemplateItem(
     }
 
     const currentItem = existingItems[currentIndex]!;
-    const nextPosition = resolveMovePosition(
-      input.position,
-      existingItems.length,
-    );
+    const nextPosition = input.position;
     const nextNote =
       input.note === undefined ? (currentItem.note ?? null) : input.note;
+
+    if (
+      nextPosition !== undefined &&
+      (nextPosition < 0 || nextPosition >= existingItems.length)
+    ) {
+      throw new ApiError(400, 'Position out of range');
+    }
 
     if (nextPosition === undefined || nextPosition === currentIndex) {
       const [updatedItem] = await tx
