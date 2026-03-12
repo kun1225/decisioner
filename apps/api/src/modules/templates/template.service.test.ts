@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '@/utils/api-error.js';
+
+import type { MockDbState } from './template-service-test-helpers.js';
 import {
   createDatabaseModuleMock,
   makeExercise,
@@ -12,7 +14,6 @@ import {
   queueUpdateResults as pushUpdateResults,
   resetMockDbState as clearMockDbState,
 } from './template-service-test-helpers.js';
-import type { MockDbState } from './template-service-test-helpers.js';
 
 const mockDbState: MockDbState = vi.hoisted(() => ({
   deleteCalls: [],
@@ -217,7 +218,9 @@ describe('deleteTemplate', () => {
   it('soft deletes a template', async () => {
     const template = makeTemplate();
     queueSelectResults([template]);
-    queueUpdateResults([makeTemplate({ deletedAt: new Date('2026-03-11T01:00:00.000Z') })]);
+    queueUpdateResults([
+      makeTemplate({ deletedAt: new Date('2026-03-11T01:00:00.000Z') }),
+    ]);
 
     await deleteTemplate(template.id, template.ownerId);
 
@@ -287,7 +290,13 @@ describe('addTemplateItem', () => {
     queueSelectResults([template], [exercise], existingItems);
     queueInsertResults([createdRow]);
     queueUpdateResults(
-      [makeTemplateItem({ id: 'item-1', sortOrder: -1, templateId: template.id })],
+      [
+        makeTemplateItem({
+          id: 'item-1',
+          sortOrder: -1,
+          templateId: template.id,
+        }),
+      ],
       [makeTemplateItem({ ...createdRow, sortOrder: -2 })],
       [
         makeTemplateItem({
@@ -297,7 +306,13 @@ describe('addTemplateItem', () => {
           templateId: template.id,
         }),
       ],
-      [makeTemplateItem({ id: 'item-1', sortOrder: 0, templateId: template.id })],
+      [
+        makeTemplateItem({
+          id: 'item-1',
+          sortOrder: 0,
+          templateId: template.id,
+        }),
+      ],
       [makeTemplateItem({ ...createdRow, sortOrder: 1 })],
       [
         makeTemplateItem({
@@ -377,13 +392,14 @@ describe('addTemplateItem', () => {
     const template = makeTemplate();
     const exercise = makeExercise();
     queueSelectResults([template], [exercise]);
-    const transactionSpy = vi
-      .spyOn(db, 'transaction')
-      .mockRejectedValueOnce(
-        Object.assign(new Error('duplicate key value violates unique constraint'), {
+    const transactionSpy = vi.spyOn(db, 'transaction').mockRejectedValueOnce(
+      Object.assign(
+        new Error('duplicate key value violates unique constraint'),
+        {
           code: '23505',
-        }),
-      );
+        },
+      ),
+    );
 
     await expect(
       addTemplateItem(template.id, template.ownerId, {
@@ -398,15 +414,13 @@ describe('addTemplateItem', () => {
     const template = makeTemplate();
     const exercise = makeExercise();
     queueSelectResults([template], [exercise]);
-    const transactionSpy = vi
-      .spyOn(db, 'transaction')
-      .mockRejectedValueOnce(
-        Object.assign(new Error('Failed query'), {
-          cause: {
-            code: '23505',
-          },
-        }),
-      );
+    const transactionSpy = vi.spyOn(db, 'transaction').mockRejectedValueOnce(
+      Object.assign(new Error('Failed query'), {
+        cause: {
+          code: '23505',
+        },
+      }),
+    );
 
     await expect(
       addTemplateItem(template.id, template.ownerId, {
@@ -421,7 +435,10 @@ describe('addTemplateItem', () => {
 describe('updateTemplateItem', () => {
   it('updates note without reordering when position is omitted', async () => {
     const template = makeTemplate();
-    const currentItem = makeTemplateItem({ note: null, templateId: template.id });
+    const currentItem = makeTemplateItem({
+      note: null,
+      templateId: template.id,
+    });
     const updatedRow = makeTemplateItem({
       note: 'Pause reps',
       templateId: template.id,
@@ -588,26 +605,37 @@ describe('updateTemplateItem', () => {
 describe('deleteTemplateItem', () => {
   it('deletes an item in the middle and compacts remaining sort orders', async () => {
     const template = makeTemplate();
-    queueSelectResults([
-      template,
-    ], [
-      makeTemplateItem({ id: 'item-1', sortOrder: 0, templateId: template.id }),
-      makeTemplateItem({
-        exerciseId: 'ex-2',
-        id: 'item-2',
-        sortOrder: 1,
-        templateId: template.id,
-      }),
-      makeTemplateItem({
-        exerciseId: 'ex-3',
-        id: 'item-3',
-        sortOrder: 2,
-        templateId: template.id,
-      }),
-    ]);
+    queueSelectResults(
+      [template],
+      [
+        makeTemplateItem({
+          id: 'item-1',
+          sortOrder: 0,
+          templateId: template.id,
+        }),
+        makeTemplateItem({
+          exerciseId: 'ex-2',
+          id: 'item-2',
+          sortOrder: 1,
+          templateId: template.id,
+        }),
+        makeTemplateItem({
+          exerciseId: 'ex-3',
+          id: 'item-3',
+          sortOrder: 2,
+          templateId: template.id,
+        }),
+      ],
+    );
     queueDeleteResults([{ id: 'item-2' }]);
     queueUpdateResults(
-      [makeTemplateItem({ id: 'item-1', sortOrder: -1, templateId: template.id })],
+      [
+        makeTemplateItem({
+          id: 'item-1',
+          sortOrder: -1,
+          templateId: template.id,
+        }),
+      ],
       [
         makeTemplateItem({
           exerciseId: 'ex-3',
@@ -616,7 +644,13 @@ describe('deleteTemplateItem', () => {
           templateId: template.id,
         }),
       ],
-      [makeTemplateItem({ id: 'item-1', sortOrder: 0, templateId: template.id })],
+      [
+        makeTemplateItem({
+          id: 'item-1',
+          sortOrder: 0,
+          templateId: template.id,
+        }),
+      ],
       [
         makeTemplateItem({
           exerciseId: 'ex-3',

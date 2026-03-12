@@ -331,9 +331,7 @@ function createDatabaseModuleMock(state: MockDbState) {
   };
 }
 
-function makeTemplate(
-  overrides: Partial<TemplateRecord> = {},
-): TemplateRecord {
+function makeTemplate(overrides: Partial<TemplateRecord> = {}): TemplateRecord {
   return {
     createdAt: new Date('2026-03-11T00:00:00.000Z'),
     deletedAt: null,
@@ -358,9 +356,7 @@ function makeTemplateItem(
   };
 }
 
-function makeExercise(
-  overrides: Partial<ExerciseRecord> = {},
-): ExerciseRecord {
+function makeExercise(overrides: Partial<ExerciseRecord> = {}): ExerciseRecord {
   return {
     deletedAt: null,
     id: 'ex-1',

@@ -17,7 +17,10 @@ import type {
 
 import { ApiError } from '@/utils/api-error.js';
 
-type DatabaseClient = Pick<typeof db, 'select' | 'insert' | 'update' | 'delete'>;
+type DatabaseClient = Pick<
+  typeof db,
+  'select' | 'insert' | 'update' | 'delete'
+>;
 type TemplateItemRecord = Awaited<ReturnType<typeof listTemplateItems>>[number];
 
 async function findTemplateOrFail(templateId: string) {
@@ -79,7 +82,10 @@ async function runTemplateItemTransaction<T>(
   }
 }
 
-function resolveInsertPosition(position: number | undefined, itemCount: number) {
+function resolveInsertPosition(
+  position: number | undefined,
+  itemCount: number,
+) {
   if (position === undefined) {
     return itemCount;
   }
@@ -294,9 +300,12 @@ export async function updateTemplateItem(
     }
 
     const currentItem = existingItems[currentIndex]!;
-    const nextPosition = resolveMovePosition(input.position, existingItems.length);
+    const nextPosition = resolveMovePosition(
+      input.position,
+      existingItems.length,
+    );
     const nextNote =
-      input.note === undefined ? currentItem.note ?? null : input.note;
+      input.note === undefined ? (currentItem.note ?? null) : input.note;
 
     if (nextPosition === undefined || nextPosition === currentIndex) {
       const [updatedItem] = await tx
