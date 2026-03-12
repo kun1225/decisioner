@@ -35,10 +35,6 @@ cd apps/api && npx vitest run src/modules/auth/auth.service.test.ts
 cd apps/web && npx vitest run src/path/to/test.ts
 ```
 
-## Environment Setup
-
-Copy `apps/api/.env.example` to `apps/api/.env`. The database package reads its `DATABASE_URL` from `apps/api/.env`.
-
 ## Architecture
 
 ### Monorepo Layout
@@ -80,68 +76,20 @@ Data fetching: TanStack Query for server state, route loaders for prefetch, muta
 
 ## Documentation Structure
 
-- `docs/PRD.md` — PRD entry point
-- `docs/prd/goals/g-XX.md` — Individual goal files (single source of truth for requirements)
-- `docs/specs/` — Technical specs (1-tech-stack, 2-monorepo-architecture, 3-backend-architecture, 4-frontend-architecture, 5-api-design, 6-data-model)
-- If a goal file conflicts with a spec, the goal file's Acceptance Criteria is the source of truth
+| Path                                    | Description                                              |
+| --------------------------------------- | -------------------------------------------------------- |
+| `docs/PRD.md`                           | PRD entry point                                          |
+| `docs/prd/goals-and-scope.md`           | Goals overview and scope                                 |
+| `docs/prd/goals/g-XX.md`                | Individual goal files (source of truth for requirements) |
+| `docs/specs/1-tech-stack.md`            | Tech stack decisions                                     |
+| `docs/specs/2-monorepo-architecture.md` | Monorepo layout and dependency rules                     |
+| `docs/specs/3-backend-architecture.md`  | Backend patterns (Route/Controller/Service/Repository)   |
+| `docs/specs/4-frontend-architecture.md` | Frontend patterns (TanStack Router/Query)                |
+| `docs/specs/5-api-design.md`            | REST API design conventions                              |
+| `docs/specs/6-data-model.md`            | Database schema and data model                           |
+| `docs/engineering/code-conventions.md`  | File naming, UI components, styling, validation rules    |
+| `docs/engineering/security.md`          | Security checklist and configuration guidelines          |
+| `docs/engineering/delivery-workflow.md` | TDD, branching, commits, PR size limits                  |
+| `docs/engineering/test-integration.md`  | Integration test conventions and shared utilities        |
 
-## Code Conventions
-
-- **File naming**: kebab-case for all files (e.g., `auth-service.ts`, `practice-header.tsx`)
-- **UI components**: Always prefer shadcn. Only custom-build when shadcn has no match; document rationale in PR.
-- **Shadcn-first rule (mandatory)**: For interactive UI controls, first use context7 to search for Shadcn existing components (e.g., via `npx shadcn add`) before building a new one.
-  For buttons specifically, use `@/components/ui/button` (`<Button />`) instead of raw `<button>` unless there is a documented technical exception.
-- **Styling**: Tailwind CSS v4 + CVA + clsx + tailwind-merge
-- **Color token reuse (mandatory)**: Define reusable colors as tokens (e.g., CSS variables in `styles.css` / `@theme`) and consume those tokens/utilities across components. Avoid ad-hoc hardcoded color values in component files.
-- **Validation**: Zod for all input validation (shared schemas in `packages/shared`)
-- **Immutability**: Always create new objects, never mutate
-
-## Security & Configuration Tips
-
-- Never commit secrets; use environment variables.
-- Confirm auth, error handling, and sensitive-data safety before merge.
-- Enforce authorization at the resource level (not only route-level); validate token issuer, audience, and expiry.
-- Validate all external input at trust boundaries; use strict schemas (reject unknown fields) and parameterized queries.
-- Apply rate limits, payload size limits, and timeouts to reduce abuse and DoS risk.
-- Do not log secrets or sensitive data; use structured logging and safe error responses (no stack traces in prod).
-- Separate dev/staging/prod environments; never reuse credentials or production data.
-
-## Delivery Workflow
-
-1. Pick scope from PRD goals:
-
-- Start at `docs/prd/goals-and-scope.md`.
-- Select one goal/task (for example `g-18`) and use `docs/prd/goals/g-XX.md` as the implementation source of truth.
-
-2. Create isolated worktree and branch:
-
-- Example: `git worktree add ../joy-gym-g18 -b feat/g-18-auth-session-security`.
-- Keep one goal/task per branch to avoid mixed scope.
-
-3. TDD first (mandatory):
-
-- Write tests first and confirm they fail (RED).
-- Implement minimal code to pass tests (GREEN).
-- Refactor while keeping tests green.
-
-4. Coverage gate:
-
-- Maintain at least 80% coverage for changed/new modules.
-- Run relevant tests before PR (for example `pnpm --filter api test`, `pnpm test`).
-
-5. PR size limit:
-
-- Each PR must stay under 500 changed lines (`+/-` total).
-- If over 500 lines, split into smaller PRs by sub-task or layer (API, DB, UI).
-
-6. Atomic commits (mandatory):
-
-- Each commit has exactly one responsibility. Never mix unrelated changes in a single commit.
-- Commit types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `perf`, `ci`.
-- Ordering: infrastructure/dependency changes first, then bug fixes, then feature code, then tests.
-- Every commit should leave the codebase in a buildable, consistent state.
-- Never commit generated files (lockfile changes are the exception) together with logic changes — separate them if the lockfile diff is large.
-- Examples of good atomic splits:
-  - `chore: add supertest devDependency` (deps only)
-  - `fix: convert JWT errors to ApiError in rotateRefreshToken` (one bug, one fix)
-  - `test: auth integration tests for register and login` (tests only)
+If a goal file conflicts with a spec, the goal file's Acceptance Criteria is the source of truth.

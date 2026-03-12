@@ -41,3 +41,16 @@ export function parseCookieFlags(
   }
   return flags;
 }
+
+export function withAuth(agent: TestAgent, accessToken: string) {
+  return {
+    delete: (path: string) =>
+      agent.delete(path).set('Authorization', `Bearer ${accessToken}`),
+    get: (path: string) =>
+      agent.get(path).set('Authorization', `Bearer ${accessToken}`),
+    patch: (path: string) =>
+      agent.patch(path).set('Authorization', `Bearer ${accessToken}`),
+    post: (path: string) =>
+      agent.post(path).set('Authorization', `Bearer ${accessToken}`),
+  };
+}

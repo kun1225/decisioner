@@ -5,6 +5,7 @@ import {
   eq,
   exercises,
   isNull,
+  sql,
   templateItems,
   templates,
 } from '@repo/database/index';
@@ -16,6 +17,14 @@ import type {
 } from '@repo/shared/templates';
 
 import { ApiError } from '@/utils/api-error.js';
+
+type DatabaseClient = Pick<
+  typeof db,
+  'select' | 'insert' | 'update' | 'delete' | 'execute'
+>;
+type TemplateItemRecord = Awaited<ReturnType<typeof listTemplateItems>>[number];
+const TEMPLATE_ITEM_ORDER_CONSTRAINT =
+  'template_items_template_id_sort_order_unique';
 
 async function findTemplateOrFail(templateId: string) {
   const [template] = await db
@@ -34,6 +43,114 @@ function verifyOwner(template: { ownerId: string }, userId: string) {
   if (template.ownerId !== userId) {
     throw new ApiError(403, 'Forbidden');
   }
+}
+
+function getErrorConstraint(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  if ('constraint' in error && typeof error.constraint === 'string') {
+    return error.constraint;
+  }
+
+  if ('cause' in error) {
+    return getErrorConstraint(error.cause);
+  }
+
+  return undefined;
+}
+
+function isTemplateItemOrderingConflict(error: unknown) {
+  return getErrorConstraint(error) === TEMPLATE_ITEM_ORDER_CONSTRAINT;
+}
+
+async function runTemplateItemTransaction<T>(
+  callback: (tx: DatabaseClient) => Promise<T>,
+) {
+  try {
+    return await db.transaction((tx) => callback(tx));
+  } catch (error) {
+    if (isTemplateItemOrderingConflict(error)) {
+      throw new ApiError(409, 'Template item ordering conflict');
+    }
+
+    throw error;
+  }
+}
+
+function moveItem<T>(items: T[], fromIndex: number, toIndex: number) {
+  if (fromIndex === toIndex) {
+    return [...items];
+  }
+
+  const nextItems = [...items];
+  const [item] = nextItems.splice(fromIndex, 1);
+
+  if (!item) {
+    return nextItems;
+  }
+
+  nextItems.splice(toIndex, 0, item);
+
+  return nextItems;
+}
+
+async function listTemplateItems(
+  templateId: string,
+  database: DatabaseClient = db,
+) {
+  return database
+    .select()
+    .from(templateItems)
+    .where(eq(templateItems.templateId, templateId))
+    .orderBy(asc(templateItems.sortOrder));
+}
+
+async function persistTemplateItemOrder(
+  items: TemplateItemRecord[],
+  database: DatabaseClient,
+) {
+  if (items.length === 0) {
+    return [];
+  }
+
+  const temporaryOrderValues = sql.join(
+    items.map(
+      (item, index) =>
+        sql`(${item.id}::uuid, ${-(items.length + index + 1)}::integer)`,
+    ),
+    sql`, `,
+  );
+
+  await database.execute(sql`
+    UPDATE ${templateItems} AS template_item
+    SET sort_order = ordering.sort_order
+    FROM (VALUES ${temporaryOrderValues}) AS ordering(id, sort_order)
+    WHERE template_item.id = ordering.id
+  `);
+
+  const finalOrderValues = sql.join(
+    items.map(
+      (item, index) => sql`(${item.id}::uuid, ${index}::integer, ${item.note})`,
+    ),
+    sql`, `,
+  );
+
+  await database.execute(sql`
+    UPDATE ${templateItems} AS template_item
+    SET
+      sort_order = ordering.sort_order,
+      note = ordering.note
+    FROM (VALUES ${finalOrderValues}) AS ordering(id, sort_order, note)
+    WHERE template_item.id = ordering.id
+  `);
+
+  return items.map((item, index) => ({
+    ...item,
+    note: item.note ?? null,
+    sortOrder: index,
+  }));
 }
 
 async function verifyExerciseAccessible(exerciseId: string, userId: string) {
@@ -78,11 +195,7 @@ export async function getTemplateById(templateId: string, userId: string) {
   const template = await findTemplateOrFail(templateId);
   verifyOwner(template, userId);
 
-  const items = await db
-    .select()
-    .from(templateItems)
-    .where(eq(templateItems.templateId, templateId))
-    .orderBy(asc(templateItems.sortOrder));
+  const items = await listTemplateItems(templateId);
 
   return { ...template, items };
 }
@@ -125,31 +238,34 @@ export async function addTemplateItem(
 
   await verifyExerciseAccessible(input.exerciseId, userId);
 
-  const [existingItem] = await db
-    .select()
-    .from(templateItems)
-    .where(
-      and(
-        eq(templateItems.templateId, templateId),
-        eq(templateItems.sortOrder, input.sortOrder),
-      ),
-    );
+  return runTemplateItemTransaction(async (tx) => {
+    const existingItems = await listTemplateItems(templateId, tx);
+    const insertPosition = input.position ?? existingItems.length;
 
-  if (existingItem) {
-    throw new ApiError(409, 'Sort order already exists in template');
-  }
+    if (insertPosition < 0 || insertPosition > existingItems.length) {
+      throw new ApiError(400, 'Position out of range');
+    }
 
-  const [created] = await db
-    .insert(templateItems)
-    .values({
-      templateId,
-      exerciseId: input.exerciseId,
-      sortOrder: input.sortOrder,
-      note: input.note,
-    })
-    .returning();
+    const temporarySortOrder = -(existingItems.length + 1);
+    const [created] = await tx
+      .insert(templateItems)
+      .values({
+        templateId,
+        exerciseId: input.exerciseId,
+        sortOrder: temporarySortOrder,
+        note: input.note,
+      })
+      .returning();
 
-  return created!;
+    const reorderedItems = [
+      ...existingItems.slice(0, insertPosition),
+      created!,
+      ...existingItems.slice(insertPosition),
+    ];
+    const updatedItems = await persistTemplateItemOrder(reorderedItems, tx);
+
+    return updatedItems.find((item) => item.id === created!.id)!;
+  });
 }
 
 export async function updateTemplateItem(
@@ -161,38 +277,61 @@ export async function updateTemplateItem(
   const template = await findTemplateOrFail(templateId);
   verifyOwner(template, userId);
 
-  if (input.sortOrder !== undefined) {
-    const [existingItem] = await db
-      .select()
-      .from(templateItems)
-      .where(
-        and(
-          eq(templateItems.templateId, templateId),
-          eq(templateItems.sortOrder, input.sortOrder),
-        ),
-      );
+  return runTemplateItemTransaction(async (tx) => {
+    const existingItems = await listTemplateItems(templateId, tx);
+    const currentIndex = existingItems.findIndex((item) => item.id === itemId);
 
-    if (existingItem && existingItem.id !== itemId) {
-      throw new ApiError(409, 'Sort order already exists in template');
+    if (currentIndex === -1) {
+      throw new ApiError(404, 'Template item not found');
     }
-  }
 
-  const [updated] = await db
-    .update(templateItems)
-    .set(input)
-    .where(
-      and(
-        eq(templateItems.id, itemId),
-        eq(templateItems.templateId, templateId),
+    const currentItem = existingItems[currentIndex]!;
+    const nextPosition = input.position;
+    const nextNote =
+      input.note === undefined ? (currentItem.note ?? null) : input.note;
+
+    if (
+      nextPosition !== undefined &&
+      (nextPosition < 0 || nextPosition >= existingItems.length)
+    ) {
+      throw new ApiError(400, 'Position out of range');
+    }
+
+    if (nextPosition === undefined || nextPosition === currentIndex) {
+      const [updatedItem] = await tx
+        .update(templateItems)
+        .set({ note: nextNote })
+        .where(
+          and(
+            eq(templateItems.id, itemId),
+            eq(templateItems.templateId, templateId),
+          ),
+        )
+        .returning();
+
+      if (!updatedItem) {
+        throw new ApiError(404, 'Template item not found');
+      }
+
+      return updatedItem;
+    }
+
+    const reorderedItems = moveItem(
+      existingItems.map((item, index) =>
+        index === currentIndex
+          ? {
+              ...item,
+              note: nextNote,
+            }
+          : item,
       ),
-    )
-    .returning();
+      currentIndex,
+      nextPosition,
+    );
+    const updatedItems = await persistTemplateItemOrder(reorderedItems, tx);
 
-  if (!updated) {
-    throw new ApiError(404, 'Template item not found');
-  }
-
-  return updated;
+    return updatedItems.find((item) => item.id === itemId)!;
+  });
 }
 
 export async function deleteTemplateItem(
@@ -203,17 +342,30 @@ export async function deleteTemplateItem(
   const template = await findTemplateOrFail(templateId);
   verifyOwner(template, userId);
 
-  const deletedItems = await db
-    .delete(templateItems)
-    .where(
-      and(
-        eq(templateItems.id, itemId),
-        eq(templateItems.templateId, templateId),
-      ),
-    )
-    .returning({ id: templateItems.id });
+  await runTemplateItemTransaction(async (tx) => {
+    const existingItems = await listTemplateItems(templateId, tx);
+    const deletedItem = existingItems.find((item) => item.id === itemId);
 
-  if (deletedItems.length === 0) {
-    throw new ApiError(404, 'Template item not found');
-  }
+    if (!deletedItem) {
+      throw new ApiError(404, 'Template item not found');
+    }
+
+    await tx
+      .delete(templateItems)
+      .where(
+        and(
+          eq(templateItems.id, itemId),
+          eq(templateItems.templateId, templateId),
+        ),
+      )
+      .returning({ id: templateItems.id });
+
+    const remainingItems = existingItems.filter((item) => item.id !== itemId);
+
+    if (remainingItems.length === 0) {
+      return;
+    }
+
+    await persistTemplateItemOrder(remainingItems, tx);
+  });
 }

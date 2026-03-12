@@ -52,7 +52,3 @@
 1. TanStack Query for server state
 2. Route loader for route-level prefetch
 3. Mutations invalidate corresponding query keys
-
-## 4.4 UI Rules Reference
-
-1. UI 視覺與互動規範請見 `docs/specs/7-ui-design-guideline.md`。

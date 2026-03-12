@@ -41,21 +41,24 @@ export const updateTemplateSchema = z
 
 export const addTemplateItemSchema = z.object({
   exerciseId: z.uuid({ error: 'Invalid exercise ID' }),
-  sortOrder: z.int({ error: 'Sort order must be an integer' }).min(0, {
-    error: 'Sort order must be non-negative',
-  }),
+  position: z
+    .int({ error: 'Position must be an integer' })
+    .min(0, {
+      error: 'Position must be non-negative',
+    })
+    .optional(),
   note: z
     .string()
     .max(500, { error: 'Note must be at most 500 characters' })
     .optional(),
-});
+}).strict();
 
 export const updateTemplateItemSchema = z
   .object({
-    sortOrder: z
-      .int({ error: 'Sort order must be an integer' })
+    position: z
+      .int({ error: 'Position must be an integer' })
       .min(0, {
-        error: 'Sort order must be non-negative',
+        error: 'Position must be non-negative',
       })
       .optional(),
     note: z
@@ -63,6 +66,7 @@ export const updateTemplateItemSchema = z
       .max(500, { error: 'Note must be at most 500 characters' })
       .optional(),
   })
+  .strict()
   .refine(requireAtLeastOneField, {
     error: 'At least one field must be provided',
   });
